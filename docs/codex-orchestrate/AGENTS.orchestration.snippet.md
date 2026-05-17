@@ -18,6 +18,8 @@ When custom agent profiles such as `repo_scout`, `mechanic`, or `test_runner` ar
 
 Keep a compact routing ledger with the current step, tier, agents used, runtime mapping, selected model, reasoning effort, why the model is sufficient, evidence, risks, next routing decision, escalation status, and final-review gate.
 
+For substantial runs where a durable record is useful, summarize the final ledger using `docs/codex-orchestrate/run-ledger-template.md` and keep private details local or sanitized.
+
 Use the cheapest safe agent/model/effort first:
 
 - `mechanic`, `repo_scout`, and `implementer_simple` on `gpt-5.3-codex-spark` for ultra-fast text-only coding loops, cheap discovery, mechanical edits, and simple targeted fixes.

@@ -19,9 +19,13 @@ REFERENCES = ROOT / ".agents" / "skills" / "codex-orchestrate" / "references"
 AGENTS = ROOT / ".codex" / "agents"
 SCENARIOS = ROOT / "evals" / "codex-orchestrate" / "scenarios.json"
 SYNC_SCRIPT = ROOT / "scripts" / "sync_orchestration_skill.py"
+RUNTIME_SCRIPT = ROOT / "scripts" / "check_runtime_compatibility.py"
 README = ROOT / "README.md"
 PACKAGE_README = ROOT / "docs" / "codex-orchestrate" / "package-readme.md"
 SNIPPET = ROOT / "docs" / "codex-orchestrate" / "AGENTS.orchestration.snippet.md"
+CONFIG_EXAMPLE = ROOT / ".codex" / "config.orchestration.example.toml"
+LEDGER_SCHEMA = ROOT / "schemas" / "orchestration-ledger.schema.json"
+LEDGER_TEMPLATE = ROOT / "docs" / "codex-orchestrate" / "run-ledger-template.md"
 
 
 REQUIRED_SKILL_SECTIONS = [
@@ -330,8 +334,23 @@ def check_docs() -> None:
         "model routing",
         "gpt-5.3-codex-spark",
         "gpt-5.5",
+        "check_runtime_compatibility.py",
+        "run-ledger-template.md",
+        "config.orchestration.example.toml",
     ]:
         require(re.search(re.escape(phrase), combined, re.IGNORECASE), f"docs missing: {phrase}")
+
+
+def check_config_example() -> None:
+    text = read(CONFIG_EXAMPLE)
+    for phrase in [
+        "[agents]",
+        "max_threads = 6",
+        "max_depth = 1",
+        "job_max_runtime_seconds = 1800",
+        "Merge these keys manually",
+    ]:
+        require_contains(text, phrase, "config.orchestration.example.toml")
 
 
 def check_sync_script() -> None:
@@ -343,6 +362,77 @@ def check_sync_script() -> None:
     require_contains(text, "DRIFT", "sync_orchestration_skill.py")
 
 
+def check_runtime_script() -> None:
+    text = read(RUNTIME_SCRIPT)
+    for phrase in [
+        "--strict",
+        "--json",
+        "codex",
+        "debug",
+        "models",
+        "WARN:",
+        "gpt-5.3-codex-spark",
+        "return 1",
+    ]:
+        require_contains(text, phrase, "check_runtime_compatibility.py")
+
+
+def check_ledger_artifacts() -> None:
+    schema_text = read(LEDGER_SCHEMA)
+    schema = json.loads(schema_text)
+    require(schema.get("title") == "Codex Orchestration Run Ledger", "ledger schema title changed")
+    required = set(schema.get("required", []))
+    for field in [
+        "schema_version",
+        "task_summary",
+        "repo_state",
+        "started_at",
+        "finished_at",
+        "root",
+        "routing_entries",
+        "escalations",
+        "validation",
+        "final_review",
+        "residual_risks",
+    ]:
+        require(field in required, f"ledger schema missing required field: {field}")
+
+    routing_required = set(schema["$defs"]["routing_entry"]["required"])
+    for field in [
+        "tier",
+        "agent_role",
+        "runtime_type",
+        "intended_model",
+        "actual_model",
+        "reasoning_effort",
+        "fallback_notes",
+        "why_model_is_sufficient",
+        "evidence",
+        "open_risks",
+        "next_decision",
+        "final_review_gate",
+    ]:
+        require(field in routing_required, f"ledger routing entry missing required field: {field}")
+
+    template = read(LEDGER_TEMPLATE)
+    for phrase in [
+        "Keep real ledgers local or sanitized",
+        "schemas/orchestration-ledger.schema.json",
+        "schema_version",
+        "task_summary",
+        "repo_state",
+        "root",
+        "agent_role",
+        "runtime_type",
+        "intended_model",
+        "actual_model",
+        "reasoning_effort",
+        "fallback_notes",
+        "usage_estimate",
+    ]:
+        require_contains(template, phrase, "run-ledger-template.md")
+
+
 def main() -> int:
     checks = [
         check_skill,
@@ -351,7 +441,10 @@ def main() -> int:
         check_scenarios,
         check_agents,
         check_docs,
+        check_config_example,
         check_sync_script,
+        check_runtime_script,
+        check_ledger_artifacts,
     ]
     try:
         for check in checks:

@@ -1,0 +1,15 @@
+# Orchestration-focused Codex config snippet.
+# Merge these keys manually into ~/.codex/config.toml or a trusted project
+# .codex/config.toml. Do not copy this file over an existing config.
+
+[agents]
+# Keep default fanout bounded. Codex's documented default is 6.
+max_threads = 6
+
+# Keep recursive subagent fanout disabled by default. Raise this only when a
+# task explicitly needs nested orchestration and the extra usage/latency is
+# worth it.
+max_depth = 1
+
+# Prevent abandoned subagent jobs from consuming local resources indefinitely.
+job_max_runtime_seconds = 1800

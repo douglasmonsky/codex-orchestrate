@@ -15,7 +15,9 @@ This repository stores reusable Codex skills, companion agent profiles, snippets
 - `.agents/skills/<skill-name>/SKILL.md`: skill entrypoints.
 - `.agents/skills/<skill-name>/references/`: optional supporting guidance for a skill.
 - `.codex/agents/*.toml`: custom Codex agent profiles used by one or more skills.
+- `.codex/config.orchestration.example.toml`: merge-only sample config for bounded orchestration fanout.
 - `docs/`: install notes, snippets, examples, and rationale.
+- `schemas/`: machine-readable contracts for skill output artifacts.
 
 ## Setup Commands
 
@@ -30,6 +32,7 @@ There is no build system yet. For skill changes, run focused structural checks:
 
 ```bash
 python3 scripts/check_orchestration_skill.py
+python3 scripts/check_runtime_compatibility.py
 python3 scripts/sync_orchestration_skill.py --check
 find .agents/skills -name SKILL.md -print
 find .codex/agents -name '*.toml' -print
@@ -43,6 +46,7 @@ When TOML agent profiles change, inspect them for valid names, explicit model ro
 - Treat repo-local skill folders under `.agents/skills/` as authoritative.
 - Treat `~/.codex/skills/` as an installed runtime copy, not the source of truth.
 - After changing `codex-orchestrate`, sync `.agents/skills/codex-orchestrate/` to `~/.codex/skills/codex-orchestrate/` and copy `.codex/agents/*.toml` to `~/.codex/agents/`.
+- Do not overwrite `~/.codex/config.toml`; merge settings manually from `.codex/config.orchestration.example.toml` when needed.
 - When Codex shows both repo-local and global copies of a skill, prefer the repo-local copy while working in this repository.
 
 ## Data Privacy Rules
@@ -65,6 +69,8 @@ When TOML agent profiles change, inspect them for valid names, explicit model ro
 - README or docs are updated when install behavior changes.
 - `python3 scripts/check_orchestration_skill.py` passes when `codex-orchestrate` changes.
 - `python3 scripts/sync_orchestration_skill.py --check` passes after syncing global installs.
+- `python3 scripts/check_runtime_compatibility.py` runs and any runtime model warnings are understood.
 - Model pins in `.codex/agents/*.toml` still match the documented `codex-orchestrate` model ladder.
+- Ledger schema and template docs stay aligned when routing-ledger behavior changes.
 - `git diff --check` passes.
 - No secrets, tokens, or private data are staged.

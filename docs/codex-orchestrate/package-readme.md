@@ -44,6 +44,8 @@ The model policy follows the current OpenAI Codex docs for subagent model pins, 
 .agents/skills/codex-orchestrate/references/escalation-and-review.md
 .codex/config.orchestration.example.toml
 .codex/agents/*.toml
+docs/codex-orchestrate/run-ledger-template.md
+schemas/orchestration-ledger.schema.json
 AGENTS.orchestration.snippet.md
 ```
 
@@ -95,19 +97,24 @@ or the trusted project config:
 /path/to/repo/.codex/config.toml
 ```
 
+The config example is merge-only. Do not overwrite an existing Codex config; keep `agents.max_depth = 1` unless recursive delegation is explicitly intended.
+
 Copy useful parts of `AGENTS.orchestration.snippet.md` into the repo's `AGENTS.md`.
 
 Model names in `.codex/agents/*.toml` are pinned intentionally. If a runtime lacks a pinned model, use the nearest safe available model and record the intended/actual model in the routing ledger.
+
+For substantial orchestrated runs, use `docs/codex-orchestrate/run-ledger-template.md` and `schemas/orchestration-ledger.schema.json` to record actual model/effort usage, fallbacks, validation, final review, and residual risk. Keep real ledgers local or sanitized unless they contain no private task data.
 
 Run the lightweight checker and sync check after changes:
 
 ```bash
 python3 scripts/check_orchestration_skill.py
+python3 scripts/check_runtime_compatibility.py
 python3 scripts/sync_orchestration_skill.py --check
 codex debug prompt-input '/orchestrate model routing smoke test'
 ```
 
-Recommended post-edit loop: checker, sync apply when drift exists, sync check, prompt smoke test, commit, push.
+Recommended post-edit loop: checker, runtime compatibility warning check, sync apply when drift exists, sync check, prompt smoke test, commit, push.
 
 ## Invocation examples
 

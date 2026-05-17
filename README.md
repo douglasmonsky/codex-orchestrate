@@ -14,7 +14,10 @@ Personal Codex skill repository for storing, reviewing, and reusing skills and c
 ```text
 .agents/skills/       Codex skill folders, each with a SKILL.md entrypoint
 .codex/agents/        Optional custom agent TOML profiles used by skills
+.codex/config.orchestration.example.toml
+                      Merge-only sample config for bounded orchestration fanout
 docs/                 Install notes, snippets, and design rationale
+schemas/              Machine-readable contracts for repeatable skill outputs
 README.md             Repo overview and usage
 AGENTS.md             Project-specific Codex instructions
 ```
@@ -58,6 +61,14 @@ python3 scripts/sync_orchestration_skill.py --check
 python3 scripts/sync_orchestration_skill.py --apply
 ```
 
+The orchestration config example is merge-only:
+
+```text
+.codex/config.orchestration.example.toml
+```
+
+Do not overwrite `~/.codex/config.toml`; merge only the `[agents]` keys you want.
+
 ## Enabling `/orchestrate`
 
 After installing `codex-orchestrate`, add this rule to your global or project `AGENTS.md`:
@@ -85,13 +96,14 @@ Run the skill-pack checker before committing orchestration changes:
 
 ```bash
 python3 scripts/check_orchestration_skill.py
+python3 scripts/check_runtime_compatibility.py
 python3 scripts/sync_orchestration_skill.py --check
 codex debug prompt-input '/orchestrate model routing smoke test'
 ```
 
-Recommended post-edit loop: run the checker, sync with `--apply` when needed, confirm `--check` passes, smoke-test prompt visibility, then commit and push.
+Recommended post-edit loop: run the checker, run the runtime compatibility warning check, sync with `--apply` when needed, confirm `--check` passes, smoke-test prompt visibility, then commit and push.
 
-The checker validates required skill sections, fallback role mapping, model routing scenarios, routing-ledger expectations, agent TOML model pins, duplicate stuck-protocol cleanup, sync tooling, and source-of-truth docs.
+The checker validates required skill sections, fallback role mapping, model routing scenarios, routing-ledger expectations, ledger schema/template coverage, agent TOML model pins, duplicate stuck-protocol cleanup, sync tooling, runtime compatibility tooling, and source-of-truth docs. `docs/codex-orchestrate/run-ledger-template.md` provides a sanitized post-run ledger template for substantial `/orchestrate` runs.
 
 ## Privacy
 
