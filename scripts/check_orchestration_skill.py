@@ -23,6 +23,7 @@ SYNC_SCRIPT = ROOT / "scripts" / "sync_orchestration_skill.py"
 RUNTIME_SCRIPT = ROOT / "scripts" / "check_runtime_compatibility.py"
 LEDGER_CHECK_SCRIPT = ROOT / "scripts" / "check_orchestration_ledger.py"
 BEHAVIOR_SCRIPT = ROOT / "scripts" / "check_orchestration_behavior.py"
+CREATOR_SCRIPT = ROOT / "scripts" / "create_orchestration_ledger.py"
 SMOKE_SCRIPT = ROOT / "scripts" / "run_orchestration_smoke.py"
 README = ROOT / "README.md"
 PACKAGE_README = ROOT / "docs" / "codex-orchestrate" / "package-readme.md"
@@ -350,6 +351,7 @@ def check_docs() -> None:
         "check_runtime_compatibility.py",
         "check_orchestration_ledger.py",
         "check_orchestration_behavior.py",
+        "create_orchestration_ledger.py",
         "run_orchestration_smoke.py",
         "run-ledger-template.md",
         "config.orchestration.example.toml",
@@ -358,6 +360,7 @@ def check_docs() -> None:
         "source-of-truth policy",
         "runtime fallback",
         "behavioral evidence",
+        "local/orchestration-ledgers",
     ]:
         require(re.search(re.escape(phrase), combined, re.IGNORECASE), f"docs missing: {phrase}")
 
@@ -458,8 +461,42 @@ def check_ledger_artifacts() -> None:
         "reasoning_effort",
         "fallback_notes",
         "usage_estimate",
+        "create_orchestration_ledger.py",
+        "local/orchestration-ledgers",
+        "check_orchestration_behavior.py",
     ]:
         require_contains(template, phrase, "run-ledger-template.md")
+
+
+def check_ledger_creator() -> None:
+    text = read(CREATOR_SCRIPT)
+    for phrase in [
+        "local/orchestration-ledgers",
+        "--allow-tracked-output",
+        "Refusing to write outside local/",
+        "check_orchestration_ledger.py",
+        "check_orchestration_behavior.py",
+        "scenario_id",
+        "task_summary",
+        "routing_entries",
+        "final_review",
+    ]:
+        require_contains(text, phrase, "create_orchestration_ledger.py")
+
+    completed = subprocess.run(
+        [sys.executable, str(CREATOR_SCRIPT), "--help"],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    require(completed.returncode == 0, "create_orchestration_ledger.py --help failed")
+    for phrase in [
+        "--output",
+        "--scenario-id",
+        "--task-summary",
+        "--allow-tracked-output",
+    ]:
+        require_contains(completed.stdout, phrase, "create_orchestration_ledger.py --help")
 
 
 def check_ledger_validator_and_samples() -> None:
@@ -561,6 +598,7 @@ def main() -> int:
         check_sync_script,
         check_runtime_script,
         check_ledger_artifacts,
+        check_ledger_creator,
         check_ledger_validator_and_samples,
         check_behavior_script,
         check_smoke_script,

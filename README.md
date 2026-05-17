@@ -100,6 +100,7 @@ Strict model pins in `.codex/agents/*.toml` are the source-of-truth policy. `scr
 Run the skill-pack checker before committing orchestration changes:
 
 ```bash
+python3 scripts/create_orchestration_ledger.py --help
 python3 scripts/check_orchestration_skill.py
 python3 scripts/check_runtime_compatibility.py
 python3 scripts/check_orchestration_ledger.py evals/codex-orchestrate/sample-ledgers/*.json
@@ -109,9 +110,9 @@ python3 scripts/sync_orchestration_skill.py --check
 codex debug prompt-input '/orchestrate model routing smoke test'
 ```
 
-Recommended post-edit loop: static checker, runtime compatibility check, sample ledger validation, behavioral evidence check, prompt smoke harness, sync check/apply, `codex debug prompt-input`, commit, push.
+Recommended post-edit loop: creator help check, static checker, runtime compatibility check, sample ledger validation, behavioral evidence check, prompt smoke harness, sync check/apply, `codex debug prompt-input`, commit, push.
 
-The checker validates required skill sections, fallback role mapping, model routing scenarios, routing-ledger expectations, durable ledger trigger rules, ledger schema/template coverage, synthetic run-ledger fixtures, behavioral evidence fixtures, agent TOML model pins, duplicate stuck-protocol cleanup, sync tooling, runtime compatibility tooling, smoke tooling, and source-of-truth docs. `docs/codex-orchestrate/run-ledger-template.md` provides a sanitized post-run ledger template for substantial `/orchestrate` runs.
+The checker validates required skill sections, fallback role mapping, model routing scenarios, routing-ledger expectations, durable ledger trigger rules, ledger schema/template coverage, synthetic run-ledger fixtures, behavioral evidence fixtures, agent TOML model pins, duplicate stuck-protocol cleanup, sync tooling, runtime compatibility tooling, ledger creator tooling, smoke tooling, and source-of-truth docs. `scripts/create_orchestration_ledger.py` creates private ledgers under `local/orchestration-ledgers/` by default and validates them immediately. `docs/codex-orchestrate/run-ledger-template.md` remains the manual template for substantial `/orchestrate` runs outside MonskySkills.
 
 ## Privacy
 

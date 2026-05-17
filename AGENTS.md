@@ -31,6 +31,7 @@ cd MonskySkills
 There is no build system yet. For skill changes, run focused structural checks:
 
 ```bash
+python3 scripts/create_orchestration_ledger.py --help
 python3 scripts/check_orchestration_skill.py
 python3 scripts/check_runtime_compatibility.py
 python3 scripts/check_orchestration_ledger.py evals/codex-orchestrate/sample-ledgers/*.json
@@ -77,6 +78,7 @@ When a request starts with `/orchestrate`, use `codex-orchestrate`. Prompt assem
 - `python3 scripts/check_orchestration_skill.py` passes when `codex-orchestrate` changes.
 - `python3 scripts/sync_orchestration_skill.py --check` passes after syncing global installs.
 - `python3 scripts/check_runtime_compatibility.py` runs and any runtime model warnings are understood.
+- `python3 scripts/create_orchestration_ledger.py --help` works and documents local-only ledger output.
 - `python3 scripts/check_orchestration_ledger.py evals/codex-orchestrate/sample-ledgers/*.json` passes for committed synthetic ledgers.
 - `python3 scripts/check_orchestration_behavior.py evals/codex-orchestrate/sample-ledgers/*.json` passes for scenario-to-ledger behavioral evidence.
 - `python3 scripts/run_orchestration_smoke.py` confirms `/orchestrate` prompt assembly exposes the core policy surface.

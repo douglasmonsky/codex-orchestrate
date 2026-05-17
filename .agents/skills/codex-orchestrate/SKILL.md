@@ -87,7 +87,7 @@ The ledger is not a substitute for delegation. It is the root's control surface 
 
 Produce a durable post-run ledger for any Tier 3 or Tier 4 run, any model fallback, any security/privacy/migration/auth task, any run with more than two subagents, any failed validation, or any final-review blocker. Tier 1 and Tier 2 ledgers are optional unless one of those triggers appears.
 
-Use `docs/codex-orchestrate/run-ledger-template.md` when a durable ledger is required. Keep private ledgers local or sanitized before committing.
+When working inside MonskySkills, use `python3 scripts/create_orchestration_ledger.py` to create and validate the local ledger. Otherwise use `docs/codex-orchestrate/run-ledger-template.md` manually. Keep private ledgers local or sanitized before committing.
 
 ## Delegation Defaults
 

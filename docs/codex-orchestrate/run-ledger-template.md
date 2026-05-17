@@ -4,6 +4,14 @@ Use this template for substantial `/orchestrate` runs when a durable routing rec
 
 Produce a durable post-run ledger for any Tier 3 or Tier 4 run, any model fallback, any security/privacy/migration/auth task, any run with more than two subagents, any failed validation, or any final-review blocker. Tier 1 and Tier 2 ledgers are optional unless one of those triggers appears.
 
+When working inside MonskySkills, prefer the guided local creator:
+
+```bash
+python3 scripts/create_orchestration_ledger.py
+```
+
+It writes to ignored `local/orchestration-ledgers/` by default, runs `scripts/check_orchestration_ledger.py`, and runs `scripts/check_orchestration_behavior.py` when the `scenario_id` matches a committed scenario. In other repos, copy this JSON shape manually and keep private details local or sanitized.
+
 Schema: `schemas/orchestration-ledger.schema.json`
 
 ```json
