@@ -1,6 +1,37 @@
 # Handoff Contracts
 
+## Table Of Contents
+
+- Routing ledger template
+- Default subagent assignment template
+- Stuck-state summary template
+- Mechanic handoff
+- Scout handoff
+- Deep scout handoff
+- Implementation handoff
+- Review handoff
+- Validation handoff
+- Pass-off template
+- Root synthesis and final review template
+
 Use these templates to keep subagent work bounded, cheap, comparable, and escalation-ready.
+
+## Routing ledger template
+
+Use this compact ledger before delegating, after each subagent result, after validation, and before final review. Keep it short; it is a control surface, not a transcript.
+
+```text
+Goal:
+Current step:
+Tier:
+Active/finished agents:
+Runtime role mapping:
+Evidence gathered:
+Open risks/uncertainty:
+Next routing decision:
+Escalation status:
+Final-review gate:
+```
 
 ## Default subagent assignment template
 
@@ -16,6 +47,9 @@ Why this agent exists:
 
 Delegation tier:
 <Tier 1 | Tier 2 | Tier 3 | Tier 4>
+
+Runtime agent type:
+<custom role if callable | explorer | worker | default>
 
 Scope:
 <files, folders, commands, docs, or error logs>

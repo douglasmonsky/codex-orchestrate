@@ -29,12 +29,20 @@ cd MonskySkills
 There is no build system yet. For skill changes, run focused structural checks:
 
 ```bash
+python3 scripts/check_orchestration_skill.py
 find .agents/skills -name SKILL.md -print
 find .codex/agents -name '*.toml' -print
 git diff --check
 ```
 
 When TOML agent profiles change, inspect them for valid names, models, reasoning effort, and clear instructions.
+
+## Source Of Truth And Sync
+
+- Treat repo-local skill folders under `.agents/skills/` as authoritative.
+- Treat `~/.codex/skills/` as an installed runtime copy, not the source of truth.
+- After changing `codex-orchestrate`, sync `.agents/skills/codex-orchestrate/` to `~/.codex/skills/codex-orchestrate/` and copy `.codex/agents/*.toml` to `~/.codex/agents/`.
+- When Codex shows both repo-local and global copies of a skill, prefer the repo-local copy while working in this repository.
 
 ## Data Privacy Rules
 
@@ -54,5 +62,6 @@ When TOML agent profiles change, inspect them for valid names, models, reasoning
 - Skill instructions are clear enough to use after restarting Codex.
 - Companion agent profiles or docs are committed with the skill when required.
 - README or docs are updated when install behavior changes.
+- `python3 scripts/check_orchestration_skill.py` passes when `codex-orchestrate` changes.
 - `git diff --check` passes.
 - No secrets, tokens, or private data are staged.

@@ -1,5 +1,19 @@
 # Effort and Model Routing
 
+## Table Of Contents
+
+- Routing principle
+- Runtime role fallback
+- Continuous reassessment
+- Effort levels
+- Model classes
+- Routing rules
+- Escalation rules
+- Pass-off rules
+- De-escalation rules
+- Delegation templates by task type
+- Root model management
+
 This skill uses effort/model routing to keep the root agent from doing every task with a high-capability configuration. The root chooses a cheap safe worker first, continually reevaluates routing as work changes, escalates stuck work narrowly, and performs final senior review before completion.
 
 ## Routing principle
@@ -7,6 +21,20 @@ This skill uses effort/model routing to keep the root agent from doing every tas
 Use the cheapest adequate worker for the current step. Routing is not fixed at the start of the task: reassess before each new phase, after every subagent result, after direct root work, and whenever new evidence changes scope or risk. Escalate only a narrow hard part, not the whole task.
 
 A strong root model should behave like a controller: classify, delegate, synthesize, escalate, and verify decisions. It should not perform broad search, log digestion, routine edits, or ordinary validation when a cheaper subagent can do them.
+
+## Runtime role fallback
+
+When named custom agents are callable, use the role names in `agent-roster.md`.
+
+When only built-in subagent roles are callable, preserve the intended role in the prompt and choose the closest built-in `agent_type`:
+
+| Intended role | Built-in fallback |
+| --- | --- |
+| `repo_scout`, `repo_scout_deep`, `reviewer`, `security_auditor`, `architect`, `migration_analyst`, `performance_investigator`, `risk_controller` | `explorer` |
+| `mechanic`, `implementer_simple`, `implementer`, `implementer_strong`, `debugger`, `test_runner`, `test_triage`, `docs_writer` | `worker` |
+| `planner` or root-level synthesis/checkpoint work | `default` |
+
+Fallback does not change the objective. Include `Role: <intended role>` in the prompt, then use the available `agent_type`. If no safe fallback exists, do the smallest root inspection needed to decide whether to continue, stop, or ask the user.
 
 ## Continuous reassessment
 

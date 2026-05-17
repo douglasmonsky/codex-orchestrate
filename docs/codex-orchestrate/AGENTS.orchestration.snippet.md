@@ -6,9 +6,17 @@ Use this snippet in a repo-level `AGENTS.md` or focused subdirectory `AGENTS.md`
 
 For repository work, prefer `$codex-orchestrate`. The root thread should act as dispatcher, escalation controller, synthesizer, and final decision owner, not as the default worker.
 
-Delegate substantive work by default. For any task involving code, files, commands, logs, tests, implementation, review, design, migration, security, performance, documentation, or research, spawn at least one appropriately scoped subagent unless the user forbids subagents or the task is pure conversational Q&A.
+If the user starts with `/orchestrate`, treat that as an explicit request for continuous delegate-first orchestration. Delegate substantive work by default. For any task involving code, files, commands, logs, tests, implementation, review, design, migration, security, performance, documentation, or research, spawn at least one appropriately scoped subagent unless the user forbids subagents or the task is pure conversational Q&A.
 
 Treat delegation as a continuous routing loop, not a one-time upfront choice. Reevaluate whether to delegate, escalate, pass off, de-escalate, or continue directly after each user clarification, direct root step, subagent result, validation result, scope change, or new risk. If the root initially answers directly but the next step becomes repository, command, research, design, implementation, validation, review, or documentation work, leave direct mode and spawn the cheapest safe subagent for that new step.
+
+When custom agent profiles such as `repo_scout`, `mechanic`, or `test_runner` are not callable in the current runtime, preserve the intended role in the prompt and use built-in fallbacks:
+
+- read-only discovery/review/audit/design/risk work: `explorer`
+- implementation/debug/test/docs/mechanical work: `worker`
+- planning/synthesis checkpoint work: `default`
+
+Keep a compact routing ledger with the current step, tier, agents used, runtime mapping, evidence, risks, next routing decision, escalation status, and final-review gate.
 
 Use the cheapest safe agent first:
 

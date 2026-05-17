@@ -1,6 +1,37 @@
 # Agent Roster
 
+## Table Of Contents
+
+- Runtime fallback
+- 1. Mechanic
+- 2. Repo Scout
+- 3. Repo Scout Deep
+- 4. Planner
+- 5. Architect
+- 6. Implementer Simple
+- 7. Implementer
+- 8. Implementer Strong
+- 9. Reviewer
+- 10. Test Runner
+- 11. Test Triage
+- 12. Debugger
+- 13. Security Auditor
+- 14. Performance Investigator
+- 15. Migration Analyst
+- 16. Documentation Writer
+- 17. Risk Controller
+
 Use these roles as reusable subagent types. The root orchestrator should prefer the cheapest adequate role, escalate stuck work by effort/model level first, and pass to a different role only when the failure mode is a specialty mismatch.
+
+## Runtime fallback
+
+If these custom role names are not available as callable subagent types, preserve the intended role in the prompt and use built-in fallbacks:
+
+- Read-only discovery, review, audit, architecture, migration, performance investigation, and risk checks -> `explorer`.
+- Implementation, debugging, test execution, docs edits, and mechanical edits -> `worker`.
+- Planning or synthesis checkpoint work -> `default`.
+
+Do not drop role intent when falling back. A built-in `worker` can still be prompted as `Role: Test Runner`; a built-in `explorer` can still be prompted as `Role: Security Auditor`.
 
 ## 1. Mechanic
 

@@ -1,5 +1,20 @@
 # Escalation and Final Review Policy
 
+## Table Of Contents
+
+- Core principle
+- What counts as stuck
+- Stuck-state summary
+- Escalation ladder
+- Same-role escalation first
+- Pass-off triggers
+- Escalation budget
+- Root responsibilities during escalation
+- Final senior-review gate
+- Final-review checklist for code changes
+- Final-review checklist for non-code work
+- Final response requirement
+
 This reference defines when to raise effort/model level, when to pass work to a different subagent type, and how the root performs the final senior-review gate.
 
 ## Core principle
@@ -7,6 +22,8 @@ This reference defines when to raise effort/model level, when to pass work to a 
 When a subagent is stuck, the primary remedy is effort escalation on the narrow unresolved task. Role switching is secondary and should happen only when the evidence shows the problem belongs to a different specialty.
 
 Do not escalate the entire project. Escalate the smallest unresolved question.
+
+This applies even when custom agents are unavailable. Preserve the intended role, use the built-in fallback role from `effort-model-routing.md`, and escalate the same narrow objective before changing specialties.
 
 ## What counts as stuck
 

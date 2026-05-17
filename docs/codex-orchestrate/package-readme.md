@@ -8,13 +8,24 @@ The root agent acts as dispatcher, escalation controller, synthesizer, and final
 
 The goal is not to minimize total tokens in every case. Subagents do their own model and tool work. The goal is to keep the root context clean, continuously route each new task phase to the cheapest safe agent, escalate only the narrow unresolved issue when work gets stuck, and reserve high-capability reasoning for genuinely hard decisions and final judgment.
 
+## Source of truth
+
+In `MonskySkills`, the repo-local copy is authoritative:
+
+```text
+.agents/skills/codex-orchestrate/
+```
+
+The global copy in `~/.codex/skills/codex-orchestrate/` is an installed runtime copy. Sync the global copy after editing the repo source, then restart Codex.
+
 ## New policy emphasis
 
-This version adds three hard policies:
+This version adds four hard policies:
 
 1. **Routing is continuous.** The root reevaluates delegation after each user clarification, direct root step, subagent result, validation result, scope change, or new risk. If a Tier 0 direct answer grows into repository or tool work, the root leaves Tier 0 and delegates the next step.
-2. **Stuck work escalates effort first.** When a subagent gets stuck, the primary remedy is to retry the same narrow unresolved task at the next effort/model level. Pass off to a different specialist only when the evidence shows role mismatch.
-3. **The root performs final senior review.** The top-level/root agent must finish by reviewing subagent output as a senior developer, code reviewer, and architect. This is a check-and-balance gate; it is not fully outsourced to a reviewer subagent.
+2. **Runtime fallback preserves role intent.** If custom agent profiles are unavailable, read-only work maps to `explorer`, implementation/test/docs work maps to `worker`, and planning/synthesis maps to `default`.
+3. **Stuck work escalates effort first.** When a subagent gets stuck, the primary remedy is to retry the same narrow unresolved task at the next effort/model level. Pass off to a different specialist only when the evidence shows role mismatch.
+4. **The root performs final senior review.** The top-level/root agent must finish by reviewing subagent output as a senior developer, code reviewer, and architect. This is a check-and-balance gate; it is not fully outsourced to a reviewer subagent.
 
 ## Contents
 
@@ -45,6 +56,13 @@ For a repository-scoped skill, copy:
 cp -R .agents/skills/codex-orchestrate /path/to/repo/.agents/skills/
 ```
 
+For the global installed copy, sync from this repository:
+
+```bash
+rm -rf ~/.codex/skills/codex-orchestrate
+cp -R .agents/skills/codex-orchestrate ~/.codex/skills/
+```
+
 For project-scoped custom agents, copy:
 
 ```bash
@@ -73,6 +91,12 @@ or the trusted project config:
 Copy useful parts of `AGENTS.orchestration.snippet.md` into the repo's `AGENTS.md`.
 
 Adjust model names in `.codex/agents/*.toml` to the models available in your environment.
+
+Run the lightweight checker after changes:
+
+```bash
+python3 scripts/check_orchestration_skill.py
+```
 
 ## Invocation examples
 

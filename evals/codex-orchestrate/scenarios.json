@@ -1,0 +1,67 @@
+[
+  {
+    "id": "tier0-upgrades-to-delegation",
+    "prompt": "/orchestrate What does this repo do? Actually, inspect the code and update the README if it is stale.",
+    "category": "tier0-upgrade",
+    "expected": {
+      "route": "Start as clarification/direct answer only if pure Q&A, then leave Tier 0 once repo inspection or docs editing is needed.",
+      "delegation": "Delegate repo inspection to repo_scout or fallback explorer; delegate docs edits to docs_writer or fallback worker.",
+      "escalation": "Escalate only if the scout cannot find the relevant surface or docs require design/code judgment.",
+      "final_review": "Root verifies README claims against cited repo evidence before final response.",
+      "must_delegate": true,
+      "runtime_fallback": "explorer for read-only inspection; worker for docs edits"
+    }
+  },
+  {
+    "id": "small-patch-with-validation",
+    "prompt": "/orchestrate Fix this one-file bug and run the narrowest relevant check.",
+    "category": "small-patch",
+    "expected": {
+      "route": "Tier 1 or Tier 2 depending on whether discovery is needed.",
+      "delegation": "Use mechanic or implementer_simple; fallback to worker with the intended role in the prompt.",
+      "escalation": "Escalate to implementer only if the patch requires broader judgment or the first worker is stuck.",
+      "final_review": "Root inspects changed diff and validation summary.",
+      "must_delegate": true,
+      "runtime_fallback": "worker"
+    }
+  },
+  {
+    "id": "validation-failure-triage",
+    "prompt": "/orchestrate The test command fails after the patch. Determine whether it is introduced, pre-existing, flaky, or environmental.",
+    "category": "validation-failure",
+    "expected": {
+      "route": "Route failed validation to test_triage before debugging unless the root cause is already obvious.",
+      "delegation": "Use test_triage or fallback worker acting as test_triage.",
+      "escalation": "Escalate to debugger only after triage cannot classify the failure with evidence.",
+      "final_review": "Root reports exact commands, failure classification, and residual uncertainty.",
+      "must_delegate": true,
+      "runtime_fallback": "worker"
+    }
+  },
+  {
+    "id": "high-risk-security-change",
+    "prompt": "/orchestrate Change authorization behavior for this API and make sure it is safe.",
+    "category": "high-risk-security",
+    "expected": {
+      "route": "Tier 4 high-risk orchestration.",
+      "delegation": "Use architect and security_auditor before or alongside implementation; fallback to explorer for read-only design/security review.",
+      "escalation": "Escalate unresolved auth or data-isolation ambiguity narrowly to a stronger reviewer/auditor path.",
+      "final_review": "Root performs mandatory senior review of security claims, validation, and residual risk.",
+      "must_delegate": true,
+      "runtime_fallback": "explorer for audit/design, worker for implementation"
+    }
+  },
+  {
+    "id": "custom-agents-unavailable",
+    "prompt": "/orchestrate Custom agent TOMLs are not callable here. Still orchestrate a repo investigation and small fix.",
+    "category": "runtime-fallback",
+    "expected": {
+      "route": "Keep the same delegation loop while mapping intended roles to available built-in agent types.",
+      "delegation": "Use explorer for read-only scout/review work, worker for implementation/test work, and default for planning/synthesis if needed.",
+      "escalation": "Escalate by intended role and effort even when the callable agent_type is a fallback.",
+      "final_review": "Root notes fallback mapping only if useful and still performs final senior review.",
+      "must_delegate": true,
+      "runtime_fallback": "explorer, worker, default"
+    }
+  }
+]

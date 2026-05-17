@@ -1,239 +1,110 @@
 ---
 name: codex-orchestrate
-description: Delegate-first Codex orchestration for coding, debugging, review, planning, research, migration, audit, testing, documentation, or any task that benefits from routing work to subagents with cheaper/specific effort and model settings. The root agent acts as dispatcher, escalation controller, synthesizer, and final senior reviewer. Delegate substantive work by default, continuously reassess delegation as the task evolves, escalate stuck work to higher effort before changing roles, and require root-level final review of subagent output before completion. Avoid only for pure conversational micro-answers or when the user forbids subagents.
+description: Delegate-first Codex orchestration for coding, debugging, review, planning, research, migration, audit, testing, documentation, or any task that benefits from routing work to subagents. The root agent acts as dispatcher, escalation controller, synthesizer, and final senior reviewer. Delegate substantive work by default, continuously reassess delegation as the task evolves, support custom-agent and built-in-agent runtimes, escalate stuck work narrowly, and require root-level final review before completion. Avoid only for pure conversational micro-answers or when the user forbids subagents.
 ---
 
 # Codex Orchestration Skill
 
 ## Purpose
 
-Act as a delegate-first root orchestrator. The root thread preserves its context for user intent, task boundaries, escalation decisions, final judgment, and synthesis. It should not become the default worker for repository exploration, implementation, validation, debugging, or review.
+Use this skill when the user asks for `$codex-orchestrate`, `/orchestrate`, or any substantial coding, debugging, review, planning, research, migration, testing, documentation, or audit task where subagents can keep the root context clean.
 
-This skill deliberately ignores special memory-management systems. Use only the current prompt, repository context, explicit files, command output, and transient handoffs between the root and subagents.
+The root thread is the controller. It owns user intent, scope, routing, escalation decisions, synthesis, and final senior review. It should not become the routine worker for broad repository exploration, implementation, validation, debugging, or review.
 
-The optimization target is not guaranteed lowest total token count. Subagents do their own model and tool work. The target is:
+## Source Of Truth
 
-1. keep noisy exploration and logs out of the root context;
-2. route simple work to the cheapest sufficient model/effort agent;
-3. escalate only the narrow hard slice that is stuck;
-4. reserve stronger reasoning for architecture, risk, conflict resolution, and final judgment;
-5. make the root act as senior developer, reviewer, and architect at the end rather than as a routine worker throughout.
+For this skill pack, the repo-local copy in `MonskySkills/.agents/skills/codex-orchestrate` is authoritative. A copy in `~/.codex/skills/codex-orchestrate` is an installed runtime copy.
 
-## Delegation-first rule
+If both repo-local and global copies are visible, prefer the repo-local copy when working inside `MonskySkills`; otherwise use the global copy. After changing the repo-local skill, sync it to the global install before relying on it in new Codex sessions.
 
-Delegation is a continuous control loop, not a one-time routing decision. The root must keep reevaluating whether the next step should be delegated, escalated, passed off, or handled directly.
+## Runtime Capabilities
 
-For any task involving code, repository files, commands, logs, tests, implementation, review, design, migration, security, performance, documentation, or research, delegate substantive work to at least one subagent unless an exemption below applies.
+Prefer named custom agents when they are available: `repo_scout`, `mechanic`, `implementer_simple`, `implementer`, `test_runner`, `test_triage`, `debugger`, `reviewer`, `architect`, `security_auditor`, `migration_analyst`, `performance_investigator`, `docs_writer`, and `risk_controller`.
 
-The root must do only these jobs by default:
-
-- classify the task and choose the cheapest safe delegation path;
-- create bounded subagent assignments;
-- receive compact results;
-- decide whether stuck work needs higher effort, a different agent type, or root intervention;
-- inspect only high-signal evidence, diffs, and cited files needed to decide;
-- reconcile contradictions;
-- perform the final senior review gate;
-- give the final answer or integrate final patches.
-
-The root may perform direct work only for these exemptions:
-
-- The user explicitly forbids subagents.
-- The request is a pure conversational answer that requires no file/tool/repository work.
-- The task is a deterministic micro-action and no cheap configured subagent is available.
-- A subagent attempt failed and the remaining bounded step is cheaper and safer for the root to complete directly than to re-delegate.
-- The final senior review requires limited inspection of the patch, cited evidence, and validation summary.
-
-Even for single-file or mechanical repository tasks, prefer a cheap `mechanic`, `repo_scout`, `test_runner`, or `docs_writer` subagent when available.
-
-## Continuous routing loop
-
-At each meaningful transition, rerun the routing decision before continuing. This includes:
-
-- after the user clarifies, narrows, expands, or redirects the request;
-- after any direct root answer or root inspection reveals repository, command, log, test, design, research, or implementation work;
-- before starting a new phase such as discovery, planning, editing, validation, debugging, review, documentation, or final synthesis;
-- after a subagent returns new evidence, uncertainty, a patch, a failed command, or a recommendation;
-- when risk changes, scope grows, evidence conflicts, or validation fails;
-- before finalizing, even if the initial route was Tier 0.
-
-If the root initially chooses Tier 0 but the task stops being pure conversational Q&A, immediately leave Tier 0. Produce a compact dispatch brief for the new work and spawn the cheapest safe subagent. Do not keep performing local repository exploration, implementation, validation, or review merely because the first decision was direct answer.
-
-Treat each new phase as a fresh dispatch point:
+If custom agent profiles are not callable in the current runtime, use this built-in fallback map:
 
 ```text
-What is the next concrete step?
-Is it substantive repo/tool/research/design work?
-Can a cheaper or more specialized subagent do it safely?
-Did new evidence require escalation, pass-off, or de-escalation?
-What is the smallest bounded assignment now?
+read-only discovery, review, audit, architecture, migration, risk checks -> explorer
+implementation, debugging, test execution, docs edits, mechanical edits -> worker
+planning, synthesis, fallback controller decisions -> default
 ```
 
-The routing tier may move up or down over the task. For example, start at Tier 0 for clarification, move to Tier 1 for repo lookup after the user answers, move to Tier 2 for a small patch, then use `test_runner` for validation and root final review.
+When falling back, preserve the intended role in the subagent prompt, set the closest available `agent_type`, and keep the same bounded objective, effort, output budget, and escalation trigger.
 
-## Dispatch tiers
+## Controller Loop
 
-Use the lowest tier that can safely satisfy the current step. Reassess the tier whenever the current step completes or new information changes the work.
+Delegation is a continuous control loop, not a one-time routing decision. At every meaningful transition, rerun the routing decision before continuing:
 
-### Tier 0: direct root answer, rare
+1. Intake and classify the current step.
+2. Update the routing ledger.
+3. Delegate the smallest substantive step to the cheapest safe role.
+4. Reassess after each user clarification, root inspection, subagent result, failed command, validation result, conflict, scope change, or new risk.
+5. Escalate, de-escalate, pass off, or continue directly only for the next bounded step.
+6. Perform final root senior review before answering.
 
-Use only for pure Q&A, clarification, or non-repository micro responses.
+Tier 0 is rare. If the root initially answers directly but the next step becomes repository, command, log, test, implementation, research, review, documentation, or design work, immediately leave Tier 0 and delegate the new step.
 
-Root action: answer directly.
-Subagents: none.
-Continuous reassessment: before any follow-on action, confirm the next step still qualifies for Tier 0. If it now involves files, commands, logs, tests, implementation, research, review, documentation, or design work, leave Tier 0 and delegate.
-Final review: root checks its own answer for scope, assumptions, unsupported claims, and whether it should have escalated out of Tier 0.
+## Routing Ledger
 
-### Tier 1: one cheap subagent
-
-Use for simple repo lookup, one-file mechanical edits, known test commands, small documentation updates, log summarization, dependency/version lookup inside the repo, or obvious command discovery.
-
-Root action: spawn one low/minimal or low/mini subagent, then synthesize.
-Default agents: `mechanic`, `repo_scout`, `test_runner`, `docs_writer`.
-Escalation: if stuck, retry the same narrow task at the next effort/model level before switching role, unless the first result proves a role mismatch.
-Final review: root inspects the returned summary and any changed diff.
-
-### Tier 2: two-step cheap/default pipeline
-
-Use for small behavior changes, moderate bug fixes, or tasks needing both discovery and execution.
-
-Root action: spawn one scout or planner, then one implementer or verifier. Add reviewer only if risk is non-trivial.
-Default agents: `repo_scout` + `implementer_simple`; or `implementer_simple` + `test_runner`; or `mechanic` + `reviewer`.
-Escalation: escalate only the failing stage, not the whole pipeline.
-Final review: root reviews plan, diff, validation, and open risks.
-
-### Tier 3: parallel fanout
-
-Use when independent questions can be answered in parallel: unfamiliar codebase, ambiguous bug, multi-file feature, migration planning, PR review, performance issue, or flaky tests.
-
-Root action: spawn 2-5 independent agents, each with a narrow objective and compact return format.
-Default agents: `repo_scout`, `repo_scout_deep`, `planner`, `debugger`, `architect`, `test_runner`, `reviewer`.
-Escalation: escalate conflicting or low-confidence branches only.
-Final review: root reconciles independent outputs and explicitly chooses the final path.
-
-### Tier 4: high-risk orchestration
-
-Use for auth, permissions, data isolation, secrets, payments, migrations, concurrency, public APIs, production-critical behavior, or large refactors.
-
-Root action: delegate exploration and implementation, but require strong review/audit before finalizing.
-Default agents: `architect`, `security_auditor`, `migration_analyst`, `reviewer`, `test_runner`, `test_triage`.
-Escalation: high-risk blocked work may go to `xhigh` when supported, but only for the narrow unresolved decision or audit.
-Final review: root performs a senior architect/code-review gate even when a reviewer or auditor has already passed the work.
-
-## Dispatch brief
-
-Before spawning agents, produce a compact dispatch brief. Keep it short. For later dispatches, update the brief with only what changed since the previous routing decision.
+Keep a compact routing ledger throughout the task. It may be visible in progress updates for long work, and it should guide final synthesis.
 
 ```text
 Goal:
-Delegation tier:
-Why delegation is needed:
-Cheapest safe effort/model plan:
-Escalation path if stuck:
-Subagents:
-Done when:
-Primary risk:
+Current step:
+Tier:
+Active/finished agents:
+Runtime role mapping:
+Evidence gathered:
+Open risks/uncertainty:
+Next routing decision:
+Escalation status:
+Final-review gate:
 ```
 
-For Tier 1, this can be one or two sentences.
+The ledger is not a substitute for delegation. It is the root's control surface for remembering what has been delegated, what evidence exists, and why the next route is justified.
 
-## Effort/model routing rules
+## Delegation Defaults
 
-Always start with the cheapest safe effort/model class.
+Delegate substantive repository/tool/research/design work unless one of these applies:
 
-Use `minimal` or `low` effort and a fast/mini model class for:
+- The user explicitly forbids subagents.
+- The request is pure conversational Q&A.
+- The step is a deterministic micro-action and delegation overhead is larger than the work.
+- A subagent already failed and the remaining bounded correction is cheaper and safer for the root to complete directly.
+- The root is performing the final senior review over cited evidence, diffs, and validation summaries.
 
-- file discovery;
-- grep/search tasks;
-- one-file mechanical edits;
-- formatting;
-- known test commands;
-- simple documentation;
-- log summarization where no root-cause reasoning is needed.
-
-Use `medium` effort and a default model class for:
-
-- ordinary implementation;
-- moderate debugging;
-- test updates;
-- planning with known constraints;
-- docs that require code understanding;
-- first escalation of cheap-agent failures.
-
-Use `high` effort and a strong model class for:
-
-- architecture;
-- security;
-- migrations;
-- concurrency;
-- ambiguous root-cause debugging;
-- performance analysis;
-- review of behavior-changing code;
-- second escalation after a medium attempt fails;
-- final synthesis when several agents disagree.
-
-Use `xhigh` only if the environment supports it and the task has high irreversibility, high ambiguity, or severe cost of error. Do not use `xhigh` for routine implementation, broad search, formatting, or ordinary test runs.
-
-## Stuck-work escalation policy
-
-When a subagent gets stuck, the default first remedy is to increase effort/model level on the same narrow task. Do not immediately broaden scope or switch specialties unless the evidence shows the assigned role is wrong.
-
-A subagent is considered stuck when any of these occur:
-
-- It reports low confidence on the core objective.
-- It cannot locate the relevant files, commands, or failure surface.
-- It produces a patch but cannot validate it.
-- It reproduces a failure but cannot explain it.
-- It returns conflicting evidence or multiple unresolved hypotheses.
-- It exceeds its assigned output budget without resolving the core question.
-- It asks the root to make a decision without enough evidence.
-
-Escalation sequence:
-
-1. Compress the stuck state. Capture objective, evidence, what failed, files touched/inspected, commands run, and the smallest unresolved question.
-2. Retry the same narrow unresolved question at the next effort/model level.
-3. If the higher-effort same-role attempt also fails, pass off to a different specialized agent whose role matches the failure mode.
-4. If the issue is high-risk or cross-cutting, involve `reviewer`, `architect`, `security_auditor`, or `risk_controller` before implementation continues.
-5. The root may intervene directly only after it has a compact stuck-state summary and the remaining work is bounded.
-
-Common ladders:
+Use the lowest tier that safely satisfies the current step:
 
 ```text
-repo_scout low/mini -> repo_scout_deep medium/default -> planner medium/default -> architect high/strong
-mechanic low/mini -> implementer_simple medium/mini-or-default -> implementer medium/default -> implementer_strong high/strong
-implementer_simple medium -> implementer medium -> debugger or architect high -> reviewer high
-test_runner low/mini -> test_triage medium/default -> debugger high/strong
-docs_writer low/mini -> repo_scout_deep medium/default -> implementer or architect if docs expose design ambiguity
-reviewer high -> architect/security_auditor/debugger high or xhigh for the disputed issue
+Tier 0: pure Q&A or clarification only; no repo/tool work.
+Tier 1: one cheap agent for lookup, mechanical edit, known validation, simple docs, or log compression.
+Tier 2: small pipeline such as scout -> implementer or implementer -> test_runner.
+Tier 3: 2-5 independent agents for ambiguous, unfamiliar, cross-cutting, or conflicting work.
+Tier 4: high-risk orchestration for auth, data isolation, secrets, migrations, concurrency, public APIs, or production-critical behavior.
 ```
 
-Do not repeat the same failed prompt at the same effort level unless there is new evidence or a narrower scope.
+The tier can move up or down. Escalate only the disputed or stuck slice; de-escalate after the hard decision is resolved.
 
-## Pass-off policy
+## Dispatch Brief
 
-Pass to a different subagent type when the stuck reason is a role mismatch rather than insufficient reasoning effort.
+Before each delegation, produce or refresh a compact dispatch brief:
 
-Examples:
+```text
+Goal:
+Current step:
+Delegation tier:
+Role requested:
+Runtime agent type:
+Why delegation is needed:
+Scope:
+Non-goals:
+Escalation trigger:
+Done when:
+```
 
-- A scout finds the relevant files but the design choice is unclear: pass to `architect`.
-- An implementer cannot explain a failing test: pass to `debugger` or `test_triage`.
-- A test runner finds a security-sensitive failure: pass to `security_auditor`.
-- A reviewer finds a migration ordering issue: pass to `migration_analyst`.
-- A performance investigator identifies a correctness tradeoff: pass to `architect` or `reviewer`.
-- Any agent detects scope creep or runaway cost: pass to `risk_controller`.
+For custom-agent details, role definitions, and default routing ladders, read `references/agent-roster.md` and `references/effort-model-routing.md` only when needed.
 
-When passing off, include the prior agent's compact stuck-state summary. Do not ask the new agent to rediscover the entire repository unless the prior evidence is unreliable.
-
-## Low-model-first protocol
-
-For unclear tasks, do not immediately use a strong reasoning worker. Use this sequence:
-
-1. `repo_scout` or `planner` at low/mini or medium/default to identify the true scope.
-2. Promote only the narrow hard part to `repo_scout_deep`, `architect`, `debugger`, `reviewer`, or `security_auditor` at the required effort.
-3. Keep implementation at the lowest safe class: `mechanic` for mechanical edits, `implementer_simple` for small patches, `implementer` for broader patches, `implementer_strong` only for complex or high-risk patches.
-4. Use `test_runner` at low/mini for known checks; escalate to `test_triage` or `debugger` only when failures need interpretation.
-
-## Subagent prompt contract
+## Subagent Contract
 
 Every subagent prompt must include:
 
@@ -241,9 +112,7 @@ Every subagent prompt must include:
 Role:
 Objective:
 Why this agent exists:
-Delegation tier:
 Scope:
-Files/directories/tools to inspect:
 Constraints:
 Non-goals:
 Reasoning effort:
@@ -254,13 +123,7 @@ Escalation target if stuck:
 Return format:
 ```
 
-Use compact output budgets to protect root context. Example:
-
-```text
-Output budget: <= 300 words unless a patch or exact command output is necessary. Do not paste large logs. Quote only the smallest evidence needed.
-```
-
-Required return format:
+Default return format:
 
 ```text
 Summary:
@@ -275,90 +138,67 @@ Escalation recommendation:
 Confidence:
 ```
 
-## Root context discipline
+Use `references/handoff-contracts.md` for concrete prompt templates.
 
-The root should not read every file a scout already mapped. It should inspect only:
+## Escalation And Pass-Off
 
-- the files that are likely to be changed;
-- exact evidence cited by subagents;
-- diffs produced by implementers;
-- test output summaries and any failing lines needed to decide;
-- final-review evidence necessary to verify correctness.
+A subagent is stuck when it reports low confidence, cannot locate the relevant surface, returns conflicting hypotheses, produces an unvalidated patch, reproduces but cannot explain a failure, exceeds its output budget without resolving the objective, or asks the root to decide without enough evidence.
 
-Prefer subagent summaries over raw logs. If a subagent returns excessive raw output, ask for a compressed evidence summary instead of importing the whole output into the root thread.
+Default escalation sequence:
 
-## Concurrency policy
+1. Compress the stuck state.
+2. Retry the same narrow objective at the next effort/model level.
+3. Pass off to a different role only when evidence shows specialty mismatch.
+4. Involve `reviewer`, `architect`, `security_auditor`, or `risk_controller` when risk changes.
+5. Let the root intervene directly only after the unresolved step is bounded.
 
-Be aggressive about delegation, but bounded about fanout.
+For detailed stuck-state templates and review gates, read `references/escalation-and-review.md`.
 
-- Tier 1: exactly 1 subagent.
-- Tier 2: usually 2 sequential or parallel subagents.
-- Tier 3: 2-5 subagents.
-- Tier 4: 3-6 subagents, including independent review/audit.
+## Validation Policy
 
-Avoid recursive delegation. Keep spawned-agent nesting at depth 1 unless the user explicitly requests a deeper workflow.
+Delegate validation instead of importing large logs into the root thread.
 
-Parallelize read-heavy work freely when scopes are independent. Be careful with parallel write-heavy work; prefer one writer at a time or non-overlapping patch scopes.
+- Known check: route to `test_runner` or built-in `worker` acting as `test_runner`.
+- Unknown validation surface: route discovery first, then validation.
+- Failing check with unclear cause: route to `test_triage`; escalate to `debugger` only when evidence is ambiguous.
+- Security, migration, auth, data, concurrency, or public API risk: require specialist review before finalizing.
 
-## Conflict-resolution policy
+The final answer should report exact commands and results, not raw logs unless a small excerpt is necessary.
 
-When subagent outputs conflict:
+## Final Senior Review
 
-1. Prefer direct repository evidence over summaries.
-2. Prefer reproduced failures over speculative explanations.
-3. Prefer tests, type checks, and command output over code-reading alone.
-4. Ask one narrow follow-up subagent only if the root cannot resolve the discrepancy cheaply.
-5. Escalate model/effort only for the disputed hard part.
-6. State unresolved uncertainty rather than flattening disagreement into false consensus.
+The root must perform final senior review for every non-trivial orchestrated task, even if a reviewer subagent ran.
 
-## Validation policy
+Check:
 
-Delegate validation instead of running large test surfaces in the root thread.
+- The result satisfies the user's actual request.
+- Scope did not drift.
+- Routing decisions and escalations were justified.
+- Evidence supports subagent conclusions.
+- Validation is proportionate.
+- Security, privacy, migration, API, concurrency, and performance risks were considered when relevant.
+- Residual uncertainty is stated plainly.
 
-- Known command: `test_runner` at low/mini.
-- Unknown validation surface: `repo_scout` or `planner` first, then `test_runner`.
-- Failure triage: `test_triage` at medium/default or `debugger` at high/strong if root cause is ambiguous.
+If review finds a blocker, do not finalize. Delegate the narrow issue at the right effort, pass to a specialist, or make a bounded direct correction if cheaper and safe.
 
-The root should report exact commands and results, but should not ingest full logs unless needed.
+## Final Response
 
-## Final senior review gate
-
-The root must finish by reviewing what subagents did. This is mandatory for all non-trivial repository tasks, including tasks where a `reviewer` subagent already ran.
-
-The root's final review role is senior developer, code reviewer, and architect. It should not redo all subagent work. It should check:
-
-1. The final result satisfies the user's actual request.
-2. The delegation path was appropriate and did not skip a necessary specialist.
-3. Escalation happened when a subagent was stuck, or the decision not to escalate is justified.
-4. The patch or answer is consistent with repository conventions and stated constraints.
-5. Tests/checks are proportionate to the change.
-6. Security, data, migration, API, concurrency, and performance risks were considered when relevant.
-7. Subagent uncertainty was not hidden.
-8. The final response is accurate, concise, and clear about residual risk.
-
-For code changes, inspect the final diff or exact files changed before answering. For research/planning tasks, inspect the evidence and unresolved assumptions. For validation, inspect command summaries and any failure interpretation.
-
-If the final senior review finds a blocking issue, do not finalize. Either send the narrow issue back to the appropriate subagent with higher effort or fix the bounded issue directly if cheaper and safe.
-
-## Final response
-
-The final response should include:
+Keep the final response concise. Include:
 
 - what was delegated and why;
-- what escalated or why escalation was not needed;
-- what changed or what was found;
+- whether escalation or fallback mapping was used;
+- what changed or was found;
 - validation performed;
 - root final-review conclusion;
-- residual risk;
-- exact files/commands when applicable.
+- residual risks.
 
-Do not expose private chain-of-thought. Provide concise decision summaries only.
+Do not expose private chain-of-thought or paste subagent prompts unless the user asks.
 
 ## References
 
-Consult these files when relevant:
+Load only the reference needed for the current decision:
 
-- `references/agent-roster.md`
-- `references/effort-model-routing.md`
-- `references/handoff-contracts.md`
-- `references/escalation-and-review.md`
+- `references/agent-roster.md`: role roster, when to use each role, expected outputs.
+- `references/effort-model-routing.md`: effort/model routing, fallback behavior, task templates.
+- `references/handoff-contracts.md`: subagent prompt templates, routing ledger template, pass-off templates.
+- `references/escalation-and-review.md`: stuck-state policy, escalation budget, final review checklists.
