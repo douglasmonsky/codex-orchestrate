@@ -19,6 +19,7 @@ Personal Codex skill repository for storing, reviewing, and reusing skills and c
 docs/                 Install notes, snippets, and design rationale
 evals/                Routing policy manifest, static scenarios, and synthetic ledger/context fixtures
 schemas/              Machine-readable contracts for repeatable skill outputs and context packets
+ui/                   Read-only local dashboard assets for reviewing orchestration ledgers
 README.md             Repo overview and usage
 AGENTS.md             Project-specific Codex instructions
 ```
@@ -117,6 +118,7 @@ python3 scripts/check_orchestration_ledger.py evals/codex-orchestrate/sample-led
 python3 scripts/check_orchestration_behavior.py evals/codex-orchestrate/sample-ledgers/*.json
 python3 scripts/report_orchestration_ledger.py evals/codex-orchestrate/sample-ledgers/small-patch.json
 python3 scripts/report_orchestration_ledger.py --json evals/codex-orchestrate/sample-ledgers/small-patch.json
+python3 scripts/serve_orchestration_ui.py --self-test
 python3 scripts/run_orchestration_smoke.py
 python3 scripts/run_orchestration_smoke.py --scenario-id lifecycle-smoke --json
 python3 scripts/run_orchestration_smoke.py --scenario-id context-packet-smoke --json
@@ -127,7 +129,17 @@ codex debug prompt-input '/orchestrate model routing smoke test'
 
 Recommended post-edit loop: creator help check, static checker, runtime compatibility check, context-packet validation, lifecycle validation, sample ledger validation, behavioral evidence check, ledger report smoke, prompt smoke harness, sync check/apply, `codex debug prompt-input`, commit, push.
 
-The checker validates required skill sections, activation contract, context packet protocol, lifecycle ledger policy, `agents/openai.yaml`, routing-policy completeness, fallback role mapping, model routing scenarios, routing-ledger expectations, durable ledger trigger rules, context-packet schema/fixture coverage, lifecycle fixture coverage, ledger schema/template coverage, synthetic run-ledger fixtures, behavioral evidence fixtures, ledger reporting, agent TOML parity with the routing policy, duplicate stuck-protocol cleanup, sync tooling, runtime compatibility tooling, ledger creator tooling, smoke tooling, and source-of-truth docs. `scripts/create_orchestration_ledger.py` creates private ledgers under `local/orchestration-ledgers/` by default and validates them immediately. `scripts/report_orchestration_ledger.py` turns a ledger into a post-run Markdown or JSON audit, including whether orchestration justified itself. `docs/codex-orchestrate/run-ledger-template.md` remains the manual template for substantial `/orchestrate` runs outside MonskySkills.
+The checker validates required skill sections, activation contract, context packet protocol, lifecycle ledger policy, `agents/openai.yaml`, routing-policy completeness, fallback role mapping, model routing scenarios, routing-ledger expectations, durable ledger trigger rules, context-packet schema/fixture coverage, lifecycle fixture coverage, ledger schema/template coverage, synthetic run-ledger fixtures, behavioral evidence fixtures, ledger reporting, local dashboard assets, agent TOML parity with the routing policy, duplicate stuck-protocol cleanup, sync tooling, runtime compatibility tooling, ledger creator tooling, smoke tooling, and source-of-truth docs. `scripts/create_orchestration_ledger.py` creates private ledgers under `local/orchestration-ledgers/` by default and validates them immediately. `scripts/report_orchestration_ledger.py` turns a ledger into a post-run Markdown or JSON audit, including whether orchestration justified itself. `docs/codex-orchestrate/run-ledger-template.md` remains the manual template for substantial `/orchestrate` runs outside MonskySkills.
+
+## Local dashboard
+
+Run the read-only orchestration dashboard with:
+
+```bash
+python3 scripts/serve_orchestration_ui.py --port 8765
+```
+
+Open `http://127.0.0.1:8765` to review sample ledgers and ignored private ledgers under `local/orchestration-ledgers/`. The dashboard only exposes read-only endpoints for ledger listings, report summaries, runtime model compatibility, and copyable commands.
 
 ## Privacy
 

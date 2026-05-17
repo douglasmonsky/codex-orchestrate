@@ -22,6 +22,14 @@ python3 scripts/report_orchestration_ledger.py --validate local/orchestration-le
 
 The report summarizes task state, tier history, subagents, intended versus actual models, context requests, lifecycle terminal exits, validation, final review, residual risks, usage estimates, and whether orchestration justified itself.
 
+For browser review inside MonskySkills, start the read-only local dashboard:
+
+```bash
+python3 scripts/serve_orchestration_ui.py --port 8765
+```
+
+Open `http://127.0.0.1:8765` to inspect sample ledgers and ignored private ledgers under `local/orchestration-ledgers/`. The dashboard does not edit ledgers or run write operations.
+
 When context packets are used, link routing entries to `packet_id` and record `context_packets` plus `subagent_lifecycle`. Every active packet needs a started event and terminal exit evidence. Use `packet-repaired` when entry conditions were unclear and the root repaired the packet before redelegating; this is the durable packet repair record.
 
 Schema: `schemas/orchestration-ledger.schema.json`

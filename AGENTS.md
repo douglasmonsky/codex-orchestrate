@@ -20,6 +20,7 @@ This repository stores reusable Codex skills, companion agent profiles, snippets
 - `docs/`: install notes, snippets, examples, and rationale.
 - `evals/codex-orchestrate/routing-policy.json`: machine-readable orchestration role/model/context-packet and lifecycle policy used by checks and helper scripts.
 - `schemas/`: machine-readable contracts for skill output artifacts, lifecycle evidence, and context packets.
+- `ui/orchestration-dashboard/`: read-only local dashboard assets for reviewing orchestration ledgers.
 
 ## Setup Commands
 
@@ -42,6 +43,7 @@ python3 scripts/check_orchestration_ledger.py evals/codex-orchestrate/sample-led
 python3 scripts/check_orchestration_behavior.py evals/codex-orchestrate/sample-ledgers/*.json
 python3 scripts/report_orchestration_ledger.py evals/codex-orchestrate/sample-ledgers/small-patch.json
 python3 scripts/report_orchestration_ledger.py --json evals/codex-orchestrate/sample-ledgers/small-patch.json
+python3 scripts/serve_orchestration_ui.py --self-test
 python3 scripts/run_orchestration_smoke.py
 python3 scripts/run_orchestration_smoke.py --scenario-id lifecycle-smoke --json
 python3 scripts/run_orchestration_smoke.py --scenario-id context-packet-smoke --json
@@ -93,6 +95,7 @@ When a request starts with `/orchestrate`, use `codex-orchestrate`. Prompt assem
 - `python3 scripts/check_orchestration_ledger.py evals/codex-orchestrate/sample-ledgers/*.json` passes for committed synthetic ledgers.
 - `python3 scripts/check_orchestration_behavior.py evals/codex-orchestrate/sample-ledgers/*.json` passes for scenario-to-ledger behavioral evidence.
 - `python3 scripts/report_orchestration_ledger.py evals/codex-orchestrate/sample-ledgers/small-patch.json` produces a post-run Markdown audit, and `--json` produces machine-readable report data.
+- `python3 scripts/serve_orchestration_ui.py --self-test` passes for the read-only local dashboard, and manual browser smoke confirms `http://127.0.0.1:8765` renders ledger reports without write controls.
 - `python3 scripts/run_orchestration_smoke.py` and a focused `--scenario-id` smoke confirm `/orchestrate` prompt assembly exposes the core policy surface.
 - Model pins in `.codex/agents/*.toml` still match `evals/codex-orchestrate/routing-policy.json`.
 - Ledger, lifecycle, and context-packet schemas stay aligned when orchestration behavior changes.

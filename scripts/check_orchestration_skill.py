@@ -38,6 +38,7 @@ LEDGER_CHECK_SCRIPT = ROOT / "scripts" / "check_orchestration_ledger.py"
 BEHAVIOR_SCRIPT = ROOT / "scripts" / "check_orchestration_behavior.py"
 CREATOR_SCRIPT = ROOT / "scripts" / "create_orchestration_ledger.py"
 REPORT_SCRIPT = ROOT / "scripts" / "report_orchestration_ledger.py"
+UI_SERVER_SCRIPT = ROOT / "scripts" / "serve_orchestration_ui.py"
 SMOKE_SCRIPT = ROOT / "scripts" / "run_orchestration_smoke.py"
 CONTEXT_PACKET_CHECK_SCRIPT = ROOT / "scripts" / "check_orchestration_context_packets.py"
 LIFECYCLE_SCRIPT = ROOT / "scripts" / "check_orchestration_lifecycle.py"
@@ -50,6 +51,7 @@ CONTEXT_PACKET_SCHEMA = ROOT / "schemas" / "orchestration-context-packet.schema.
 LEDGER_TEMPLATE = ROOT / "docs" / "codex-orchestrate" / "run-ledger-template.md"
 SAMPLE_LEDGERS = ROOT / "evals" / "codex-orchestrate" / "sample-ledgers"
 SAMPLE_CONTEXT_PACKETS = ROOT / "evals" / "codex-orchestrate" / "sample-context-packets"
+UI_DIR = ROOT / "ui" / "orchestration-dashboard"
 
 
 REQUIRED_SKILL_SECTIONS = [
@@ -181,6 +183,8 @@ def check_skill() -> None:
         "subagent lifecycle",
         "terminal exit",
         "packet repair",
+        "serve_orchestration_ui.py",
+        "read-only dashboard review",
     ]:
         require_contains(text, phrase, "SKILL.md")
 
@@ -468,6 +472,8 @@ def check_docs() -> None:
         "check_orchestration_behavior.py",
         "create_orchestration_ledger.py",
         "report_orchestration_ledger.py",
+        "serve_orchestration_ui.py",
+        "orchestration-dashboard",
         "run_orchestration_smoke.py",
         "agents/openai.yaml",
         "routing-policy.json",
@@ -492,6 +498,8 @@ def check_docs() -> None:
         "runtime fallback",
         "behavioral evidence",
         "whether orchestration justified itself",
+        "read-only local dashboard",
+        "http://127.0.0.1:8765",
         "local/orchestration-ledgers",
     ]:
         require(re.search(re.escape(phrase), combined, re.IGNORECASE), f"docs missing: {phrase}")
@@ -611,6 +619,7 @@ def check_ledger_artifacts() -> None:
         "local/orchestration-ledgers",
         "check_orchestration_behavior.py",
         "report_orchestration_ledger.py",
+        "serve_orchestration_ui.py",
         "Did orchestration justify itself?",
         "context_packets",
         "subagent_lifecycle",
@@ -826,6 +835,81 @@ def check_ledger_reporter() -> None:
     )
 
 
+def check_orchestration_ui() -> None:
+    text = read(UI_SERVER_SCRIPT)
+    for phrase in [
+        "--host",
+        "--port",
+        "--self-test",
+        "127.0.0.1",
+        "8765",
+        "do_POST",
+        "do_PUT",
+        "do_PATCH",
+        "do_DELETE",
+        "read-only dashboard rejects write methods",
+        "evals",
+        "sample-ledgers",
+        "local",
+        "orchestration-ledgers",
+        "/api/health",
+        "/api/ledgers",
+        "/api/report",
+        "/api/runtime",
+        "/api/commands",
+        "report_orchestration_ledger.py",
+        "check_runtime_compatibility.py",
+    ]:
+        require_contains(text, phrase, "serve_orchestration_ui.py")
+
+    for asset in ["index.html", "styles.css", "app.js"]:
+        require((UI_DIR / asset).exists(), f"missing UI asset: ui/orchestration-dashboard/{asset}")
+
+    html = read(UI_DIR / "index.html")
+    for phrase in [
+        "Orchestration Ledger Console",
+        "Run validation",
+        "Routing Timeline",
+        "Context Lifecycle",
+        "Final Review",
+        "Residual Risks",
+    ]:
+        require_contains(html, phrase, "ui/orchestration-dashboard/index.html")
+
+    app = read(UI_DIR / "app.js")
+    for phrase in [
+        "/api/ledgers",
+        "/api/report",
+        "/api/runtime",
+        "/api/commands",
+        "orchestration_value",
+        "routing_decisions",
+        "terminal_packet_ids",
+    ]:
+        require_contains(app, phrase, "ui/orchestration-dashboard/app.js")
+
+    css = read(UI_DIR / "styles.css")
+    for phrase in [
+        "min-height: 100dvh",
+        "grid-template-columns",
+        "ledger-list",
+        "timeline-item",
+        "@media",
+    ]:
+        require_contains(css, phrase, "ui/orchestration-dashboard/styles.css")
+
+    completed = subprocess.run(
+        [sys.executable, str(UI_SERVER_SCRIPT), "--self-test"],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    require(
+        completed.returncode == 0,
+        f"orchestration UI self-test failed: {completed.stderr.strip() or completed.stdout.strip()}",
+    )
+
+
 def check_lifecycle_script() -> None:
     text = read(LIFECYCLE_SCRIPT)
     for phrase in [
@@ -916,6 +1000,7 @@ def main() -> int:
         check_ledger_creator,
         check_ledger_validator_and_samples,
         check_ledger_reporter,
+        check_orchestration_ui,
         check_lifecycle_script,
         check_behavior_script,
         check_smoke_script,

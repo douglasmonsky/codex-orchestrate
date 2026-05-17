@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Orchestration Ledger Console</title>
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body>
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">MonskySkills</p>
+        <h1>Orchestration Ledger Console</h1>
+      </div>
+      <div class="topbar-actions">
+        <label class="toggle">
+          <input id="validate-toggle" type="checkbox">
+          <span>Run validation</span>
+        </label>
+        <button id="refresh-button" type="button">Refresh</button>
+      </div>
+    </header>
+
+    <main class="shell">
+      <aside class="sidebar" aria-label="Ledger navigation">
+        <section class="toolbar">
+          <label for="ledger-search">Filter ledgers</label>
+          <input id="ledger-search" type="search" placeholder="scenario, model, role">
+          <select id="source-filter" aria-label="Source filter">
+            <option value="all">All sources</option>
+            <option value="sample">Sample</option>
+            <option value="local">Local</option>
+          </select>
+        </section>
+        <section>
+          <div class="section-heading">
+            <h2>Ledgers</h2>
+            <span id="ledger-count">0</span>
+          </div>
+          <div id="ledger-list" class="ledger-list" role="list"></div>
+        </section>
+      </aside>
+
+      <section class="workspace" aria-live="polite">
+        <section id="status-panel" class="status-strip"></section>
+
+        <section class="summary-grid">
+          <article class="summary-panel verdict-panel">
+            <p class="eyebrow">Verdict</p>
+            <h2 id="verdict-answer">Select a ledger</h2>
+            <p id="verdict-rationale">Choose a sample or local run ledger to inspect routing quality and validation evidence.</p>
+          </article>
+          <article class="summary-panel">
+            <p class="eyebrow">Runtime</p>
+            <h2 id="runtime-status">Checking</h2>
+            <p id="runtime-detail">Pinned model availability will appear here.</p>
+          </article>
+          <article class="summary-panel">
+            <p class="eyebrow">Validation</p>
+            <h2 id="validation-score">Not loaded</h2>
+            <p id="validation-detail">Enable validation to run the existing ledger checks before rendering.</p>
+          </article>
+        </section>
+
+        <section class="report-layout">
+          <article class="report-panel span-2">
+            <div class="section-heading">
+              <h2>Task</h2>
+              <span id="selected-ledger-id">No ledger selected</span>
+            </div>
+            <dl id="task-details" class="details-grid"></dl>
+          </article>
+
+          <article class="report-panel">
+            <div class="section-heading">
+              <h2>Models</h2>
+            </div>
+            <div id="model-list" class="pill-list"></div>
+          </article>
+
+          <article class="report-panel span-2">
+            <div class="section-heading">
+              <h2>Routing Timeline</h2>
+            </div>
+            <div id="routing-timeline" class="timeline"></div>
+          </article>
+
+          <article class="report-panel">
+            <div class="section-heading">
+              <h2>Context Lifecycle</h2>
+            </div>
+            <dl id="lifecycle-details" class="details-grid compact"></dl>
+          </article>
+
+          <article class="report-panel">
+            <div class="section-heading">
+              <h2>Final Review</h2>
+            </div>
+            <div id="final-review" class="text-block"></div>
+          </article>
+
+          <article class="report-panel">
+            <div class="section-heading">
+              <h2>Residual Risks</h2>
+            </div>
+            <div id="residual-risks" class="text-block"></div>
+          </article>
+
+          <article class="report-panel span-2">
+            <div class="section-heading">
+              <h2>Commands</h2>
+            </div>
+            <div id="commands-list" class="commands"></div>
+          </article>
+        </section>
+      </section>
+    </main>
+
+    <script src="/app.js"></script>
+  </body>
+</html>
