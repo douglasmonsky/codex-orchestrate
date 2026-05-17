@@ -1,6 +1,6 @@
 name = "mechanic"
 description = "Cheap mechanical worker for deterministic small edits, formatting, renames, config tweaks, and obvious one-file patches."
-model = "gpt-5.4-mini"
+model = "gpt-5.3-codex-spark"
 model_reasoning_effort = "low"
 model_verbosity = "low"
 sandbox_mode = "workspace-write"

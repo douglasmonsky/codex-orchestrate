@@ -35,7 +35,7 @@ find .codex/agents -name '*.toml' -print
 git diff --check
 ```
 
-When TOML agent profiles change, inspect them for valid names, models, reasoning effort, and clear instructions.
+When TOML agent profiles change, inspect them for valid names, explicit model routing, reasoning effort, and clear instructions.
 
 ## Source Of Truth And Sync
 
@@ -63,5 +63,6 @@ When TOML agent profiles change, inspect them for valid names, models, reasoning
 - Companion agent profiles or docs are committed with the skill when required.
 - README or docs are updated when install behavior changes.
 - `python3 scripts/check_orchestration_skill.py` passes when `codex-orchestrate` changes.
+- Model pins in `.codex/agents/*.toml` still match the documented `codex-orchestrate` model ladder.
 - `git diff --check` passes.
 - No secrets, tokens, or private data are staged.

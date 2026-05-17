@@ -21,7 +21,7 @@
 - 16. Documentation Writer
 - 17. Risk Controller
 
-Use these roles as reusable subagent types. The root orchestrator should prefer the cheapest adequate role, escalate stuck work by effort/model level first, and pass to a different role only when the failure mode is a specialty mismatch.
+Use these roles as reusable subagent types. The root orchestrator should prefer the cheapest adequate role, concrete model, and effort. Escalate stuck work by model class and/or effort first, then pass to a different role only when the failure mode is a specialty mismatch.
 
 ## Runtime fallback
 
@@ -43,7 +43,8 @@ Use when:
 - The root already knows the desired change.
 
 Default effort: minimal or low.
-Preferred model class: fast/mini.
+Preferred model class: spark/fast.
+Default model: `gpt-5.3-codex-spark`.
 Sandbox: workspace-write.
 Escalate to: `implementer_simple` when the edit requires judgment; `implementer` when behavior changes.
 Return:
@@ -63,7 +64,8 @@ Use when:
 - The task needs command/test discovery.
 
 Default effort: low.
-Preferred model class: fast/mini.
+Preferred model class: spark/fast.
+Default model: `gpt-5.3-codex-spark`.
 Sandbox: read-only.
 Escalate to: `repo_scout_deep` when relevant surface is not found or cross-cutting context is needed; `planner` when discovery becomes sequencing; `architect` when discovery reveals design uncertainty.
 Return:
@@ -85,6 +87,7 @@ Use when:
 
 Default effort: medium.
 Preferred model class: default.
+Default model: `gpt-5.4`.
 Sandbox: read-only.
 Escalate to: `planner` for execution sequencing; `architect` for design boundaries; `debugger` for failure diagnosis.
 Return:
@@ -105,6 +108,7 @@ Use when:
 
 Default effort: medium.
 Preferred model class: default.
+Default model: `gpt-5.4`.
 Sandbox: read-only.
 Escalate to: `architect` for design decisions; `risk_controller` for scope/cost concerns; `migration_analyst` for migration ordering.
 Return:
@@ -125,6 +129,7 @@ Use when:
 
 Default effort: high.
 Preferred model class: strong.
+Default model: `gpt-5.5`.
 Sandbox: read-only.
 Escalate to: `security_auditor` for security-sensitive design; `migration_analyst` for staged migration; `reviewer` for patch-level concerns; `xhigh` only for severe ambiguity/high cost of error.
 Return:
@@ -145,7 +150,8 @@ Use when:
 - Acceptance criteria are clear.
 
 Default effort: low or medium.
-Preferred model class: fast/mini or default.
+Preferred model class: spark/fast or default.
+Default model: `gpt-5.3-codex-spark`.
 Sandbox: workspace-write.
 Escalate to: `implementer` when the patch spans multiple files or requires deeper judgment; `debugger` when a failure cannot be explained; `reviewer` when correctness risk is non-trivial.
 Return:
@@ -168,6 +174,7 @@ Use when:
 
 Default effort: medium.
 Preferred model class: default.
+Default model: `gpt-5.4`.
 Sandbox: workspace-write.
 Escalate to: `implementer_strong` when implementation logic is complex; `architect` when design ambiguity blocks progress; `debugger` when validation fails; `security_auditor` for security-sensitive changes.
 Return:
@@ -189,6 +196,7 @@ Use when:
 
 Default effort: high.
 Preferred model class: strong.
+Default model: `gpt-5.5`.
 Sandbox: workspace-write.
 Escalate to: `architect`, `security_auditor`, or `reviewer` depending on the unresolved risk.
 Return:
@@ -210,6 +218,7 @@ Use when:
 
 Default effort: high.
 Preferred model class: strong.
+Default model: `gpt-5.5`.
 Sandbox: read-only.
 Escalate to: `architect` for design disputes; `security_auditor` for security findings; `debugger` for unexplained failures; `xhigh` if supported for severe disputed correctness issues.
 Return:
@@ -229,7 +238,8 @@ Use when:
 - A simple validation pass is enough.
 
 Default effort: low.
-Preferred model class: fast/mini.
+Preferred model class: mini.
+Default model: `gpt-5.4-mini`.
 Sandbox: workspace-write.
 Escalate to: `test_triage` when failures need interpretation; `debugger` when failures are ambiguous or flaky.
 Return:
@@ -250,6 +260,7 @@ Use when:
 
 Default effort: medium.
 Preferred model class: default.
+Default model: `gpt-5.4`.
 Sandbox: workspace-write.
 Escalate to: `debugger` for root-cause investigation; `implementer` for obvious fix; `risk_controller` if validation cost is growing.
 Return:
@@ -270,6 +281,7 @@ Use when:
 
 Default effort: high for ambiguous failures, medium for bounded failures.
 Preferred model class: strong for ambiguous failures, default otherwise.
+Default model: `gpt-5.5` for ambiguous failures, `gpt-5.4` for bounded failures.
 Sandbox: workspace-write when reproduction commands are needed.
 Escalate to: `architect` if root cause is design-level; `security_auditor` if security-sensitive; `implementer` when fix is clear.
 Return:
@@ -289,6 +301,7 @@ Use when:
 
 Default effort: high or xhigh if supported for severe-risk work.
 Preferred model class: strong.
+Default model: `gpt-5.5`.
 Sandbox: read-only.
 Escalate to: `architect` for design remediation; `reviewer` for patch correctness; `xhigh` if supported for severe unresolved security ambiguity.
 Return:
@@ -309,6 +322,7 @@ Use when:
 
 Default effort: high.
 Preferred model class: strong.
+Default model: `gpt-5.5`.
 Sandbox: workspace-write if benchmarks/profiling are needed.
 Escalate to: `architect` for design tradeoffs; `reviewer` for patch risk; `test_runner` for measurement validation.
 Return:
@@ -329,6 +343,7 @@ Use when:
 
 Default effort: high.
 Preferred model class: strong.
+Default model: `gpt-5.5`.
 Sandbox: read-only.
 Escalate to: `architect` for design decisions; `security_auditor` for data/auth risk; `risk_controller` for scope control.
 Return:
@@ -347,7 +362,8 @@ Use when:
 - Existing style and examples must be preserved.
 
 Default effort: low.
-Preferred model class: fast/mini.
+Preferred model class: mini.
+Default model: `gpt-5.4-mini`.
 Sandbox: workspace-write.
 Escalate to: `repo_scout_deep` when code understanding is needed; `architect` when documentation reveals design ambiguity; `reviewer` for public-facing high-risk docs.
 Return:
@@ -369,6 +385,7 @@ Use when:
 
 Default effort: medium.
 Preferred model class: default.
+Default model: `gpt-5.4`.
 Sandbox: read-only.
 Escalate to: root decision; this agent should not recursively delegate.
 Return:

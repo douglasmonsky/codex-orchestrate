@@ -1,6 +1,6 @@
 name = "architect"
 description = "Strong architecture agent for design tradeoffs, invariants, API boundaries, data flow, and migration implications."
-model = "gpt-5.4"
+model = "gpt-5.5"
 model_reasoning_effort = "high"
 model_verbosity = "medium"
 sandbox_mode = "read-only"

@@ -15,11 +15,11 @@
 - Final-review checklist for non-code work
 - Final response requirement
 
-This reference defines when to raise effort/model level, when to pass work to a different subagent type, and how the root performs the final senior-review gate.
+This reference defines when to raise model class, when to raise reasoning effort, when to pass work to a different subagent type, and how the root performs the final senior-review gate.
 
 ## Core principle
 
-When a subagent is stuck, the primary remedy is effort escalation on the narrow unresolved task. Role switching is secondary and should happen only when the evidence shows the problem belongs to a different specialty.
+When a subagent is stuck, the primary remedy is same-role escalation on the narrow unresolved task by model class and/or reasoning effort. Role switching is secondary and should happen only when the evidence shows the problem belongs to a different specialty.
 
 Do not escalate the entire project. Escalate the smallest unresolved question.
 
@@ -46,13 +46,16 @@ Before retrying or passing off, compress the state into this form:
 ```text
 Original objective:
 Agent/effort/model used:
+Intended model:
+Actual model:
+Model fallback used:
 What was tried:
 Files inspected/touched:
 Commands run:
 Observed evidence:
 What failed or remains unclear:
 Smallest unresolved question:
-Recommended next agent/effort:
+Recommended next agent/model/effort:
 ```
 
 The next subagent should receive this summary and a narrower objective. Do not make the next agent repeat broad discovery unless prior evidence is unreliable.
@@ -63,10 +66,12 @@ Use this default ladder unless the repository or user gives stronger constraints
 
 ```text
 minimal -> low -> medium -> high -> xhigh only when supported and justified
-fast/mini -> default -> strong
+gpt-5.3-codex-spark -> gpt-5.4-mini -> gpt-5.4 -> gpt-5.5
 ```
 
 Escalate one step at a time for most tasks. Skip directly to `high/strong` only when the task is security-sensitive, architecture-critical, migration-sensitive, concurrency-sensitive, data-destructive, or production-critical.
+
+Raise model class first when the evidence says the current model lacks capability for the judgment. Raise effort first when the model is appropriate but needs deeper deliberation over the same evidence.
 
 ## Same-role escalation first
 
@@ -122,7 +127,7 @@ The root must:
 
 1. Decide whether the subagent is truly stuck or merely incomplete.
 2. Preserve compact evidence; avoid pulling raw logs into root context.
-3. Choose same-role effort escalation unless role mismatch is clear.
+3. Choose same-role model/effort escalation unless role mismatch is clear.
 4. Keep the next prompt narrower than the prior prompt.
 5. Track why each escalation or pass-off happened.
 6. Stop escalation when additional attempts are unlikely to improve confidence proportionally.
@@ -159,7 +164,7 @@ Residual risk:
 
 Blocking final-review findings require one of these actions:
 
-- Send a narrow issue to the correct subagent at higher effort.
+- Send a narrow issue to the correct subagent at a higher model class and/or effort.
 - Ask a specialist subagent for audit/review if the risk category changed.
 - Make a bounded direct correction if cheaper and safe.
 - Report the blocker honestly if the environment prevents completion.

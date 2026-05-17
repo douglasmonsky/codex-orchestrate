@@ -26,6 +26,9 @@ Current step:
 Tier:
 Active/finished agents:
 Runtime role mapping:
+Model selected:
+Reasoning effort:
+Why this model is sufficient:
 Evidence gathered:
 Open risks/uncertainty:
 Next routing decision:
@@ -51,6 +54,12 @@ Delegation tier:
 Runtime agent type:
 <custom role if callable | explorer | worker | default>
 
+Model selected:
+<actual model, for example gpt-5.3-codex-spark | gpt-5.4-mini | gpt-5.4 | gpt-5.5>
+
+Why this model is sufficient:
+<bounded reason tied to task risk and ambiguity>
+
 Scope:
 <files, folders, commands, docs, or error logs>
 
@@ -71,7 +80,7 @@ Reasoning effort:
 <minimal | low | medium | high | xhigh if supported>
 
 Preferred model class:
-<fast/mini | default | strong>
+<spark/fast | mini | default | strong>
 
 Output budget:
 <= <word count> words unless exact patch details or essential command output require more.
@@ -91,7 +100,7 @@ Files touched or inspected:
 Commands run:
 Risks / uncertainty:
 Stuck status: <not stuck | stuck | blocked by scope | blocked by environment | role mismatch>
-Escalation recommendation: <none | same role at higher effort | pass to role X | root decision needed>
+Escalation recommendation: <none | same role at higher model/effort | pass to role X | root decision needed>
 Confidence:
 ```
 
@@ -102,13 +111,16 @@ Use this when a subagent cannot complete the assigned objective.
 ```text
 Original objective:
 Agent/effort/model used:
+Intended model:
+Actual model:
+Model fallback used:
 What was tried:
 Files inspected/touched:
 Commands run:
 Observed evidence:
 What failed or remains unclear:
 Smallest unresolved question:
-Recommended next agent/effort:
+Recommended next agent/model/effort:
 Confidence:
 ```
 
@@ -140,7 +152,10 @@ Reasoning effort:
 minimal or low
 
 Preferred model class:
-fast/mini
+spark/fast
+
+Model selected:
+gpt-5.3-codex-spark
 
 Escalation trigger:
 Any ambiguity, behavior change, validation failure, or need to inspect unrelated files.
@@ -182,7 +197,10 @@ Reasoning effort:
 low
 
 Preferred model class:
-fast/mini
+spark/fast
+
+Model selected:
+gpt-5.3-codex-spark
 
 Escalation trigger:
 Relevant files/commands not found, multiple unrelated candidate surfaces, or low confidence.
@@ -278,13 +296,16 @@ Reasoning effort:
 <low | medium | high>
 
 Preferred model class:
-<fast/mini | default | strong>
+<spark/fast | default | strong>
+
+Model selected:
+<gpt-5.3-codex-spark for Implementer Simple | gpt-5.4 for Implementer | gpt-5.5 for Implementer Strong>
 
 Escalation trigger:
 Unable to implement within scope, unclear design, unexplained validation failure, or low confidence patch.
 
 Escalation target if stuck:
-Same implementation role at one higher effort if available; otherwise implementer_strong, debugger, architect, or reviewer according to failure mode.
+Same implementation role at one higher model/effort if available; otherwise implementer_strong, debugger, architect, or reviewer according to failure mode.
 
 Return format:
 Patch summary:
@@ -322,6 +343,9 @@ high
 
 Preferred model class:
 strong
+
+Model selected:
+gpt-5.5
 
 Escalation trigger:
 Blocking issue requires design, security, migration, root-cause debugging, or higher-effort disputed judgment.
@@ -361,7 +385,10 @@ Reasoning effort:
 low for known commands; medium for failure interpretation.
 
 Preferred model class:
-fast/mini for known commands; default for triage.
+mini for known commands; default for triage.
+
+Model selected:
+gpt-5.4-mini for known commands; gpt-5.4 for triage.
 
 Escalation trigger:
 Unknown command surface, flaky behavior, unexplained failure, environment blocker, or ambiguous introduced/pre-existing classification.
@@ -416,6 +443,9 @@ Reasoning effort:
 Preferred model class:
 <default | strong>
 
+Model selected:
+<gpt-5.4 | gpt-5.5>
+
 Return format:
 Resolved issue:
 Evidence:
@@ -430,7 +460,7 @@ After subagents return, the root should synthesize and review in this format int
 
 ```text
 Delegation used:
-- <agent>: <effort/model class> — <why>
+- <agent>: <model/effort/model class> — <why>
 
 Subagent results:
 - <agent>: <one-line result>

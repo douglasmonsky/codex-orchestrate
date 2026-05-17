@@ -1,6 +1,6 @@
 name = "reviewer"
 description = "Strong read-only reviewer for correctness, regressions, edge cases, missing tests, and unnecessary complexity."
-model = "gpt-5.4"
+model = "gpt-5.5"
 model_reasoning_effort = "high"
 model_verbosity = "medium"
 sandbox_mode = "read-only"

@@ -1,6 +1,6 @@
 name = "implementer_simple"
 description = "Cheap bounded implementation worker for small low-risk patches after scope and acceptance criteria are clear."
-model = "gpt-5.4-mini"
+model = "gpt-5.3-codex-spark"
 model_reasoning_effort = "medium"
 model_verbosity = "medium"
 sandbox_mode = "workspace-write"

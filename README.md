@@ -21,7 +21,7 @@ AGENTS.md             Project-specific Codex instructions
 
 ## Current skills
 
-- `codex-orchestrate`: delegate-first Codex orchestration skill for routing repository work through subagents, escalating stuck work, and requiring final root review.
+- `codex-orchestrate`: delegate-first Codex orchestration skill for routing repository work through subagents, selecting explicit models/effort, escalating stuck work, and requiring final root review.
 
 ## Source of truth
 
@@ -68,6 +68,19 @@ After installing `codex-orchestrate`, add this rule to your global or project `A
 When a user starts a request with `/orchestrate`, treat it as an explicit instruction to use `$codex-orchestrate` for continuous delegate-first orchestration. Reevaluate delegation after each phase, spawn the cheapest safe subagents for substantive repository work, use built-in fallback roles when custom agents are unavailable, escalate stuck work narrowly, and finish with root senior review before responding.
 ```
 
+## Model routing
+
+`codex-orchestrate` treats model choice as a first-class routing decision:
+
+```text
+gpt-5.3-codex-spark  ultra-fast text-only coding loops, scouts, mechanics, simple targeted fixes
+gpt-5.4-mini         efficient lightweight support, known validation, docs edits, log/test summaries
+gpt-5.4              ordinary implementation, planning, deep discovery, test triage, risk checks
+gpt-5.5              high-risk or high-ambiguity architecture, review, security, debugging, migration, performance
+```
+
+Smaller models can preserve local-message usage limits, but subagent fanout still consumes usage. Stronger models are intentionally pinned for quality-sensitive roles.
+
 ## Validation
 
 Run the skill-pack checker before committing orchestration changes:
@@ -76,7 +89,7 @@ Run the skill-pack checker before committing orchestration changes:
 python3 scripts/check_orchestration_skill.py
 ```
 
-The checker validates required skill sections, fallback role mapping, lightweight routing scenarios, agent TOML structure, duplicate stuck-protocol cleanup, and source-of-truth docs.
+The checker validates required skill sections, fallback role mapping, model routing scenarios, agent TOML model pins, duplicate stuck-protocol cleanup, and source-of-truth docs.
 
 ## Privacy
 

@@ -1,6 +1,6 @@
 name = "performance_investigator"
 description = "Performance diagnosis agent for latency, throughput, memory, allocation, IO, caching, and algorithmic bottlenecks."
-model = "gpt-5.4"
+model = "gpt-5.5"
 model_reasoning_effort = "high"
 model_verbosity = "medium"
 sandbox_mode = "workspace-write"

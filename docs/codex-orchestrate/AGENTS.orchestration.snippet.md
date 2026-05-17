@@ -16,18 +16,18 @@ When custom agent profiles such as `repo_scout`, `mechanic`, or `test_runner` ar
 - implementation/debug/test/docs/mechanical work: `worker`
 - planning/synthesis checkpoint work: `default`
 
-Keep a compact routing ledger with the current step, tier, agents used, runtime mapping, evidence, risks, next routing decision, escalation status, and final-review gate.
+Keep a compact routing ledger with the current step, tier, agents used, runtime mapping, selected model, reasoning effort, why the model is sufficient, evidence, risks, next routing decision, escalation status, and final-review gate.
 
-Use the cheapest safe agent first:
+Use the cheapest safe agent/model/effort first:
 
-- `mechanic`, `repo_scout`, `test_runner`, and `docs_writer` on `low` or `minimal` effort for mechanical work, search, known validation, simple docs, and log compression.
-- `implementer_simple` on low/medium effort for small patches.
-- `repo_scout_deep`, `implementer`, `planner`, `test_triage`, and `risk_controller` on medium effort for deeper mapping, ordinary multi-file work, failure interpretation, and cost/risk checks.
-- `architect`, `reviewer`, `security_auditor`, `debugger`, `migration_analyst`, `performance_investigator`, and `implementer_strong` on high effort only when ambiguity, risk, or cost of error justifies it.
+- `mechanic`, `repo_scout`, and `implementer_simple` on `gpt-5.3-codex-spark` for ultra-fast text-only coding loops, cheap discovery, mechanical edits, and simple targeted fixes.
+- `test_runner` and `docs_writer` on `gpt-5.4-mini` for known validation, docs edits, and compact log/test summaries.
+- `repo_scout_deep`, `implementer`, `planner`, `test_triage`, and `risk_controller` on `gpt-5.4` for deeper mapping, ordinary multi-file work, failure interpretation, and cost/risk checks.
+- `architect`, `reviewer`, `security_auditor`, `debugger`, `migration_analyst`, `performance_investigator`, and `implementer_strong` on `gpt-5.5` for high-risk or high-ambiguity work.
 
 ## Stuck-work escalation
 
-When a subagent is stuck, escalate effort/model level on the same narrow unresolved task before switching specialties.
+When a subagent is stuck, escalate model class and/or reasoning effort on the same narrow unresolved task before switching specialties. Raise model class first when the current model lacks capability; raise effort first when the model is right but needs deeper deliberation.
 
 Treat a subagent as stuck when it cannot locate relevant files/commands, reports low confidence, produces an unvalidated patch, reproduces but cannot explain a failure, returns conflicting hypotheses, or asks for root judgment without enough evidence.
 
@@ -85,4 +85,4 @@ Before finalizing, the root should check:
 - Security, data, migration, API, concurrency, and performance risks were considered when relevant.
 - Residual uncertainty is stated plainly.
 
-If final review finds a blocking issue, send the narrow issue back to the appropriate subagent at higher effort, pass to a specialist if role mismatch is clear, or make a bounded direct correction if cheaper and safe.
+If final review finds a blocking issue, send the narrow issue back to the appropriate subagent at a higher model class and/or effort, pass to a specialist if role mismatch is clear, or make a bounded direct correction if cheaper and safe.

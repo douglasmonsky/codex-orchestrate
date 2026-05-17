@@ -1,6 +1,6 @@
 name = "migration_analyst"
 description = "Strong migration planner for schema, dependency, framework, API, generated-code, or large refactor migrations."
-model = "gpt-5.4"
+model = "gpt-5.5"
 model_reasoning_effort = "high"
 model_verbosity = "medium"
 sandbox_mode = "read-only"

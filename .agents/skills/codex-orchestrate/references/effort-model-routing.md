@@ -6,6 +6,7 @@
 - Runtime role fallback
 - Continuous reassessment
 - Effort levels
+- Model ladder
 - Model classes
 - Routing rules
 - Escalation rules
@@ -14,11 +15,11 @@
 - Delegation templates by task type
 - Root model management
 
-This skill uses effort/model routing to keep the root agent from doing every task with a high-capability configuration. The root chooses a cheap safe worker first, continually reevaluates routing as work changes, escalates stuck work narrowly, and performs final senior review before completion.
+This skill uses explicit model and effort routing to keep the root agent from doing every task with a high-capability configuration. The root chooses a cheap safe worker first, continually reevaluates routing as work changes, escalates stuck work narrowly, and performs final senior review before completion.
 
 ## Routing principle
 
-Use the cheapest adequate worker for the current step. Routing is not fixed at the start of the task: reassess before each new phase, after every subagent result, after direct root work, and whenever new evidence changes scope or risk. Escalate only a narrow hard part, not the whole task.
+Use the cheapest adequate worker, concrete model, and reasoning effort for the current step. Routing is not fixed at the start of the task: reassess before each new phase, after every subagent result, after direct root work, and whenever new evidence changes scope or risk. Escalate only a narrow hard part, not the whole task.
 
 A strong root model should behave like a controller: classify, delegate, synthesize, escalate, and verify decisions. It should not perform broad search, log digestion, routine edits, or ordinary validation when a cheaper subagent can do them.
 
@@ -132,19 +133,41 @@ Do not use for:
 - low-risk documentation;
 - first attempts at normal tasks.
 
+## Model ladder
+
+Use this maximum-quality ladder unless the user or runtime requires a different model:
+
+```text
+gpt-5.3-codex-spark -> gpt-5.4-mini -> gpt-5.4 -> gpt-5.5
+```
+
+- `gpt-5.3-codex-spark`: near-instant text-only coding iteration; use for cheap scouts, deterministic mechanics, and simple targeted fixes when no image/multimodal or heavy reasoning is needed.
+- `gpt-5.4-mini`: efficient lightweight general support; use for known validation, docs edits, and compact log/test summarization.
+- `gpt-5.4`: default normal-work model; use for ordinary implementation, planning, deep discovery, test triage, and risk control.
+- `gpt-5.5`: strongest demanding-work model; use for architecture, review, security, migration, performance, ambiguous debugging, and complex or high-risk implementation.
+
+If the pinned model is unavailable, choose the nearest available model that preserves safety. Record both intended and actual model in the routing ledger.
+
 ## Model classes
 
-### fast/mini
+### spark/fast
 
 Use for:
-- `mechanic`;
 - `repo_scout`;
+- `mechanic`;
+- `implementer_simple` after scope is known;
+- fast text-only code-map or targeted-fix loops.
+
+Typical reason: these tasks are bounded, text-only, and benefit from near-instant iteration.
+
+### mini
+
+Use for:
 - `test_runner` with known commands;
 - `docs_writer`;
-- simple `implementer_simple` work;
 - log compression.
 
-Typical reason: these tasks are bounded and can return distilled facts or small patches.
+Typical reason: these tasks are bounded and benefit from a general lightweight model rather than the fastest coding-only lane.
 
 ### default
 
@@ -175,9 +198,9 @@ Typical reason: these tasks involve tradeoffs, edge cases, high ambiguity, or hi
 
 ## Routing rules
 
-Start cheap unless the first-order risk is high.
+Start cheap unless the first-order risk is high. Choose both model and effort; do not treat effort escalation as a substitute for a stronger model when capability is the bottleneck.
 
-Choose low/mini first when:
+Choose Spark or low/mini first when:
 - The work is discovery, inventory, command execution, formatting, simple docs, or mechanical editing.
 - The expected output is a compact map, patch, or command result.
 - Failure is cheap and recoverable.
@@ -197,7 +220,7 @@ After any initial route, continue applying these rules to the next concrete step
 
 ## Escalation rules
 
-Escalate effort/model when at least one is true:
+Escalate model class and/or reasoning effort when at least one is true:
 
 - A cheap agent reports low confidence with useful evidence.
 - A subagent is stuck by the criteria in `escalation-and-review.md`.
@@ -210,10 +233,10 @@ Escalate effort/model when at least one is true:
 Primary remedy when stuck:
 
 ```text
-same narrow objective + one higher effort/model tier
+same narrow objective + one higher model class and/or effort tier
 ```
 
-Do not immediately broaden the task. Do not switch role until same-role escalation is unlikely to help or the stuck reason is clearly specialty mismatch.
+Raise model class first when the current model appears incapable of the judgment needed. Raise effort first when the model is appropriate but needs deeper deliberation. Do not immediately broaden the task. Do not switch role until same-role escalation is unlikely to help or the stuck reason is clearly specialty mismatch.
 
 ## Pass-off rules
 
@@ -231,7 +254,7 @@ Pass to a different role when evidence shows the problem belongs elsewhere:
 
 ## De-escalation rules
 
-Downgrade effort/model when:
+Downgrade model and/or effort when:
 
 - Work is mechanical.
 - The scope is one obvious file or command.

@@ -1,6 +1,6 @@
 name = "implementer_strong"
 description = "High-effort bounded implementation worker for complex, edge-case-heavy, or high-risk patches after the root narrows scope."
-model = "gpt-5.4"
+model = "gpt-5.5"
 model_reasoning_effort = "high"
 model_verbosity = "medium"
 sandbox_mode = "workspace-write"

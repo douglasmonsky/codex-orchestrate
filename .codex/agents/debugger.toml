@@ -1,6 +1,6 @@
 name = "debugger"
 description = "Strong root-cause investigator for ambiguous failures, flaky tests, logs, stack traces, and reproduction."
-model = "gpt-5.4"
+model = "gpt-5.5"
 model_reasoning_effort = "high"
 model_verbosity = "medium"
 sandbox_mode = "workspace-write"

@@ -1,6 +1,6 @@
 name = "security_auditor"
 description = "Strong adversarial auditor for auth, authorization, secrets, injection, sandboxing, dependency risk, and data isolation."
-model = "gpt-5.4"
+model = "gpt-5.5"
 model_reasoning_effort = "high"
 model_verbosity = "medium"
 sandbox_mode = "read-only"

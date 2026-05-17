@@ -27,6 +27,7 @@ REQUIRED_SKILL_SECTIONS = [
     "## Purpose",
     "## Source Of Truth",
     "## Runtime Capabilities",
+    "## Model Routing",
     "## Controller Loop",
     "## Routing Ledger",
     "## Delegation Defaults",
@@ -70,10 +71,51 @@ EXPECTED_AGENT_NAMES = {
     "test_triage",
 }
 
+SUPPORTED_MODELS = {
+    "gpt-5.3-codex-spark",
+    "gpt-5.4-mini",
+    "gpt-5.4",
+    "gpt-5.5",
+}
+
+EXPECTED_AGENT_MODELS = {
+    "mechanic": "gpt-5.3-codex-spark",
+    "repo_scout": "gpt-5.3-codex-spark",
+    "implementer_simple": "gpt-5.3-codex-spark",
+    "test_runner": "gpt-5.4-mini",
+    "docs_writer": "gpt-5.4-mini",
+    "repo_scout_deep": "gpt-5.4",
+    "planner": "gpt-5.4",
+    "implementer": "gpt-5.4",
+    "test_triage": "gpt-5.4",
+    "risk_controller": "gpt-5.4",
+    "architect": "gpt-5.5",
+    "reviewer": "gpt-5.5",
+    "security_auditor": "gpt-5.5",
+    "migration_analyst": "gpt-5.5",
+    "performance_investigator": "gpt-5.5",
+    "debugger": "gpt-5.5",
+    "implementer_strong": "gpt-5.5",
+}
+
+HIGH_RISK_ROLES = {
+    "architect",
+    "reviewer",
+    "security_auditor",
+    "migration_analyst",
+    "performance_investigator",
+    "debugger",
+    "implementer_strong",
+}
+
+SPARK_ROLES = {"mechanic", "repo_scout", "implementer_simple"}
+MINI_ROLES = {"test_runner", "docs_writer"}
+
 REQUIRED_SCENARIO_EXPECTED_FIELDS = [
     "route",
     "delegation",
     "escalation",
+    "model_routing",
     "final_review",
     "must_delegate",
     "runtime_fallback",
@@ -116,6 +158,12 @@ def check_skill() -> None:
         "immediately leave Tier 0",
         "routing ledger",
         "Final Senior Review",
+        "gpt-5.3-codex-spark",
+        "gpt-5.4-mini",
+        "gpt-5.4",
+        "gpt-5.5",
+        "Model selected",
+        "Why this model is sufficient",
     ]:
         require_contains(text, phrase, "SKILL.md")
 
@@ -131,11 +179,20 @@ def check_references() -> None:
         require_contains(text, "## Table Of Contents", path.name)
 
     routing = read(REFERENCES / "effort-model-routing.md")
-    for phrase in ["Runtime role fallback", "repo_scout", "explorer", "worker", "default"]:
+    for phrase in [
+        "Runtime role fallback",
+        "Model ladder",
+        "gpt-5.3-codex-spark -> gpt-5.4-mini -> gpt-5.4 -> gpt-5.5",
+        "Raise model class first",
+        "repo_scout",
+        "explorer",
+        "worker",
+        "default",
+    ]:
         require_contains(routing, phrase, "effort-model-routing.md")
 
     handoffs = read(REFERENCES / "handoff-contracts.md")
-    for phrase in ["Routing ledger template", "Runtime agent type", "Stuck-state summary template"]:
+    for phrase in ["Routing ledger template", "Runtime agent type", "Model selected", "Why this model is sufficient", "Stuck-state summary template"]:
         require_contains(handoffs, phrase, "handoff-contracts.md")
 
 
@@ -164,6 +221,7 @@ def check_scenarios() -> None:
         "validation-failure",
         "high-risk-security",
         "runtime-fallback",
+        "model-escalation",
     }:
         require(required in categories, f"missing scenario category: {required}")
 
@@ -182,6 +240,17 @@ def check_agents() -> None:
         names.add(name)
         require(path.stem == name, f"{path.name} name does not match file stem")
         require(name in EXPECTED_AGENT_NAMES, f"unexpected agent name: {name}")
+        require(data["model"] in SUPPORTED_MODELS, f"{path.name} has unsupported model: {data['model']}")
+        require(
+            data["model"] == EXPECTED_AGENT_MODELS[name],
+            f"{path.name} should use {EXPECTED_AGENT_MODELS[name]}, found {data['model']}",
+        )
+        if name in HIGH_RISK_ROLES:
+            require(data["model"] == "gpt-5.5", f"{path.name} high-risk role must use gpt-5.5")
+        if name in SPARK_ROLES:
+            require(data["model"] == "gpt-5.3-codex-spark", f"{path.name} fast coding role must use gpt-5.3-codex-spark")
+        if name in MINI_ROLES:
+            require(data["model"] == "gpt-5.4-mini", f"{path.name} lightweight general role must use gpt-5.4-mini")
         require(data["model_reasoning_effort"] in {"minimal", "low", "medium", "high", "xhigh"}, f"{path.name} has invalid effort")
         require(data["sandbox_mode"] in {"read-only", "workspace-write"}, f"{path.name} has invalid sandbox_mode")
         require(isinstance(data["nickname_candidates"], list) and data["nickname_candidates"], f"{path.name} needs nicknames")
@@ -206,6 +275,9 @@ def check_docs() -> None:
         "global",
         "/orchestrate",
         "continuous",
+        "model routing",
+        "gpt-5.3-codex-spark",
+        "gpt-5.5",
     ]:
         require(re.search(re.escape(phrase), combined, re.IGNORECASE), f"docs missing: {phrase}")
 

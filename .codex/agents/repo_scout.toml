@@ -1,6 +1,6 @@
 name = "repo_scout"
 description = "Cheap read-only repository scout for file maps, conventions, entry points, tests, and likely change surfaces."
-model = "gpt-5.4-mini"
+model = "gpt-5.3-codex-spark"
 model_reasoning_effort = "low"
 model_verbosity = "low"
 sandbox_mode = "read-only"

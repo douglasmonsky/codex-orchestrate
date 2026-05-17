@@ -7,6 +7,7 @@
       "route": "Start as clarification/direct answer only if pure Q&A, then leave Tier 0 once repo inspection or docs editing is needed.",
       "delegation": "Delegate repo inspection to repo_scout or fallback explorer; delegate docs edits to docs_writer or fallback worker.",
       "escalation": "Escalate only if the scout cannot find the relevant surface or docs require design/code judgment.",
+      "model_routing": "Use gpt-5.3-codex-spark for repo_scout discovery and gpt-5.4-mini for docs_writer edits unless code reasoning requires gpt-5.4.",
       "final_review": "Root verifies README claims against cited repo evidence before final response.",
       "must_delegate": true,
       "runtime_fallback": "explorer for read-only inspection; worker for docs edits"
@@ -20,6 +21,7 @@
       "route": "Tier 1 or Tier 2 depending on whether discovery is needed.",
       "delegation": "Use mechanic or implementer_simple; fallback to worker with the intended role in the prompt.",
       "escalation": "Escalate to implementer only if the patch requires broader judgment or the first worker is stuck.",
+      "model_routing": "Start mechanic or implementer_simple on gpt-5.3-codex-spark; escalate to gpt-5.4 implementer when ordinary coding judgment is needed.",
       "final_review": "Root inspects changed diff and validation summary.",
       "must_delegate": true,
       "runtime_fallback": "worker"
@@ -33,6 +35,7 @@
       "route": "Route failed validation to test_triage before debugging unless the root cause is already obvious.",
       "delegation": "Use test_triage or fallback worker acting as test_triage.",
       "escalation": "Escalate to debugger only after triage cannot classify the failure with evidence.",
+      "model_routing": "Use gpt-5.4-mini for known test execution, gpt-5.4 for test_triage, and gpt-5.5 for ambiguous debugger work.",
       "final_review": "Root reports exact commands, failure classification, and residual uncertainty.",
       "must_delegate": true,
       "runtime_fallback": "worker"
@@ -46,6 +49,7 @@
       "route": "Tier 4 high-risk orchestration.",
       "delegation": "Use architect and security_auditor before or alongside implementation; fallback to explorer for read-only design/security review.",
       "escalation": "Escalate unresolved auth or data-isolation ambiguity narrowly to a stronger reviewer/auditor path.",
+      "model_routing": "Start architect, security_auditor, reviewer, and any strong implementation on gpt-5.5 because auth risk has high cost of error.",
       "final_review": "Root performs mandatory senior review of security claims, validation, and residual risk.",
       "must_delegate": true,
       "runtime_fallback": "explorer for audit/design, worker for implementation"
@@ -59,9 +63,24 @@
       "route": "Keep the same delegation loop while mapping intended roles to available built-in agent types.",
       "delegation": "Use explorer for read-only scout/review work, worker for implementation/test work, and default for planning/synthesis if needed.",
       "escalation": "Escalate by intended role and effort even when the callable agent_type is a fallback.",
+      "model_routing": "Record intended model and actual fallback model in the routing ledger when a pinned model is unavailable.",
       "final_review": "Root notes fallback mapping only if useful and still performs final senior review.",
       "must_delegate": true,
       "runtime_fallback": "explorer, worker, default"
+    }
+  },
+  {
+    "id": "stuck-spark-escalation",
+    "prompt": "/orchestrate A simple Spark-based implementer got stuck on a focused fix. Escalate without broadening the task.",
+    "category": "model-escalation",
+    "expected": {
+      "route": "Keep the same narrow objective and same intended implementation role before switching specialties.",
+      "delegation": "Retry the bounded implementation path with the next adequate model/effort before passing off.",
+      "escalation": "Escalate from gpt-5.3-codex-spark implementer_simple to gpt-5.4 implementer or gpt-5.5 implementer_strong based on ambiguity and risk.",
+      "model_routing": "Model class escalation is explicit; raise model first if Spark lacks capability, raise effort first if the model is adequate but needs deeper deliberation.",
+      "final_review": "Root checks that the escalation stayed narrow and that final validation supports the patch.",
+      "must_delegate": true,
+      "runtime_fallback": "worker"
     }
   }
 ]

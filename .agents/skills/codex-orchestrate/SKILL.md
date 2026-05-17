@@ -31,6 +31,23 @@ planning, synthesis, fallback controller decisions -> default
 
 When falling back, preserve the intended role in the subagent prompt, set the closest available `agent_type`, and keep the same bounded objective, effort, output budget, and escalation trigger.
 
+## Model Routing
+
+Route by role, concrete model, and reasoning effort. Treat model selection as a first-class control, not an afterthought inside effort selection.
+
+Default maximum-quality ladder:
+
+```text
+gpt-5.3-codex-spark: ultra-fast text-only coding loops, cheap repo scouts, mechanics, and simple targeted fixes.
+gpt-5.4-mini: efficient general lightweight support, known validation, docs edits, and compact log/test summarization.
+gpt-5.4: ordinary implementation, planning, deep discovery, test triage, and routing/risk checks.
+gpt-5.5: high-risk or high-ambiguity architecture, review, security, migration, performance, debugging, and strong implementation.
+```
+
+Smaller models can preserve local-message usage limits, but subagent fanout still consumes usage. Use cheap models for bounded routine work, and use stronger models intentionally where the cost of error is high.
+
+If a pinned model is unavailable, choose the nearest available model in the same direction of quality/capability, record the fallback in the routing ledger, and keep the intended model in the dispatch brief for traceability.
+
 ## Controller Loop
 
 Delegation is a continuous control loop, not a one-time routing decision. At every meaningful transition, rerun the routing decision before continuing:
@@ -54,6 +71,9 @@ Current step:
 Tier:
 Active/finished agents:
 Runtime role mapping:
+Model selected:
+Reasoning effort:
+Why this model is sufficient:
 Evidence gathered:
 Open risks/uncertainty:
 Next routing decision:
@@ -95,6 +115,9 @@ Current step:
 Delegation tier:
 Role requested:
 Runtime agent type:
+Model selected:
+Reasoning effort:
+Why this model is sufficient:
 Why delegation is needed:
 Scope:
 Non-goals:
@@ -116,6 +139,7 @@ Scope:
 Constraints:
 Non-goals:
 Reasoning effort:
+Model selected:
 Preferred model class:
 Output budget:
 Escalation trigger:
@@ -147,10 +171,12 @@ A subagent is stuck when it reports low confidence, cannot locate the relevant s
 Default escalation sequence:
 
 1. Compress the stuck state.
-2. Retry the same narrow objective at the next effort/model level.
+2. Retry the same narrow objective at the next model class and/or effort level.
 3. Pass off to a different role only when evidence shows specialty mismatch.
 4. Involve `reviewer`, `architect`, `security_auditor`, or `risk_controller` when risk changes.
 5. Let the root intervene directly only after the unresolved step is bounded.
+
+When the prior result shows the current model lacks capability, raise model class first. When the model is appropriate but the task needs deeper deliberation, raise reasoning effort first.
 
 For detailed stuck-state templates and review gates, read `references/escalation-and-review.md`.
 
