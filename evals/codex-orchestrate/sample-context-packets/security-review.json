@@ -1,0 +1,45 @@
+{
+  "fixture_id": "security-review-context-packet",
+  "expected_result": "pass",
+  "packet": {
+    "schema_version": "1.0",
+    "packet_id": "packet-security-review-001",
+    "scenario_id": "high-risk-security-change",
+    "role": "security_auditor",
+    "runtime_type": "security_auditor or explorer fallback",
+    "tier": "Tier 4",
+    "objective": "Review the authorization change for bypass, data-isolation, and regression risk.",
+    "scope": [
+      "diff:auth-change",
+      "file:src/auth/policy.py:1",
+      "file:tests/test_auth_policy.py:1"
+    ],
+    "non_goals": [
+      "Do not implement the fix.",
+      "Do not review unrelated account-management behavior."
+    ],
+    "evidence_handles": [
+      "diff:auth-change",
+      "file:src/auth/policy.py:1",
+      "cmd:auth-tests"
+    ],
+    "allowed_tools_paths": [
+      "src/auth/",
+      "tests/test_auth_policy.py"
+    ],
+    "model": "gpt-5.5",
+    "reasoning_effort": "high",
+    "writable": false,
+    "entry_condition": "Start only when the auth diff and test handles are available and the task is read-only.",
+    "exit_condition": "Return blocking findings, missing validation, residual risks, or a Context request for a precise missing handle.",
+    "output_budget_words": 500,
+    "context_request_rule": "Use Context request with reason, requested_handle, and decision_impact before requesting broader auth context.",
+    "expected_return": [
+      "Blocking issues",
+      "Evidence",
+      "Missing tests",
+      "Residual risk",
+      "Confidence"
+    ]
+  }
+}

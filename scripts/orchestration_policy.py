@@ -39,6 +39,14 @@ def role_fallback_map(policy: dict[str, Any]) -> dict[str, str]:
     return {name: role["built_in_fallback"] for name, role in roles(policy).items()}
 
 
+def role_context_budget_map(policy: dict[str, Any]) -> dict[str, int]:
+    return dict(policy["context_packet"]["role_output_budgets_words"])
+
+
+def context_packet_policy(policy: dict[str, Any]) -> dict[str, Any]:
+    return policy["context_packet"]
+
+
 def supported_models(policy: dict[str, Any]) -> set[str]:
     return set(policy["supported_models"])
 

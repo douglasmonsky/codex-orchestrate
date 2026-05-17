@@ -13,7 +13,16 @@ import sys
 import tomllib
 from pathlib import Path
 
-from orchestration_policy import load_policy, role_effort_map, role_model_map, role_names, role_sandbox_map, supported_models
+from orchestration_policy import (
+    context_packet_policy,
+    load_policy,
+    role_context_budget_map,
+    role_effort_map,
+    role_model_map,
+    role_names,
+    role_sandbox_map,
+    supported_models,
+)
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -29,13 +38,16 @@ LEDGER_CHECK_SCRIPT = ROOT / "scripts" / "check_orchestration_ledger.py"
 BEHAVIOR_SCRIPT = ROOT / "scripts" / "check_orchestration_behavior.py"
 CREATOR_SCRIPT = ROOT / "scripts" / "create_orchestration_ledger.py"
 SMOKE_SCRIPT = ROOT / "scripts" / "run_orchestration_smoke.py"
+CONTEXT_PACKET_CHECK_SCRIPT = ROOT / "scripts" / "check_orchestration_context_packets.py"
 README = ROOT / "README.md"
 PACKAGE_README = ROOT / "docs" / "codex-orchestrate" / "package-readme.md"
 SNIPPET = ROOT / "docs" / "codex-orchestrate" / "AGENTS.orchestration.snippet.md"
 CONFIG_EXAMPLE = ROOT / ".codex" / "config.orchestration.example.toml"
 LEDGER_SCHEMA = ROOT / "schemas" / "orchestration-ledger.schema.json"
+CONTEXT_PACKET_SCHEMA = ROOT / "schemas" / "orchestration-context-packet.schema.json"
 LEDGER_TEMPLATE = ROOT / "docs" / "codex-orchestrate" / "run-ledger-template.md"
 SAMPLE_LEDGERS = ROOT / "evals" / "codex-orchestrate" / "sample-ledgers"
+SAMPLE_CONTEXT_PACKETS = ROOT / "evals" / "codex-orchestrate" / "sample-context-packets"
 
 
 REQUIRED_SKILL_SECTIONS = [
@@ -49,6 +61,7 @@ REQUIRED_SKILL_SECTIONS = [
     "## When To Produce A Ledger",
     "## Delegation Defaults",
     "## Dispatch Brief",
+    "## Context Packet Protocol",
     "## Subagent Contract",
     "## Escalation And Pass-Off",
     "## Validation Policy",
@@ -156,6 +169,12 @@ def check_skill() -> None:
         "gpt-5.5",
         "Model selected",
         "Why this model is sufficient",
+        "Context Packet Protocol",
+        "context packet",
+        "context handle",
+        "Context request",
+        "Entry condition",
+        "Exit condition",
     ]:
         require_contains(text, phrase, "SKILL.md")
 
@@ -188,6 +207,7 @@ def check_routing_policy() -> dict:
         "default_root",
         "roles",
         "durable_ledger_triggers",
+        "context_packet",
         "required_smoke_terms",
         "default_smoke_scenario_ids",
         "smoke_scenarios",
@@ -215,7 +235,60 @@ def check_routing_policy() -> dict:
 
     for phrase in ["model fallback", "more than two subagents", "failed validation", "final-review blocker"]:
         require(any(phrase in trigger for trigger in policy["durable_ledger_triggers"]), f"routing-policy missing trigger: {phrase}")
-    for term in ["/orchestrate", "codex-orchestrate", "model routing", "runtime fallback", "routing ledger", "controller loop", "first-step classification", "final senior review"]:
+    context_policy = context_packet_policy(policy)
+    for field in [
+        "schema_version",
+        "required_packet_fields",
+        "required_context_request_fields",
+        "handle_prefixes",
+        "role_output_budgets_words",
+        "raw_dump_forbidden_keys",
+        "raw_dump_markers",
+    ]:
+        require(field in context_policy, f"routing-policy context_packet missing field: {field}")
+    for field in [
+        "objective",
+        "scope",
+        "non_goals",
+        "evidence_handles",
+        "allowed_tools_paths",
+        "model",
+        "reasoning_effort",
+        "entry_condition",
+        "exit_condition",
+        "output_budget_words",
+        "context_request_rule",
+    ]:
+        require(field in context_policy["required_packet_fields"], f"context packet required fields missing: {field}")
+    for field in ["reason", "requested_handle", "decision_impact"]:
+        require(field in context_policy["required_context_request_fields"], f"context request required fields missing: {field}")
+    for prefix in ["file:", "cmd:", "diff:", "ledger:", "artifact:", "scenario:"]:
+        require(prefix in context_policy["handle_prefixes"], f"context packet handle prefix missing: {prefix}")
+    budgets = role_context_budget_map(policy)
+    require(set(budgets) == set(roles), "context packet budget roles must match routing roles")
+    for role, budget in budgets.items():
+        require(isinstance(budget, int) and 1 <= budget <= 500, f"context packet budget invalid for {role}")
+    require(budgets["mechanic"] <= 200, "mechanic context budget should stay <= 200 words")
+    require(budgets["repo_scout"] <= 250, "repo_scout context budget should stay <= 250 words")
+    require(budgets["implementer"] <= 350, "implementer context budget should stay <= 350 words")
+    require(budgets["reviewer"] <= 400, "reviewer context budget should stay <= 400 words")
+    require(budgets["security_auditor"] <= 500, "security_auditor context budget should stay <= 500 words")
+
+    for term in [
+        "/orchestrate",
+        "codex-orchestrate",
+        "model routing",
+        "runtime fallback",
+        "routing ledger",
+        "context packet",
+        "context handle",
+        "context request",
+        "entry condition",
+        "exit condition",
+        "controller loop",
+        "first-step classification",
+        "final senior review",
+    ]:
         require(term in policy["required_smoke_terms"], f"routing-policy required_smoke_terms missing: {term}")
     for scenario_id in policy["default_smoke_scenario_ids"]:
         require(scenario_id in policy["smoke_scenarios"], f"default smoke scenario not defined: {scenario_id}")
@@ -241,7 +314,16 @@ def check_references() -> None:
         require_contains(routing, phrase, "effort-model-routing.md")
 
     handoffs = read(REFERENCES / "handoff-contracts.md")
-    for phrase in ["Routing ledger template", "When to produce a durable ledger", "Runtime agent type", "Model selected", "Why this model is sufficient", "Stuck-state summary template"]:
+    for phrase in [
+        "Routing ledger template",
+        "When to produce a durable ledger",
+        "Context packet template",
+        "Context request template",
+        "Runtime agent type",
+        "Model selected",
+        "Why this model is sufficient",
+        "Stuck-state summary template",
+    ]:
         require_contains(handoffs, phrase, "handoff-contracts.md")
 
     for phrase in ["source-of-truth policy", "operational availability", "does not loosen source validation"]:
@@ -377,6 +459,14 @@ def check_docs() -> None:
         "run_orchestration_smoke.py",
         "agents/openai.yaml",
         "routing-policy.json",
+        "context packet",
+        "context handle",
+        "context request",
+        "entry condition",
+        "exit condition",
+        "check_orchestration_context_packets.py",
+        "orchestration-context-packet.schema.json",
+        "sample-context-packets",
         "activation contract",
         "run-ledger-template.md",
         "config.orchestration.example.toml",
@@ -492,6 +582,70 @@ def check_ledger_artifacts() -> None:
         "check_orchestration_behavior.py",
     ]:
         require_contains(template, phrase, "run-ledger-template.md")
+
+
+def check_context_packet_artifacts() -> None:
+    schema_text = read(CONTEXT_PACKET_SCHEMA)
+    schema = json.loads(schema_text)
+    require(schema.get("title") == "Codex Orchestration Context Packet", "context packet schema title changed")
+    required = set(schema.get("required", []))
+    for field in [
+        "schema_version",
+        "packet_id",
+        "scenario_id",
+        "role",
+        "runtime_type",
+        "tier",
+        "objective",
+        "scope",
+        "non_goals",
+        "evidence_handles",
+        "allowed_tools_paths",
+        "model",
+        "reasoning_effort",
+        "writable",
+        "entry_condition",
+        "exit_condition",
+        "output_budget_words",
+        "context_request_rule",
+        "expected_return",
+    ]:
+        require(field in required, f"context packet schema missing required field: {field}")
+    request_required = set(schema["$defs"]["context_request"]["required"])
+    for field in ["reason", "requested_handle", "decision_impact"]:
+        require(field in request_required, f"context request schema missing required field: {field}")
+
+    script = read(CONTEXT_PACKET_CHECK_SCRIPT)
+    for phrase in [
+        "orchestration-context-packet.schema.json",
+        "context_packet_policy",
+        "role_context_budget_map",
+        "expected_result",
+        "raw dump",
+        "handle_prefixes",
+        "required_context_request_fields",
+        "--json",
+    ]:
+        require_contains(script, phrase, "check_orchestration_context_packets.py")
+
+    expected_samples = {
+        "small-patch.json",
+        "security-review.json",
+        "stuck-context-request.json",
+        "over-broad-packet-rejection.json",
+    }
+    files = sorted(SAMPLE_CONTEXT_PACKETS.glob("*.json"))
+    require({path.name for path in files} == expected_samples, "sample context-packet roster changed")
+    completed = subprocess.run(
+        [sys.executable, str(CONTEXT_PACKET_CHECK_SCRIPT), *[str(path) for path in files]],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    require(
+        completed.returncode == 0,
+        f"sample context-packet validation failed: {completed.stderr.strip() or completed.stdout.strip()}",
+    )
 
 
 def check_ledger_creator() -> None:
@@ -629,6 +783,7 @@ def main() -> int:
         check_sync_script,
         check_runtime_script,
         check_ledger_artifacts,
+        check_context_packet_artifacts,
         check_ledger_creator,
         check_ledger_validator_and_samples,
         check_behavior_script,

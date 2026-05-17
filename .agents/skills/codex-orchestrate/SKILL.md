@@ -117,7 +117,7 @@ The tier can move up or down. Escalate only the disputed or stuck slice; de-esca
 
 ## Dispatch Brief
 
-Before each delegation, produce or refresh a compact dispatch brief:
+Before each delegation, produce or refresh a compact dispatch brief as a context packet:
 
 ```text
 Goal:
@@ -136,6 +136,25 @@ Done when:
 ```
 
 For custom-agent details, role definitions, and default routing ladders, read `references/agent-roster.md` and `references/effort-model-routing.md` only when needed.
+
+## Context Packet Protocol
+
+Initial dispatch sends a context packet, not raw repo context, transcripts, or pasted logs. Include objective, scope, non-goals, known evidence handles, allowed tools/paths, model/effort, entry condition, exit condition, output budget, and context-request rule.
+
+Use context handles such as `file:path:line`, `cmd:name`, `diff:path`, `ledger:entry`, `artifact:path`, and `scenario:id`. Provide exact handles instead of broad summaries whenever possible.
+
+Entry condition: subagents start only when objective, scope, model/effort, writable or read-only status, and done condition are clear. If entry conditions are unclear, return a packet-repair request instead of broad exploration.
+
+Exit condition: subagents exit when done, blocked, stuck, out of scope, or needing specific context. They may request more context only with:
+
+```text
+Context request:
+Reason:
+Requested handle/path:
+Decision impact:
+```
+
+Each context request triggers root reassessment: grant narrow context, escalate, pass off, repair the packet, or stop fanout.
 
 ## Subagent Contract
 

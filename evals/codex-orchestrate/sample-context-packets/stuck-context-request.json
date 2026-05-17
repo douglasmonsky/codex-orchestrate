@@ -1,0 +1,49 @@
+{
+  "fixture_id": "stuck-context-request",
+  "expected_result": "pass",
+  "packet": {
+    "schema_version": "1.0",
+    "packet_id": "packet-stuck-context-request-001",
+    "scenario_id": "stuck-spark-escalation",
+    "role": "repo_scout",
+    "runtime_type": "explorer fallback preserving repo_scout role",
+    "tier": "Tier 2",
+    "objective": "Find the smallest config surface needed to explain why the simple implementer got stuck.",
+    "scope": [
+      "file:pyproject.toml:1",
+      "ledger:stuck-summary-001"
+    ],
+    "non_goals": [
+      "Do not implement a fix.",
+      "Do not inspect unrelated dependency trees."
+    ],
+    "evidence_handles": [
+      "ledger:stuck-summary-001",
+      "file:pyproject.toml:1"
+    ],
+    "allowed_tools_paths": [
+      "pyproject.toml",
+      "README.md"
+    ],
+    "model": "gpt-5.3-codex-spark",
+    "reasoning_effort": "low",
+    "writable": false,
+    "entry_condition": "Start only if the stuck summary and suspected config file are available.",
+    "exit_condition": "Return the decision-ready config surface, or a Context request for the exact missing file handle.",
+    "output_budget_words": 240,
+    "context_request_rule": "Use Context request with reason, requested_handle, and decision_impact before asking for broader repo context.",
+    "expected_return": [
+      "Relevant files",
+      "Evidence",
+      "Recommended next agent",
+      "Stuck status"
+    ],
+    "context_requests": [
+      {
+        "reason": "The stuck summary references packaging behavior but the package entrypoint handle is not in the packet.",
+        "requested_handle": "file:src/package/__init__.py:1",
+        "decision_impact": "Determines whether to retry implementer_simple or escalate to implementer."
+      }
+    ]
+  }
+}

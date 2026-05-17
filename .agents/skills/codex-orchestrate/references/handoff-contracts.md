@@ -4,6 +4,8 @@
 
 - Routing ledger template
 - When to produce a durable ledger
+- Context packet template
+- Context request template
 - Default subagent assignment template
 - Stuck-state summary template
 - Mechanic handoff
@@ -43,11 +45,62 @@ Produce a durable post-run ledger for any Tier 3 or Tier 4 run, any model fallba
 
 When working inside MonskySkills, use `python3 scripts/create_orchestration_ledger.py` for the durable version. In other repos, use `docs/codex-orchestrate/run-ledger-template.md` manually. Keep private ledgers local or sanitized before committing.
 
+## Context packet template
+
+Initial subagent dispatch should use a compact context packet. Do not paste raw transcripts, full logs, or broad repo summaries into the first handoff.
+
+```text
+Context packet:
+Packet id:
+Scenario id:
+Role:
+Runtime agent type:
+Tier:
+Objective:
+Scope:
+- <file:path:line | folder | command surface>
+Non-goals:
+- <explicit exclusion>
+Known evidence handles:
+- <file:path:line | cmd:name | diff:path | ledger:entry | artifact:path | scenario:id>
+Allowed tools/paths:
+- <read/write boundary>
+Model:
+Reasoning effort:
+Writable:
+Entry condition:
+Exit condition:
+Output budget:
+Context-request rule:
+Use the Context request block before asking for broader context.
+Expected return:
+```
+
+Entry condition must make the task startable: objective, scope, model/effort, writable or read-only status, and done condition are clear. If not, the subagent should request packet repair rather than widening scope.
+
+Exit condition must define when the subagent returns: done, blocked, stuck, out of scope, or needing a specific additional context handle.
+
+## Context request template
+
+Use only when the packet lacks context needed for the assigned decision.
+
+```text
+Context request:
+Reason:
+Requested handle/path:
+Decision impact:
+```
+
+The root should reassess routing before granting context: provide only the narrow handle needed, escalate, pass off, repair the packet, or stop fanout.
+
 ## Default subagent assignment template
 
 ```text
 Role:
 You are the <agent role> for this Codex task.
+
+Context packet:
+<use the compact packet template above>
 
 Objective:
 <one specific outcome>
@@ -78,6 +131,7 @@ Constraints:
 - Return evidence, not just conclusions.
 - Keep output compact.
 - If stuck, return a stuck-state summary instead of broadening scope.
+- If more context is required, return a structured Context request.
 
 Non-goals:
 - <what not to solve>
@@ -87,7 +141,7 @@ Reasoning effort:
 <minimal | low | medium | high | xhigh if supported>
 
 Preferred concrete model:
-<spark/fast | mini | default | strong>
+<gpt-5.3-codex-spark | gpt-5.4-mini | gpt-5.4 | gpt-5.5>
 
 Output budget:
 <= <word count> words unless exact patch details or essential command output require more.
@@ -107,6 +161,7 @@ Files touched or inspected:
 Commands run:
 Risks / uncertainty:
 Stuck status: <not stuck | stuck | blocked by scope | blocked by environment | role mismatch>
+Context request: <none | structured request>
 Escalation recommendation: <none | same role at higher model/effort | pass to role X | root decision needed>
 Confidence:
 ```
@@ -159,7 +214,7 @@ Reasoning effort:
 minimal or low
 
 Preferred concrete model:
-spark/fast
+gpt-5.3-codex-spark
 
 Model selected:
 gpt-5.3-codex-spark
@@ -176,6 +231,7 @@ Patch summary:
 Validation:
 Assumptions:
 Stuck status:
+Context request:
 Escalation recommendation:
 ```
 
@@ -204,7 +260,7 @@ Reasoning effort:
 low
 
 Preferred concrete model:
-spark/fast
+gpt-5.3-codex-spark
 
 Model selected:
 gpt-5.3-codex-spark
@@ -222,6 +278,7 @@ Tests/checks:
 Conventions:
 Risks/open questions:
 Stuck status:
+Context request:
 Escalation recommendation:
 ```
 
@@ -249,7 +306,7 @@ Reasoning effort:
 medium
 
 Preferred concrete model:
-default
+gpt-5.4
 
 Escalation trigger:
 Design/API uncertainty, migration ordering, or unresolved failure analysis.
@@ -262,6 +319,7 @@ Resolved surface:
 Evidence:
 Remaining unknowns:
 Recommended next agent:
+Context request:
 Confidence:
 ```
 
@@ -303,7 +361,7 @@ Reasoning effort:
 <low | medium | high>
 
 Preferred concrete model:
-<spark/fast | default | strong>
+<gpt-5.3-codex-spark | gpt-5.4 | gpt-5.5>
 
 Model selected:
 <gpt-5.3-codex-spark for Implementer Simple | gpt-5.4 for Implementer | gpt-5.5 for Implementer Strong>
@@ -322,6 +380,7 @@ Failures:
 Assumptions:
 Residual risk:
 Stuck status:
+Context request:
 Escalation recommendation:
 Confidence:
 ```
@@ -349,7 +408,7 @@ Reasoning effort:
 high
 
 Preferred concrete model:
-strong
+gpt-5.5
 
 Model selected:
 gpt-5.5
@@ -366,6 +425,7 @@ Non-blocking issues:
 Missing tests/checks:
 Suggested fixes:
 Stuck status:
+Context request:
 Escalation recommendation:
 Confidence:
 ```
@@ -392,7 +452,7 @@ Reasoning effort:
 low for known commands; medium for failure interpretation.
 
 Preferred concrete model:
-mini for known commands; default for triage.
+gpt-5.4-mini for known commands; gpt-5.4 for triage.
 
 Model selected:
 gpt-5.4-mini for known commands; gpt-5.4 for triage.
@@ -410,6 +470,7 @@ Failures:
 Interpretation:
 Recommended next check:
 Stuck status:
+Context request:
 Escalation recommendation:
 Confidence:
 ```
@@ -448,7 +509,7 @@ Reasoning effort:
 <medium | high | xhigh if supported>
 
 Preferred concrete model:
-<default | strong>
+<gpt-5.4 | gpt-5.5>
 
 Model selected:
 <gpt-5.4 | gpt-5.5>
@@ -458,6 +519,7 @@ Resolved issue:
 Evidence:
 Recommended action:
 Remaining uncertainty:
+Context request:
 Confidence:
 ```
 

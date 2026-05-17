@@ -5,6 +5,7 @@
 - Routing principle
 - Runtime role fallback
 - Continuous reassessment
+- Context packet routing
 - Effort levels
 - Model ladder
 - Model classes
@@ -54,6 +55,14 @@ Recheck the route at each transition:
 If a direct root answer becomes repository, command, log, test, implementation, research, review, documentation, or design work, leave direct mode and delegate the new step. Do not keep a Tier 0 decision just because it was correct for the opening response.
 
 The correct next route may be cheaper, stronger, or a different role than the previous one. De-escalate after a specialist resolves the hard part; escalate when ambiguity, risk, or failure appears.
+
+## Context packet routing
+
+Dispatch the first subagent with a compact context packet instead of broad repo context. Use handles such as `file:path:line`, `cmd:name`, `diff:path`, `ledger:entry`, `artifact:path`, and `scenario:id` so the subagent can request precise context later.
+
+The routing policy manifest defines the required packet fields, allowed handle prefixes, required Context request fields, and role-specific output budgets. Treat those budgets as initial-output ceilings, not permission to omit necessary evidence.
+
+If a subagent needs more context, it must return a structured Context request with reason, requested handle/path, and decision impact. The root reassesses before granting context; this can lead to a narrower packet, model/effort escalation, pass-off, or stopping fanout.
 
 ## Effort levels
 

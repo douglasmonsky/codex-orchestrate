@@ -145,6 +145,78 @@
     "failed validation",
     "final-review blocker"
   ],
+  "context_packet": {
+    "schema_version": "1.0",
+    "required_packet_fields": [
+      "schema_version",
+      "packet_id",
+      "scenario_id",
+      "role",
+      "runtime_type",
+      "tier",
+      "objective",
+      "scope",
+      "non_goals",
+      "evidence_handles",
+      "allowed_tools_paths",
+      "model",
+      "reasoning_effort",
+      "writable",
+      "entry_condition",
+      "exit_condition",
+      "output_budget_words",
+      "context_request_rule",
+      "expected_return"
+    ],
+    "required_context_request_fields": [
+      "reason",
+      "requested_handle",
+      "decision_impact"
+    ],
+    "handle_prefixes": [
+      "file:",
+      "cmd:",
+      "diff:",
+      "ledger:",
+      "artifact:",
+      "scenario:"
+    ],
+    "role_output_budgets_words": {
+      "architect": 500,
+      "debugger": 500,
+      "docs_writer": 300,
+      "implementer": 350,
+      "implementer_simple": 350,
+      "implementer_strong": 350,
+      "mechanic": 200,
+      "migration_analyst": 500,
+      "performance_investigator": 500,
+      "planner": 350,
+      "repo_scout": 250,
+      "repo_scout_deep": 250,
+      "reviewer": 400,
+      "risk_controller": 350,
+      "security_auditor": 500,
+      "test_runner": 250,
+      "test_triage": 350
+    },
+    "raw_dump_forbidden_keys": [
+      "raw_context",
+      "raw_log",
+      "full_log",
+      "transcript",
+      "full_transcript",
+      "full_repo_context"
+    ],
+    "raw_dump_markers": [
+      "raw transcript",
+      "full transcript",
+      "raw log",
+      "full log",
+      "complete terminal output",
+      "entire conversation"
+    ]
+  },
   "required_smoke_terms": [
     "/orchestrate",
     "codex-orchestrate",
@@ -152,17 +224,25 @@
     "source of truth",
     "runtime fallback",
     "routing ledger",
+    "context packet",
+    "context handle",
+    "context request",
+    "entry condition",
+    "exit condition",
     "controller loop",
     "first-step classification",
     "final senior review"
   ],
   "default_smoke_scenario_ids": [
     "model-routing-smoke",
-    "fallback-smoke"
+    "fallback-smoke",
+    "context-packet-smoke"
   ],
   "smoke_scenarios": {
     "model-routing-smoke": "/orchestrate model routing smoke test",
     "fallback-smoke": "/orchestrate Custom agent TOMLs are not callable here. Still orchestrate a repo investigation and small fix.",
+    "context-packet-smoke": "/orchestrate Use compact context packets and context handles for a small repo fix before asking subagents for extra context.",
+    "context-request-smoke": "/orchestrate A subagent needs more evidence. Require a structured context request before adding more context.",
     "high-risk-security-change": "/orchestrate Change authorization behavior for this API and make sure it is safe.",
     "tier0-upgrades-to-delegation": "/orchestrate What does this repo do? Actually, inspect the code and update the README if it is stale."
   }

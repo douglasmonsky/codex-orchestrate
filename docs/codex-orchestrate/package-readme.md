@@ -6,7 +6,7 @@ This package contains an instruction-only Codex skill and custom agent configs f
 
 The root agent acts as dispatcher, escalation controller, synthesizer, and final senior reviewer. For repository work, it delegates substantive exploration, implementation, validation, debugging, review, or documentation to subagents by default, then reconciles the results.
 
-The goal is not to minimize total tokens in every case. Subagents do their own model and tool work. The goal is to keep the root context clean, continuously route each new task phase to the cheapest safe agent/model/effort, escalate only the narrow unresolved issue when work gets stuck, and reserve high-capability reasoning for genuinely hard decisions and final judgment.
+The goal is not to minimize total tokens in every case. Subagents do their own model and tool work. The goal is to keep the root context clean, dispatch compact context packets with precise context handles, continuously route each new task phase to the cheapest safe agent/model/effort, escalate only the narrow unresolved issue when work gets stuck, and reserve high-capability reasoning for genuinely hard decisions and final judgment.
 
 ## Source of truth
 
@@ -20,14 +20,15 @@ The global copy in `~/.codex/skills/codex-orchestrate/` is an installed runtime 
 
 ## New policy emphasis
 
-This version adds six hard policies:
+This version adds seven hard policies:
 
 1. **Activation initializes the controller.** `/orchestrate` and `$codex-orchestrate` initialize the controller loop, routing ledger, first-step classification, model/effort selection, and final-review gate.
 2. **Routing is continuous.** The root reevaluates delegation after each user clarification, direct root step, subagent result, validation result, scope change, or new risk. If a Tier 0 direct answer grows into repository or tool work, the root leaves Tier 0 and delegates the next step.
 3. **Runtime fallback preserves role intent.** If custom agent profiles are unavailable, read-only work maps to `explorer`, implementation/test/docs work maps to `worker`, and planning/synthesis maps to `default`.
 4. **Model routing is explicit.** The root chooses a concrete model and reasoning effort for each subagent. Use `gpt-5.3-codex-spark` for ultra-fast text-only coding loops, `gpt-5.4-mini` for lightweight general support, `gpt-5.4` for normal judgment, and `gpt-5.5` for high-risk or high-ambiguity specialists.
-5. **Stuck work escalates model and/or effort first.** When a subagent gets stuck, retry the same narrow unresolved task at the next model class and/or reasoning-effort level. Pass off to a different specialist only when the evidence shows role mismatch.
-6. **The root performs final senior review.** The top-level/root agent must finish by reviewing subagent output as a senior developer, code reviewer, and architect. This is a check-and-balance gate; it is not fully outsourced to a reviewer subagent.
+5. **Initial context is packetized.** Initial dispatch uses a compact context packet with objective, scope, non-goals, context handles, allowed tools/paths, model/effort, entry condition, exit condition, output budget, and a Context request rule.
+6. **Stuck work escalates model and/or effort first.** When a subagent gets stuck, retry the same narrow unresolved task at the next model class and/or reasoning-effort level. Pass off to a different specialist only when the evidence shows role mismatch.
+7. **The root performs final senior review.** The top-level/root agent must finish by reviewing subagent output as a senior developer, code reviewer, and architect. This is a check-and-balance gate; it is not fully outsourced to a reviewer subagent.
 
 The model policy follows the current OpenAI Codex docs for subagent model pins, Codex model selection, and usage-limit tradeoffs:
 
@@ -48,11 +49,14 @@ The model policy follows the current OpenAI Codex docs for subagent model pins, 
 .codex/agents/*.toml
 docs/codex-orchestrate/run-ledger-template.md
 schemas/orchestration-ledger.schema.json
+schemas/orchestration-context-packet.schema.json
+scripts/check_orchestration_context_packets.py
 scripts/check_orchestration_ledger.py
 scripts/check_orchestration_behavior.py
 scripts/create_orchestration_ledger.py
 scripts/run_orchestration_smoke.py
 evals/codex-orchestrate/routing-policy.json
+evals/codex-orchestrate/sample-context-packets/*.json
 evals/codex-orchestrate/sample-ledgers/*.json
 AGENTS.orchestration.snippet.md
 ```
@@ -111,7 +115,9 @@ Copy useful parts of `AGENTS.orchestration.snippet.md` into the repo's `AGENTS.m
 
 Model names in `.codex/agents/*.toml` are pinned intentionally. Strict model pins are the source-of-truth policy. `scripts/check_runtime_compatibility.py` reports operational availability and warnings; runtime fallback must be recorded in the routing ledger, but it does not loosen source validation.
 
-The skill UI metadata is stored in `.agents/skills/codex-orchestrate/agents/openai.yaml`. Shared harness constants for role/model routing, smoke terms, and durable-ledger triggers are stored in `evals/codex-orchestrate/routing-policy.json`; helper scripts and static checks read that manifest.
+The skill UI metadata is stored in `.agents/skills/codex-orchestrate/agents/openai.yaml`. Shared harness constants for role/model routing, smoke terms, context-packet budgets, and durable-ledger triggers are stored in `evals/codex-orchestrate/routing-policy.json`; helper scripts and static checks read that manifest.
+
+Initial subagent dispatch should use compact context packets, not raw repo context, transcripts, or pasted logs. Use context handles such as `file:path:line`, `cmd:name`, `diff:path`, `ledger:entry`, `artifact:path`, and `scenario:id`. If a subagent needs more context, it must return a structured Context request with reason, requested handle/path, and decision impact; that request triggers root reassessment before more context is granted.
 
 Produce a durable post-run ledger for any Tier 3 or Tier 4 run, any model fallback, any security/privacy/migration/auth task, any run with more than two subagents, any failed validation, or any final-review blocker. Tier 1 and Tier 2 ledgers are optional unless one of those triggers appears. Inside MonskySkills, use `scripts/create_orchestration_ledger.py` to write an ignored local ledger and validate it immediately. Elsewhere, use `docs/codex-orchestrate/run-ledger-template.md` and `schemas/orchestration-ledger.schema.json` manually to record actual model/effort usage, fallbacks, validation, final review, and residual risk. Keep real ledgers local or sanitized unless they contain no private task data.
 
@@ -121,15 +127,17 @@ Run the lightweight checker and sync check after changes:
 python3 scripts/create_orchestration_ledger.py --help
 python3 scripts/check_orchestration_skill.py
 python3 scripts/check_runtime_compatibility.py
+python3 scripts/check_orchestration_context_packets.py evals/codex-orchestrate/sample-context-packets/*.json
 python3 scripts/check_orchestration_ledger.py evals/codex-orchestrate/sample-ledgers/*.json
 python3 scripts/check_orchestration_behavior.py evals/codex-orchestrate/sample-ledgers/*.json
 python3 scripts/run_orchestration_smoke.py
+python3 scripts/run_orchestration_smoke.py --scenario-id context-packet-smoke --json
 python3 scripts/run_orchestration_smoke.py --scenario-id high-risk-security-change --json
 python3 scripts/sync_orchestration_skill.py --check
 codex debug prompt-input '/orchestrate model routing smoke test'
 ```
 
-Recommended post-edit loop: creator help check, static checker, runtime compatibility check, sample ledger validation, behavioral evidence check, prompt smoke harness, sync check/apply, `codex debug prompt-input`, commit, push.
+Recommended post-edit loop: creator help check, static checker, runtime compatibility check, context-packet validation, sample ledger validation, behavioral evidence check, prompt smoke harness, sync check/apply, `codex debug prompt-input`, commit, push.
 
 Use `scripts/create_orchestration_ledger.py` for private local ledgers when working in MonskySkills; it writes to ignored `local/orchestration-ledgers/` by default, runs `scripts/check_orchestration_ledger.py`, and runs `scripts/check_orchestration_behavior.py` when the `scenario_id` matches a committed scenario. Use `scripts/check_orchestration_behavior.py` to compare sanitized ledgers against scenario expectations; this validates recorded behavior, not future live model behavior. Use `scripts/run_orchestration_smoke.py` after instruction changes to confirm `/orchestrate` prompt assembly still exposes source-of-truth, runtime fallback, routing-ledger, model-routing, and final-review language.
 
