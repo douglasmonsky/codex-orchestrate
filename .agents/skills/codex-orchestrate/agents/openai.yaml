@@ -1,0 +1,6 @@
+interface:
+  display_name: "Codex Orchestrate"
+  short_description: "Continuous subagent orchestration"
+  default_prompt: "Use $codex-orchestrate to route this repository task through continuous delegate-first orchestration with model routing and root final review."
+policy:
+  allow_implicit_invocation: true

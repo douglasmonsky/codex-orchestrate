@@ -10,32 +10,17 @@ import sys
 from pathlib import Path
 from typing import Any
 
-
-DEFAULT_SCENARIOS = [
-    {
-        "id": "model-routing-smoke",
-        "prompt": "/orchestrate model routing smoke test",
-    },
-    {
-        "id": "fallback-smoke",
-        "prompt": "/orchestrate Custom agent TOMLs are not callable here. Still orchestrate a repo investigation and small fix.",
-    },
-]
-
-REQUIRED_TERMS = [
-    "/orchestrate",
-    "codex-orchestrate",
-    "model routing",
-    "source of truth",
-    "runtime fallback",
-    "routing ledger",
-    "final senior review",
-]
+from orchestration_policy import load_policy
 
 
 def parse_args(argv: list[str]) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--json", action="store_true", help="print machine-readable results")
+    parser.add_argument(
+        "--scenario-id",
+        action="append",
+        help="run only the selected routing-policy smoke scenario id; repeatable",
+    )
     parser.add_argument(
         "--write-artifacts",
         type=Path,
@@ -60,11 +45,11 @@ def artifact_path(directory: Path, scenario_id: str) -> Path:
     return directory / f"{safe_id}.json"
 
 
-def check_scenario(scenario: dict[str, str], artifact_dir: Path | None) -> dict[str, Any]:
+def check_scenario(scenario: dict[str, str], required_terms: list[str], artifact_dir: Path | None) -> dict[str, Any]:
     returncode, stdout, stderr = run_prompt(scenario["prompt"])
     combined = f"{stdout}\n{stderr}"
     normalized = combined.lower()
-    missing = [term for term in REQUIRED_TERMS if term.lower() not in normalized]
+    missing = [term for term in required_terms if term.lower() not in normalized]
     result: dict[str, Any] = {
         "id": scenario["id"],
         "prompt": scenario["prompt"],
@@ -83,11 +68,28 @@ def check_scenario(scenario: dict[str, str], artifact_dir: Path | None) -> dict[
     return result
 
 
+def selected_scenarios(policy: dict[str, Any], requested_ids: list[str] | None) -> list[dict[str, str]]:
+    prompts = policy["smoke_scenarios"]
+    scenario_ids = requested_ids or policy["default_smoke_scenario_ids"]
+    missing = [scenario_id for scenario_id in scenario_ids if scenario_id not in prompts]
+    if missing:
+        raise KeyError(f"unknown smoke scenario id(s): {', '.join(missing)}")
+    return [{"id": scenario_id, "prompt": prompts[scenario_id]} for scenario_id in scenario_ids]
+
+
 def main(argv: list[str]) -> int:
     args = parse_args(argv)
-    results = [check_scenario(scenario, args.write_artifacts) for scenario in DEFAULT_SCENARIOS]
+    try:
+        policy = load_policy()
+        required_terms = policy["required_smoke_terms"]
+        scenarios = selected_scenarios(policy, args.scenario_id)
+    except (OSError, json.JSONDecodeError, KeyError) as exc:
+        print(f"FAIL: {exc}", file=sys.stderr)
+        return 1
+
+    results = [check_scenario(scenario, required_terms, args.write_artifacts) for scenario in scenarios]
     passed = all(result["passed"] for result in results)
-    payload = {"status": "ok" if passed else "fail", "required_terms": REQUIRED_TERMS, "results": results}
+    payload = {"status": "ok" if passed else "fail", "required_terms": required_terms, "results": results}
 
     if args.json:
         print(json.dumps(payload, indent=2, sort_keys=True))

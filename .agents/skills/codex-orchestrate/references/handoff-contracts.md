@@ -86,7 +86,7 @@ Non-goals:
 Reasoning effort:
 <minimal | low | medium | high | xhigh if supported>
 
-Preferred model class:
+Preferred concrete model:
 <spark/fast | mini | default | strong>
 
 Output budget:
@@ -158,7 +158,7 @@ Constraints:
 Reasoning effort:
 minimal or low
 
-Preferred model class:
+Preferred concrete model:
 spark/fast
 
 Model selected:
@@ -203,7 +203,7 @@ Constraints:
 Reasoning effort:
 low
 
-Preferred model class:
+Preferred concrete model:
 spark/fast
 
 Model selected:
@@ -248,7 +248,7 @@ Constraints:
 Reasoning effort:
 medium
 
-Preferred model class:
+Preferred concrete model:
 default
 
 Escalation trigger:
@@ -302,7 +302,7 @@ Constraints:
 Reasoning effort:
 <low | medium | high>
 
-Preferred model class:
+Preferred concrete model:
 <spark/fast | default | strong>
 
 Model selected:
@@ -348,7 +348,7 @@ Review priorities:
 Reasoning effort:
 high
 
-Preferred model class:
+Preferred concrete model:
 strong
 
 Model selected:
@@ -391,7 +391,7 @@ Constraints:
 Reasoning effort:
 low for known commands; medium for failure interpretation.
 
-Preferred model class:
+Preferred concrete model:
 mini for known commands; default for triage.
 
 Model selected:
@@ -447,7 +447,7 @@ Constraints:
 Reasoning effort:
 <medium | high | xhigh if supported>
 
-Preferred model class:
+Preferred concrete model:
 <default | strong>
 
 Model selected:

@@ -12,20 +12,14 @@ import argparse
 import json
 import subprocess
 import sys
-import tomllib
 from pathlib import Path
 from typing import Any
 
+from orchestration_policy import load_policy, role_model_map, supported_models
+
 
 ROOT = Path(__file__).resolve().parents[1]
-AGENTS = ROOT / ".codex" / "agents"
 CODEX_DEBUG_MODELS = ["codex", "debug", "models"]
-FIRST_CLASS_MODELS = {
-    "gpt-5.3-codex-spark",
-    "gpt-5.4-mini",
-    "gpt-5.4",
-    "gpt-5.5",
-}
 
 
 def looks_like_model_id(value: str) -> bool:
@@ -45,21 +39,6 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
         help="print machine-readable results",
     )
     return parser.parse_args(argv)
-
-
-def pinned_models() -> dict[str, str]:
-    if not AGENTS.exists():
-        raise FileNotFoundError(f"missing agents directory: {AGENTS}")
-
-    models: dict[str, str] = {}
-    for path in sorted(AGENTS.glob("*.toml")):
-        data = tomllib.loads(path.read_text())
-        name = data.get("name", path.stem)
-        model = data.get("model")
-        if not isinstance(model, str) or not model:
-            raise ValueError(f"{path.relative_to(ROOT)} is missing a model pin")
-        models[str(name)] = model
-    return models
 
 
 def collect_model_ids(value: Any) -> set[str]:
@@ -105,9 +84,10 @@ def available_models() -> tuple[set[str], str | None]:
 
 
 def build_report() -> tuple[dict[str, Any], int]:
-    pins = pinned_models()
+    policy = load_policy()
+    pins = role_model_map(policy)
     available, catalog_warning = available_models()
-    expected = sorted(set(pins.values()) | FIRST_CLASS_MODELS)
+    expected = sorted(set(pins.values()) | supported_models(policy))
     missing = sorted(model for model in expected if model not in available)
     roles_by_missing_model = {
         model: sorted(role for role, pinned in pins.items() if pinned == model)
@@ -147,7 +127,7 @@ def main(argv: list[str]) -> int:
     args = parse_args(argv)
     try:
         report, exit_code = build_report()
-    except (FileNotFoundError, ValueError, tomllib.TOMLDecodeError) as exc:
+    except (FileNotFoundError, ValueError, json.JSONDecodeError, KeyError) as exc:
         if args.json:
             print(json.dumps({"status": "fail", "error": str(exc)}, indent=2, sort_keys=True))
         else:

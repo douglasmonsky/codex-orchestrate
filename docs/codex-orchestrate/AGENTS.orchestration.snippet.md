@@ -8,6 +8,8 @@ For repository work, prefer `$codex-orchestrate`. The root thread should act as 
 
 If the user starts with `/orchestrate`, treat that as an explicit request for continuous delegate-first orchestration. Delegate substantive work by default. For any task involving code, files, commands, logs, tests, implementation, review, design, migration, security, performance, documentation, or research, spawn at least one appropriately scoped subagent unless the user forbids subagents or the task is pure conversational Q&A.
 
+Activation must initialize the controller loop, routing ledger, first-step classification, model/effort selection, and final-review gate before substantive work.
+
 Treat delegation as a continuous routing loop, not a one-time upfront choice. Reevaluate whether to delegate, escalate, pass off, de-escalate, or continue directly after each user clarification, direct root step, subagent result, validation result, scope change, or new risk. If the root initially answers directly but the next step becomes repository, command, research, design, implementation, validation, review, or documentation work, leave direct mode and spawn the cheapest safe subagent for that new step.
 
 When custom agent profiles such as `repo_scout`, `mechanic`, or `test_runner` are not callable in the current runtime, preserve the intended role in the prompt and use built-in fallbacks:

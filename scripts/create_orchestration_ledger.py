@@ -18,31 +18,17 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
+from orchestration_policy import load_policy, role_effort_map, role_model_map
+
 
 ROOT = Path(__file__).resolve().parents[1]
 SCENARIOS = ROOT / "evals" / "codex-orchestrate" / "scenarios.json"
 LEDGER_CHECK = ROOT / "scripts" / "check_orchestration_ledger.py"
 BEHAVIOR_CHECK = ROOT / "scripts" / "check_orchestration_behavior.py"
 DEFAULT_DIR = ROOT / "local" / "orchestration-ledgers"
-MODEL_BY_ROLE = {
-    "mechanic": "gpt-5.3-codex-spark",
-    "repo_scout": "gpt-5.3-codex-spark",
-    "implementer_simple": "gpt-5.3-codex-spark",
-    "test_runner": "gpt-5.4-mini",
-    "docs_writer": "gpt-5.4-mini",
-    "repo_scout_deep": "gpt-5.4",
-    "planner": "gpt-5.4",
-    "implementer": "gpt-5.4",
-    "test_triage": "gpt-5.4",
-    "risk_controller": "gpt-5.4",
-    "architect": "gpt-5.5",
-    "reviewer": "gpt-5.5",
-    "security_auditor": "gpt-5.5",
-    "migration_analyst": "gpt-5.5",
-    "performance_investigator": "gpt-5.5",
-    "debugger": "gpt-5.5",
-    "implementer_strong": "gpt-5.5",
-}
+POLICY = load_policy()
+MODEL_BY_ROLE = role_model_map(POLICY)
+EFFORT_BY_ROLE = role_effort_map(POLICY)
 ROLE_ORDER = tuple(MODEL_BY_ROLE)
 MODEL_PATTERN = re.compile(r"gpt-[a-z0-9.\-]+")
 TIER_PATTERN = re.compile(r"Tier\s+[0-4]", re.IGNORECASE)
@@ -168,8 +154,8 @@ def scenario_defaults(scenario: dict[str, Any] | None) -> dict[str, str]:
         return {
             "tier": "Tier 1",
             "role": "implementer_simple",
-            "model": "gpt-5.3-codex-spark",
-            "effort": "medium",
+            "model": MODEL_BY_ROLE["implementer_simple"],
+            "effort": EFFORT_BY_ROLE["implementer_simple"],
             "validation_result": "skipped",
             "final_status": "passed",
         }
@@ -180,7 +166,7 @@ def scenario_defaults(scenario: dict[str, Any] | None) -> dict[str, str]:
         "tier": first_tier(ledger.get("tier", "")),
         "role": role,
         "model": first_model(ledger.get("model", ""), role),
-        "effort": first_effort(ledger.get("effort", "")),
+        "effort": first_effort(ledger.get("effort", "")) or EFFORT_BY_ROLE.get(role, "medium"),
         "validation_result": "failed" if category in {"validation-failure", "final-review-failure"} else "passed",
         "final_status": "blocked" if category == "final-review-failure" else "passed",
     }
@@ -209,6 +195,7 @@ def collect_routing_entries(defaults: dict[str, str], task_summary: str) -> list
         intended_model = prompt("Intended model", MODEL_BY_ROLE.get(role, defaults["model"]))
         actual_model = prompt("Actual model", intended_model)
         fallback_default = "No fallback used." if actual_model == intended_model else "Model fallback used; replace with details."
+        effort_default = EFFORT_BY_ROLE.get(role, defaults["effort"])
         entries.append(
             {
                 "step": prompt("Step", task_summary),
@@ -217,7 +204,7 @@ def collect_routing_entries(defaults: dict[str, str], task_summary: str) -> list
                 "runtime_type": prompt("Runtime type", "custom"),
                 "intended_model": intended_model,
                 "actual_model": actual_model,
-                "reasoning_effort": prompt("Reasoning effort", defaults["effort"]),
+                "reasoning_effort": prompt("Reasoning effort", effort_default),
                 "fallback_notes": prompt("Fallback notes", fallback_default),
                 "why_model_is_sufficient": prompt(
                     "Why this model is sufficient",
@@ -307,8 +294,8 @@ def build_ledger(args: argparse.Namespace, scenarios: dict[str, dict[str, Any]])
 
     print("\nRoot")
     root = {
-        "model": prompt("Root model", "gpt-5.5"),
-        "reasoning_effort": prompt("Root reasoning effort", "medium"),
+        "model": prompt("Root model", POLICY["default_root"]["model"]),
+        "reasoning_effort": prompt("Root reasoning effort", POLICY["default_root"]["reasoning_effort"]),
     }
 
     routing_entries = collect_routing_entries(defaults, task_summary)

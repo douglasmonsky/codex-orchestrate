@@ -14,32 +14,16 @@ import sys
 from pathlib import Path
 from typing import Any
 
+from orchestration_policy import built_in_roles, load_policy, role_names
+
 
 ROOT = Path(__file__).resolve().parents[1]
 SCENARIOS = ROOT / "evals" / "codex-orchestrate" / "scenarios.json"
-LEDGER_CHECK = ROOT / "scripts" / "check_orchestration_ledger.py"
 MODEL_PATTERN = re.compile(r"gpt-[a-z0-9.\-]+")
 TIER_PATTERN = re.compile(r"Tier\s+[0-4]", re.IGNORECASE)
-ROLE_NAMES = {
-    "architect",
-    "debugger",
-    "docs_writer",
-    "implementer",
-    "implementer_simple",
-    "implementer_strong",
-    "mechanic",
-    "migration_analyst",
-    "performance_investigator",
-    "planner",
-    "repo_scout",
-    "repo_scout_deep",
-    "reviewer",
-    "risk_controller",
-    "security_auditor",
-    "test_runner",
-    "test_triage",
-}
-BUILT_IN_ROLES = {"explorer", "worker", "default"}
+POLICY = load_policy()
+ROLE_NAMES = role_names(POLICY)
+BUILT_IN_ROLES = built_in_roles(POLICY)
 
 
 class BehaviorError(Exception):

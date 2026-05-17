@@ -17,6 +17,8 @@
 
 This skill uses explicit model and effort routing to keep the root agent from doing every task with a high-capability configuration. The root chooses a cheap safe worker first, continually reevaluates routing as work changes, escalates stuck work narrowly, and performs final senior review before completion.
 
+The repo-level harness stores the machine-readable role/model policy in `evals/codex-orchestrate/routing-policy.json`. Treat that file as checker data for parity with the agent TOMLs and docs; it does not replace the skill instructions at runtime.
+
 ## Routing principle
 
 Use the cheapest adequate worker, concrete model, and reasoning effort for the current step. Routing is not fixed at the start of the task: reassess before each new phase, after every subagent result, after direct root work, and whenever new evidence changes scope or risk. Escalate only a narrow hard part, not the whole task.
@@ -269,16 +271,16 @@ Downgrade model and/or effort when:
 
 ### One-file mechanical edit
 
-- `mechanic`: minimal or low / fast-mini
-- Escalate to `implementer_simple`: medium / fast-mini or default only if the edit requires judgment
-- Optional `test_runner`: low / fast-mini if there is a known check
+- `mechanic`: minimal or low / `gpt-5.3-codex-spark`
+- Escalate to `implementer_simple`: medium / `gpt-5.3-codex-spark` only if the edit requires judgment
+- Optional `test_runner`: low / `gpt-5.4-mini` if there is a known check
 - Root final review: inspect diff and validation summary
 
 ### Small behavior fix
 
-- `repo_scout`: low / fast-mini
-- `implementer_simple`: low or medium / fast-mini or default
-- `test_runner`: low / fast-mini
+- `repo_scout`: low / `gpt-5.3-codex-spark`
+- `implementer_simple`: low or medium / `gpt-5.3-codex-spark`
+- `test_runner`: low / `gpt-5.4-mini`
 - Escalate stuck implementation to `implementer`: medium / default
 - Escalate unexplained validation to `test_triage` or `debugger`
 - Optional `reviewer`: high / strong if behavior is risky
@@ -286,10 +288,10 @@ Downgrade model and/or effort when:
 
 ### Unfamiliar feature request
 
-- `repo_scout`: low / fast-mini
+- `repo_scout`: low / `gpt-5.3-codex-spark`
 - `planner`: medium / default
 - `implementer`: medium / default
-- `test_runner`: low / fast-mini
+- `test_runner`: low / `gpt-5.4-mini`
 - Escalate design questions to `architect`
 - Escalate implementation blockers to `implementer_strong` only after narrowing
 - `reviewer`: high / strong when risk justifies it
@@ -306,17 +308,17 @@ Downgrade model and/or effort when:
 
 ### Flaky or ambiguous test
 
-- `test_runner`: low / fast-mini for reproduction or known command
+- `test_runner`: low / `gpt-5.4-mini` for reproduction or known command
 - `test_triage`: medium / default for failure interpretation
 - `debugger`: high / strong for root cause
 - `implementer_simple` or `implementer`: lowest safe class after root cause is identified
-- `test_runner`: low / fast-mini for focused re-run
+- `test_runner`: low / `gpt-5.4-mini` for focused re-run
 - Root final review: verify failure classification and whether fix is validated
 
 ### Documentation-only update
 
-- `docs_writer`: low / fast-mini
-- `repo_scout`: low / fast-mini only if conventions are unclear
+- `docs_writer`: low / `gpt-5.4-mini`
+- `repo_scout`: low / `gpt-5.3-codex-spark` only if conventions are unclear
 - Escalate to `repo_scout_deep`: medium / default if docs require code understanding
 - Root final review: verify docs do not claim unsupported behavior
 

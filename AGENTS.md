@@ -14,9 +14,11 @@ This repository stores reusable Codex skills, companion agent profiles, snippets
 
 - `.agents/skills/<skill-name>/SKILL.md`: skill entrypoints.
 - `.agents/skills/<skill-name>/references/`: optional supporting guidance for a skill.
+- `.agents/skills/<skill-name>/agents/openai.yaml`: UI metadata and invocation hints for discoverable skills.
 - `.codex/agents/*.toml`: custom Codex agent profiles used by one or more skills.
 - `.codex/config.orchestration.example.toml`: merge-only sample config for bounded orchestration fanout.
 - `docs/`: install notes, snippets, examples, and rationale.
+- `evals/codex-orchestrate/routing-policy.json`: machine-readable orchestration role/model policy used by checks and helper scripts.
 - `schemas/`: machine-readable contracts for skill output artifacts.
 
 ## Setup Commands
@@ -37,6 +39,7 @@ python3 scripts/check_runtime_compatibility.py
 python3 scripts/check_orchestration_ledger.py evals/codex-orchestrate/sample-ledgers/*.json
 python3 scripts/check_orchestration_behavior.py evals/codex-orchestrate/sample-ledgers/*.json
 python3 scripts/run_orchestration_smoke.py
+python3 scripts/run_orchestration_smoke.py --scenario-id high-risk-security-change --json
 python3 scripts/sync_orchestration_skill.py --check
 find .agents/skills -name SKILL.md -print
 find .codex/agents -name '*.toml' -print
@@ -55,7 +58,7 @@ When TOML agent profiles change, inspect them for valid names, explicit model ro
 
 ## Orchestration Prompt Surface
 
-When a request starts with `/orchestrate`, use `codex-orchestrate`. Prompt assembly should expose model routing, source of truth, runtime fallback, routing ledger, and final senior review language so smoke checks can detect stale or missing orchestration instructions.
+When a request starts with `/orchestrate`, use `codex-orchestrate`. Prompt assembly should expose the activation contract, controller loop, first-step classification, model routing, source of truth, runtime fallback, routing ledger, and final senior review language so smoke checks can detect stale or missing orchestration instructions.
 
 ## Data Privacy Rules
 
@@ -81,8 +84,8 @@ When a request starts with `/orchestrate`, use `codex-orchestrate`. Prompt assem
 - `python3 scripts/create_orchestration_ledger.py --help` works and documents local-only ledger output.
 - `python3 scripts/check_orchestration_ledger.py evals/codex-orchestrate/sample-ledgers/*.json` passes for committed synthetic ledgers.
 - `python3 scripts/check_orchestration_behavior.py evals/codex-orchestrate/sample-ledgers/*.json` passes for scenario-to-ledger behavioral evidence.
-- `python3 scripts/run_orchestration_smoke.py` confirms `/orchestrate` prompt assembly exposes the core policy surface.
-- Model pins in `.codex/agents/*.toml` still match the documented `codex-orchestrate` model ladder.
+- `python3 scripts/run_orchestration_smoke.py` and a focused `--scenario-id` smoke confirm `/orchestrate` prompt assembly exposes the core policy surface.
+- Model pins in `.codex/agents/*.toml` still match `evals/codex-orchestrate/routing-policy.json`.
 - Ledger schema and template docs stay aligned when routing-ledger behavior changes.
 - `git diff --check` passes.
 - No secrets, tokens, or private data are staged.

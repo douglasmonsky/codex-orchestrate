@@ -17,7 +17,7 @@ Personal Codex skill repository for storing, reviewing, and reusing skills and c
 .codex/config.orchestration.example.toml
                       Merge-only sample config for bounded orchestration fanout
 docs/                 Install notes, snippets, and design rationale
-evals/                Static scenarios and synthetic run-ledger fixtures
+evals/                Routing policy manifest, static scenarios, and synthetic run-ledger fixtures
 schemas/              Machine-readable contracts for repeatable skill outputs
 README.md             Repo overview and usage
 AGENTS.md             Project-specific Codex instructions
@@ -80,6 +80,8 @@ After installing `codex-orchestrate`, add this rule to your global or project `A
 When a user starts a request with `/orchestrate`, treat it as an explicit instruction to use `$codex-orchestrate` for continuous delegate-first orchestration. Reevaluate delegation after each phase, spawn the cheapest safe subagents for substantive repository work, use built-in fallback roles when custom agents are unavailable, escalate stuck work narrowly, and finish with root senior review before responding.
 ```
 
+Activation must initialize the controller loop, routing ledger, first-step classification, model/effort selection, and final-review gate before substantive work.
+
 ## Model routing
 
 `codex-orchestrate` treats model choice as a first-class routing decision:
@@ -95,6 +97,8 @@ Smaller models can preserve local-message usage limits, but subagent fanout stil
 
 Strict model pins in `.codex/agents/*.toml` are the source-of-truth policy. `scripts/check_runtime_compatibility.py` reports operational availability and warnings; runtime fallback must be recorded in the routing ledger, but it does not loosen source validation.
 
+Harness metadata lives in `.agents/skills/codex-orchestrate/agents/openai.yaml`. Shared routing constants for checks and helper scripts live in `evals/codex-orchestrate/routing-policy.json`; changing role/model policy means updating that manifest and validating parity with the TOMLs.
+
 ## Validation
 
 Run the skill-pack checker before committing orchestration changes:
@@ -106,13 +110,14 @@ python3 scripts/check_runtime_compatibility.py
 python3 scripts/check_orchestration_ledger.py evals/codex-orchestrate/sample-ledgers/*.json
 python3 scripts/check_orchestration_behavior.py evals/codex-orchestrate/sample-ledgers/*.json
 python3 scripts/run_orchestration_smoke.py
+python3 scripts/run_orchestration_smoke.py --scenario-id high-risk-security-change --json
 python3 scripts/sync_orchestration_skill.py --check
 codex debug prompt-input '/orchestrate model routing smoke test'
 ```
 
 Recommended post-edit loop: creator help check, static checker, runtime compatibility check, sample ledger validation, behavioral evidence check, prompt smoke harness, sync check/apply, `codex debug prompt-input`, commit, push.
 
-The checker validates required skill sections, fallback role mapping, model routing scenarios, routing-ledger expectations, durable ledger trigger rules, ledger schema/template coverage, synthetic run-ledger fixtures, behavioral evidence fixtures, agent TOML model pins, duplicate stuck-protocol cleanup, sync tooling, runtime compatibility tooling, ledger creator tooling, smoke tooling, and source-of-truth docs. `scripts/create_orchestration_ledger.py` creates private ledgers under `local/orchestration-ledgers/` by default and validates them immediately. `docs/codex-orchestrate/run-ledger-template.md` remains the manual template for substantial `/orchestrate` runs outside MonskySkills.
+The checker validates required skill sections, activation contract, `agents/openai.yaml`, routing-policy completeness, fallback role mapping, model routing scenarios, routing-ledger expectations, durable ledger trigger rules, ledger schema/template coverage, synthetic run-ledger fixtures, behavioral evidence fixtures, agent TOML parity with the routing policy, duplicate stuck-protocol cleanup, sync tooling, runtime compatibility tooling, ledger creator tooling, smoke tooling, and source-of-truth docs. `scripts/create_orchestration_ledger.py` creates private ledgers under `local/orchestration-ledgers/` by default and validates them immediately. `docs/codex-orchestrate/run-ledger-template.md` remains the manual template for substantial `/orchestrate` runs outside MonskySkills.
 
 ## Privacy
 

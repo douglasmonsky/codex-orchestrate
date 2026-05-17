@@ -43,7 +43,7 @@ Use when:
 - The root already knows the desired change.
 
 Default effort: minimal or low.
-Preferred model class: spark/fast.
+Preferred model: `gpt-5.3-codex-spark`.
 Default model: `gpt-5.3-codex-spark`.
 Sandbox: workspace-write.
 Escalate to: `implementer_simple` when the edit requires judgment; `implementer` when behavior changes.
@@ -64,7 +64,7 @@ Use when:
 - The task needs command/test discovery.
 
 Default effort: low.
-Preferred model class: spark/fast.
+Preferred model: `gpt-5.3-codex-spark`.
 Default model: `gpt-5.3-codex-spark`.
 Sandbox: read-only.
 Escalate to: `repo_scout_deep` when relevant surface is not found or cross-cutting context is needed; `planner` when discovery becomes sequencing; `architect` when discovery reveals design uncertainty.
@@ -86,7 +86,7 @@ Use when:
 - The task needs deeper convention inference before implementation.
 
 Default effort: medium.
-Preferred model class: default.
+Preferred model: `gpt-5.4`.
 Default model: `gpt-5.4`.
 Sandbox: read-only.
 Escalate to: `planner` for execution sequencing; `architect` for design boundaries; `debugger` for failure diagnosis.
@@ -107,7 +107,7 @@ Use when:
 - Implementation order or validation gates are unclear.
 
 Default effort: medium.
-Preferred model class: default.
+Preferred model: `gpt-5.4`.
 Default model: `gpt-5.4`.
 Sandbox: read-only.
 Escalate to: `architect` for design decisions; `risk_controller` for scope/cost concerns; `migration_analyst` for migration ordering.
@@ -128,7 +128,7 @@ Use when:
 - A stuck implementation needs a design decision.
 
 Default effort: high.
-Preferred model class: strong.
+Preferred model: `gpt-5.5`.
 Default model: `gpt-5.5`.
 Sandbox: read-only.
 Escalate to: `security_auditor` for security-sensitive design; `migration_analyst` for staged migration; `reviewer` for patch-level concerns; `xhigh` only for severe ambiguity/high cost of error.
@@ -150,7 +150,7 @@ Use when:
 - Acceptance criteria are clear.
 
 Default effort: low or medium.
-Preferred model class: spark/fast or default.
+Preferred model: `gpt-5.3-codex-spark`.
 Default model: `gpt-5.3-codex-spark`.
 Sandbox: workspace-write.
 Escalate to: `implementer` when the patch spans multiple files or requires deeper judgment; `debugger` when a failure cannot be explained; `reviewer` when correctness risk is non-trivial.
@@ -173,7 +173,7 @@ Use when:
 - Tests or behavior updates are required.
 
 Default effort: medium.
-Preferred model class: default.
+Preferred model: `gpt-5.4`.
 Default model: `gpt-5.4`.
 Sandbox: workspace-write.
 Escalate to: `implementer_strong` when implementation logic is complex; `architect` when design ambiguity blocks progress; `debugger` when validation fails; `security_auditor` for security-sensitive changes.
@@ -195,7 +195,7 @@ Use when:
 - The work is production-critical or edge-case-heavy.
 
 Default effort: high.
-Preferred model class: strong.
+Preferred model: `gpt-5.5`.
 Default model: `gpt-5.5`.
 Sandbox: workspace-write.
 Escalate to: `architect`, `security_auditor`, or `reviewer` depending on the unresolved risk.
@@ -217,7 +217,7 @@ Use when:
 - The root wants an adversarial check before finalization.
 
 Default effort: high.
-Preferred model class: strong.
+Preferred model: `gpt-5.5`.
 Default model: `gpt-5.5`.
 Sandbox: read-only.
 Escalate to: `architect` for design disputes; `security_auditor` for security findings; `debugger` for unexplained failures; `xhigh` if supported for severe disputed correctness issues.
@@ -238,7 +238,7 @@ Use when:
 - A simple validation pass is enough.
 
 Default effort: low.
-Preferred model class: mini.
+Preferred model: `gpt-5.4-mini`.
 Default model: `gpt-5.4-mini`.
 Sandbox: workspace-write.
 Escalate to: `test_triage` when failures need interpretation; `debugger` when failures are ambiguous or flaky.
@@ -259,7 +259,7 @@ Use when:
 - The root needs the smallest next discriminating check.
 
 Default effort: medium.
-Preferred model class: default.
+Preferred model: `gpt-5.4`.
 Default model: `gpt-5.4`.
 Sandbox: workspace-write.
 Escalate to: `debugger` for root-cause investigation; `implementer` for obvious fix; `risk_controller` if validation cost is growing.
@@ -280,7 +280,7 @@ Use when:
 - Logs, stack traces, or flaky behavior need structured analysis.
 
 Default effort: high for ambiguous failures, medium for bounded failures.
-Preferred model class: strong for ambiguous failures, default otherwise.
+Preferred model: `gpt-5.5` for ambiguous failures, `gpt-5.4` for bounded failures.
 Default model: `gpt-5.5` for ambiguous failures, `gpt-5.4` for bounded failures.
 Sandbox: workspace-write when reproduction commands are needed.
 Escalate to: `architect` if root cause is design-level; `security_auditor` if security-sensitive; `implementer` when fix is clear.
@@ -300,7 +300,7 @@ Use when:
 - The work touches auth, authorization, secrets, network access, sandboxing, dependency trust, data isolation, injection surfaces, permissions, or abuse paths.
 
 Default effort: high or xhigh if supported for severe-risk work.
-Preferred model class: strong.
+Preferred model: `gpt-5.5`.
 Default model: `gpt-5.5`.
 Sandbox: read-only.
 Escalate to: `architect` for design remediation; `reviewer` for patch correctness; `xhigh` if supported for severe unresolved security ambiguity.
@@ -321,7 +321,7 @@ Use when:
 - An optimization has correctness or architecture tradeoffs.
 
 Default effort: high.
-Preferred model class: strong.
+Preferred model: `gpt-5.5`.
 Default model: `gpt-5.5`.
 Sandbox: workspace-write if benchmarks/profiling are needed.
 Escalate to: `architect` for design tradeoffs; `reviewer` for patch risk; `test_runner` for measurement validation.
@@ -342,7 +342,7 @@ Use when:
 - Migration testing needs gates.
 
 Default effort: high.
-Preferred model class: strong.
+Preferred model: `gpt-5.5`.
 Default model: `gpt-5.5`.
 Sandbox: read-only.
 Escalate to: `architect` for design decisions; `security_auditor` for data/auth risk; `risk_controller` for scope control.
@@ -362,7 +362,7 @@ Use when:
 - Existing style and examples must be preserved.
 
 Default effort: low.
-Preferred model class: mini.
+Preferred model: `gpt-5.4-mini`.
 Default model: `gpt-5.4-mini`.
 Sandbox: workspace-write.
 Escalate to: `repo_scout_deep` when code understanding is needed; `architect` when documentation reveals design ambiguity; `reviewer` for public-facing high-risk docs.
@@ -384,7 +384,7 @@ Use when:
 - The root needs a stop/continue recommendation.
 
 Default effort: medium.
-Preferred model class: default.
+Preferred model: `gpt-5.4`.
 Default model: `gpt-5.4`.
 Sandbox: read-only.
 Escalate to: root decision; this agent should not recursively delegate.

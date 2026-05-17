@@ -13,12 +13,16 @@ import sys
 import tomllib
 from pathlib import Path
 
+from orchestration_policy import load_policy, role_effort_map, role_model_map, role_names, role_sandbox_map, supported_models
+
 
 ROOT = Path(__file__).resolve().parents[1]
 SKILL = ROOT / ".agents" / "skills" / "codex-orchestrate" / "SKILL.md"
+OPENAI_YAML = ROOT / ".agents" / "skills" / "codex-orchestrate" / "agents" / "openai.yaml"
 REFERENCES = ROOT / ".agents" / "skills" / "codex-orchestrate" / "references"
 AGENTS = ROOT / ".codex" / "agents"
 SCENARIOS = ROOT / "evals" / "codex-orchestrate" / "scenarios.json"
+ROUTING_POLICY = ROOT / "evals" / "codex-orchestrate" / "routing-policy.json"
 SYNC_SCRIPT = ROOT / "scripts" / "sync_orchestration_skill.py"
 RUNTIME_SCRIPT = ROOT / "scripts" / "check_runtime_compatibility.py"
 LEDGER_CHECK_SCRIPT = ROOT / "scripts" / "check_orchestration_ledger.py"
@@ -36,6 +40,7 @@ SAMPLE_LEDGERS = ROOT / "evals" / "codex-orchestrate" / "sample-ledgers"
 
 REQUIRED_SKILL_SECTIONS = [
     "## Purpose",
+    "## Activation Contract",
     "## Source Of Truth",
     "## Runtime Capabilities",
     "## Model Routing",
@@ -63,65 +68,6 @@ REQUIRED_AGENT_FIELDS = [
     "developer_instructions",
 ]
 
-EXPECTED_AGENT_NAMES = {
-    "architect",
-    "debugger",
-    "docs_writer",
-    "implementer",
-    "implementer_simple",
-    "implementer_strong",
-    "mechanic",
-    "migration_analyst",
-    "performance_investigator",
-    "planner",
-    "repo_scout",
-    "repo_scout_deep",
-    "reviewer",
-    "risk_controller",
-    "security_auditor",
-    "test_runner",
-    "test_triage",
-}
-
-SUPPORTED_MODELS = {
-    "gpt-5.3-codex-spark",
-    "gpt-5.4-mini",
-    "gpt-5.4",
-    "gpt-5.5",
-}
-
-EXPECTED_AGENT_MODELS = {
-    "mechanic": "gpt-5.3-codex-spark",
-    "repo_scout": "gpt-5.3-codex-spark",
-    "implementer_simple": "gpt-5.3-codex-spark",
-    "test_runner": "gpt-5.4-mini",
-    "docs_writer": "gpt-5.4-mini",
-    "repo_scout_deep": "gpt-5.4",
-    "planner": "gpt-5.4",
-    "implementer": "gpt-5.4",
-    "test_triage": "gpt-5.4",
-    "risk_controller": "gpt-5.4",
-    "architect": "gpt-5.5",
-    "reviewer": "gpt-5.5",
-    "security_auditor": "gpt-5.5",
-    "migration_analyst": "gpt-5.5",
-    "performance_investigator": "gpt-5.5",
-    "debugger": "gpt-5.5",
-    "implementer_strong": "gpt-5.5",
-}
-
-HIGH_RISK_ROLES = {
-    "architect",
-    "reviewer",
-    "security_auditor",
-    "migration_analyst",
-    "performance_investigator",
-    "debugger",
-    "implementer_strong",
-}
-
-SPARK_ROLES = {"mechanic", "repo_scout", "implementer_simple"}
-MINI_ROLES = {"test_runner", "docs_writer"}
 FORBIDDEN_STALE_POLICY_PHRASES = [
     "Stuck work escalates effort first",
     "next effort/model level",
@@ -130,6 +76,8 @@ FORBIDDEN_STALE_POLICY_PHRASES = [
     "same role at higher effort",
     "Recommended next agent/effort",
     "effort/model level",
+    "fast" + "-mini",
+    "model class" + " only",
 ]
 
 REQUIRED_SCENARIO_EXPECTED_FIELDS = [
@@ -186,6 +134,10 @@ def check_skill() -> None:
         "repo-local copy",
         "authoritative",
         "global install",
+        "Activation Contract",
+        "first-step classification",
+        "model/effort selection",
+        "final-review gate",
         "built-in fallback map",
         "explorer",
         "worker",
@@ -211,6 +163,63 @@ def check_skill() -> None:
         len(text.splitlines()) <= 260,
         "SKILL.md should stay compact; move detail into references",
     )
+
+
+def check_openai_metadata() -> None:
+    text = read(OPENAI_YAML)
+    for phrase in [
+        'display_name: "Codex Orchestrate"',
+        'short_description: "Continuous subagent orchestration"',
+        'default_prompt: "Use $codex-orchestrate',
+        "continuous delegate-first orchestration",
+        "model routing",
+        "root final review",
+        "allow_implicit_invocation: true",
+    ]:
+        require_contains(text, phrase, "agents/openai.yaml")
+
+
+def check_routing_policy() -> dict:
+    policy = load_policy()
+    require(policy.get("schema_version") == "1.0", "routing-policy.json schema_version changed")
+    for field in [
+        "supported_models",
+        "model_ladder",
+        "default_root",
+        "roles",
+        "durable_ledger_triggers",
+        "required_smoke_terms",
+        "default_smoke_scenario_ids",
+        "smoke_scenarios",
+    ]:
+        require(field in policy, f"routing-policy.json missing field: {field}")
+
+    ladder = policy["model_ladder"]
+    require(
+        ladder == ["gpt-5.3-codex-spark", "gpt-5.4-mini", "gpt-5.4", "gpt-5.5"],
+        "routing-policy.json model_ladder changed unexpectedly",
+    )
+    require(set(policy["supported_models"]) == set(ladder), "supported_models must match model_ladder")
+    require(policy["default_root"] == {"model": "gpt-5.5", "reasoning_effort": "medium"}, "default_root changed unexpectedly")
+
+    roles = policy["roles"]
+    require(len(roles) == 17, f"routing-policy.json expected 17 roles, found {len(roles)}")
+    fallback_values = {"explorer", "worker", "default"}
+    for name, data in roles.items():
+        for field in ["model", "default_effort", "sandbox_mode", "built_in_fallback", "risk_class"]:
+            require(field in data, f"routing-policy role {name} missing field: {field}")
+        require(data["model"] in ladder, f"routing-policy role {name} has unsupported model")
+        require(data["default_effort"] in {"minimal", "low", "medium", "high", "xhigh"}, f"routing-policy role {name} has invalid effort")
+        require(data["sandbox_mode"] in {"read-only", "workspace-write"}, f"routing-policy role {name} has invalid sandbox")
+        require(data["built_in_fallback"] in fallback_values, f"routing-policy role {name} has invalid built-in fallback")
+
+    for phrase in ["model fallback", "more than two subagents", "failed validation", "final-review blocker"]:
+        require(any(phrase in trigger for trigger in policy["durable_ledger_triggers"]), f"routing-policy missing trigger: {phrase}")
+    for term in ["/orchestrate", "codex-orchestrate", "model routing", "runtime fallback", "routing ledger", "controller loop", "first-step classification", "final senior review"]:
+        require(term in policy["required_smoke_terms"], f"routing-policy required_smoke_terms missing: {term}")
+    for scenario_id in policy["default_smoke_scenario_ids"]:
+        require(scenario_id in policy["smoke_scenarios"], f"default smoke scenario not defined: {scenario_id}")
+    return policy
 
 
 def check_references() -> None:
@@ -245,6 +254,7 @@ def check_no_stale_effort_policy() -> None:
         README,
         PACKAGE_README,
         SNIPPET,
+        ROUTING_POLICY,
         *sorted(REFERENCES.glob("*.md")),
         *sorted(AGENTS.glob("*.toml")),
     ]
@@ -297,6 +307,16 @@ def check_scenarios() -> None:
 
 
 def check_agents() -> None:
+    policy = load_policy()
+    expected_names = role_names(policy)
+    expected_models = role_model_map(policy)
+    expected_efforts = role_effort_map(policy)
+    expected_sandbox = role_sandbox_map(policy)
+    supported = supported_models(policy)
+    high_risk_roles = {name for name, data in policy["roles"].items() if data["risk_class"] == "high"}
+    fast_roles = {name for name, data in policy["roles"].items() if data["model"] == policy["model_ladder"][0]}
+    lightweight_roles = {name for name, data in policy["roles"].items() if data["model"] == "gpt-5.4-mini"}
+
     files = sorted(AGENTS.glob("*.toml"))
     require(len(files) == 17, f"expected 17 agent TOMLs, found {len(files)}")
 
@@ -309,20 +329,22 @@ def check_agents() -> None:
         name = data["name"]
         names.add(name)
         require(path.stem == name, f"{path.name} name does not match file stem")
-        require(name in EXPECTED_AGENT_NAMES, f"unexpected agent name: {name}")
-        require(data["model"] in SUPPORTED_MODELS, f"{path.name} has unsupported model: {data['model']}")
+        require(name in expected_names, f"unexpected agent name: {name}")
+        require(data["model"] in supported, f"{path.name} has unsupported model: {data['model']}")
         require(
-            data["model"] == EXPECTED_AGENT_MODELS[name],
-            f"{path.name} should use {EXPECTED_AGENT_MODELS[name]}, found {data['model']}",
+            data["model"] == expected_models[name],
+            f"{path.name} should use {expected_models[name]}, found {data['model']}",
         )
-        if name in HIGH_RISK_ROLES:
+        if name in high_risk_roles:
             require(data["model"] == "gpt-5.5", f"{path.name} high-risk role must use gpt-5.5")
-        if name in SPARK_ROLES:
+        if name in fast_roles:
             require(data["model"] == "gpt-5.3-codex-spark", f"{path.name} fast coding role must use gpt-5.3-codex-spark")
-        if name in MINI_ROLES:
+        if name in lightweight_roles:
             require(data["model"] == "gpt-5.4-mini", f"{path.name} lightweight general role must use gpt-5.4-mini")
         require(data["model_reasoning_effort"] in {"minimal", "low", "medium", "high", "xhigh"}, f"{path.name} has invalid effort")
+        require(data["model_reasoning_effort"] == expected_efforts[name], f"{path.name} effort does not match routing policy")
         require(data["sandbox_mode"] in {"read-only", "workspace-write"}, f"{path.name} has invalid sandbox_mode")
+        require(data["sandbox_mode"] == expected_sandbox[name], f"{path.name} sandbox_mode does not match routing policy")
         require(isinstance(data["nickname_candidates"], list) and data["nickname_candidates"], f"{path.name} needs nicknames")
 
         instructions = data["developer_instructions"]
@@ -333,7 +355,7 @@ def check_agents() -> None:
             f"{path.name} should have exactly one stuck-work protocol",
         )
 
-    require(names == EXPECTED_AGENT_NAMES, "agent roster does not match expected names")
+    require(names == expected_names, "agent roster does not match routing-policy role names")
 
 
 def check_docs() -> None:
@@ -353,6 +375,9 @@ def check_docs() -> None:
         "check_orchestration_behavior.py",
         "create_orchestration_ledger.py",
         "run_orchestration_smoke.py",
+        "agents/openai.yaml",
+        "routing-policy.json",
+        "activation contract",
         "run-ledger-template.md",
         "config.orchestration.example.toml",
         "sample-ledgers",
@@ -391,11 +416,12 @@ def check_runtime_script() -> None:
     for phrase in [
         "--strict",
         "--json",
+        "load_policy",
+        "role_model_map",
         "codex",
         "debug",
         "models",
         "WARN:",
-        "gpt-5.3-codex-spark",
         "return 1",
     ]:
         require_contains(text, phrase, "check_runtime_compatibility.py")
@@ -473,6 +499,8 @@ def check_ledger_creator() -> None:
     for phrase in [
         "local/orchestration-ledgers",
         "--allow-tracked-output",
+        "load_policy",
+        "role_model_map",
         "Refusing to write outside local/",
         "check_orchestration_ledger.py",
         "check_orchestration_behavior.py",
@@ -545,6 +573,9 @@ def check_ledger_validator_and_samples() -> None:
 def check_behavior_script() -> None:
     text = read(BEHAVIOR_SCRIPT)
     for phrase in [
+        "load_policy",
+        "role_names",
+        "built_in_roles",
         "scenario_id",
         "scenarios.json",
         "routing_entries",
@@ -571,17 +602,15 @@ def check_behavior_script() -> None:
 def check_smoke_script() -> None:
     text = read(SMOKE_SCRIPT)
     for phrase in [
+        "load_policy",
         "codex",
         "debug",
         "prompt-input",
         "--json",
+        "--scenario-id",
         "--write-artifacts",
-        "codex-orchestrate",
-        "model routing",
-        "source of truth",
-        "runtime fallback",
-        "routing ledger",
-        "final senior review",
+        "required_smoke_terms",
+        "default_smoke_scenario_ids",
     ]:
         require_contains(text, phrase, "run_orchestration_smoke.py")
 
@@ -589,6 +618,8 @@ def check_smoke_script() -> None:
 def main() -> int:
     checks = [
         check_skill,
+        check_openai_metadata,
+        check_routing_policy,
         check_references,
         check_no_stale_effort_policy,
         check_scenarios,

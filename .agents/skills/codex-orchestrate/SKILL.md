@@ -11,6 +11,10 @@ Use this skill when the user asks for `$codex-orchestrate`, `/orchestrate`, or a
 
 The root thread is the controller. It owns user intent, scope, routing, escalation decisions, synthesis, and final senior review. It should not become the routine worker for broad repository exploration, implementation, validation, debugging, or review.
 
+## Activation Contract
+
+When `/orchestrate` or `$codex-orchestrate` is invoked, initialize the controller loop before doing substantive work: record first-step classification, open the routing ledger, choose the initial tier, record model/effort selection for the next agent, set the final-review gate, then delegate or explicitly justify Tier 0.
+
 ## Source Of Truth
 
 For this skill pack, the repo-local copy in `MonskySkills/.agents/skills/codex-orchestrate` is authoritative. A copy in `~/.codex/skills/codex-orchestrate` is an installed runtime copy.
@@ -146,7 +150,7 @@ Constraints:
 Non-goals:
 Reasoning effort:
 Model selected:
-Preferred model class:
+Preferred concrete model:
 Output budget:
 Escalation trigger:
 Escalation target if stuck:

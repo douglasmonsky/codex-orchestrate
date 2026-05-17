@@ -20,13 +20,14 @@ The global copy in `~/.codex/skills/codex-orchestrate/` is an installed runtime 
 
 ## New policy emphasis
 
-This version adds five hard policies:
+This version adds six hard policies:
 
-1. **Routing is continuous.** The root reevaluates delegation after each user clarification, direct root step, subagent result, validation result, scope change, or new risk. If a Tier 0 direct answer grows into repository or tool work, the root leaves Tier 0 and delegates the next step.
-2. **Runtime fallback preserves role intent.** If custom agent profiles are unavailable, read-only work maps to `explorer`, implementation/test/docs work maps to `worker`, and planning/synthesis maps to `default`.
-3. **Model routing is explicit.** The root chooses a concrete model and reasoning effort for each subagent. Use `gpt-5.3-codex-spark` for ultra-fast text-only coding loops, `gpt-5.4-mini` for lightweight general support, `gpt-5.4` for normal judgment, and `gpt-5.5` for high-risk or high-ambiguity specialists.
-4. **Stuck work escalates model and/or effort first.** When a subagent gets stuck, retry the same narrow unresolved task at the next model class and/or reasoning-effort level. Pass off to a different specialist only when the evidence shows role mismatch.
-5. **The root performs final senior review.** The top-level/root agent must finish by reviewing subagent output as a senior developer, code reviewer, and architect. This is a check-and-balance gate; it is not fully outsourced to a reviewer subagent.
+1. **Activation initializes the controller.** `/orchestrate` and `$codex-orchestrate` initialize the controller loop, routing ledger, first-step classification, model/effort selection, and final-review gate.
+2. **Routing is continuous.** The root reevaluates delegation after each user clarification, direct root step, subagent result, validation result, scope change, or new risk. If a Tier 0 direct answer grows into repository or tool work, the root leaves Tier 0 and delegates the next step.
+3. **Runtime fallback preserves role intent.** If custom agent profiles are unavailable, read-only work maps to `explorer`, implementation/test/docs work maps to `worker`, and planning/synthesis maps to `default`.
+4. **Model routing is explicit.** The root chooses a concrete model and reasoning effort for each subagent. Use `gpt-5.3-codex-spark` for ultra-fast text-only coding loops, `gpt-5.4-mini` for lightweight general support, `gpt-5.4` for normal judgment, and `gpt-5.5` for high-risk or high-ambiguity specialists.
+5. **Stuck work escalates model and/or effort first.** When a subagent gets stuck, retry the same narrow unresolved task at the next model class and/or reasoning-effort level. Pass off to a different specialist only when the evidence shows role mismatch.
+6. **The root performs final senior review.** The top-level/root agent must finish by reviewing subagent output as a senior developer, code reviewer, and architect. This is a check-and-balance gate; it is not fully outsourced to a reviewer subagent.
 
 The model policy follows the current OpenAI Codex docs for subagent model pins, Codex model selection, and usage-limit tradeoffs:
 
@@ -38,6 +39,7 @@ The model policy follows the current OpenAI Codex docs for subagent model pins, 
 
 ```text
 .agents/skills/codex-orchestrate/SKILL.md
+.agents/skills/codex-orchestrate/agents/openai.yaml
 .agents/skills/codex-orchestrate/references/agent-roster.md
 .agents/skills/codex-orchestrate/references/effort-model-routing.md
 .agents/skills/codex-orchestrate/references/handoff-contracts.md
@@ -50,6 +52,7 @@ scripts/check_orchestration_ledger.py
 scripts/check_orchestration_behavior.py
 scripts/create_orchestration_ledger.py
 scripts/run_orchestration_smoke.py
+evals/codex-orchestrate/routing-policy.json
 evals/codex-orchestrate/sample-ledgers/*.json
 AGENTS.orchestration.snippet.md
 ```
@@ -108,6 +111,8 @@ Copy useful parts of `AGENTS.orchestration.snippet.md` into the repo's `AGENTS.m
 
 Model names in `.codex/agents/*.toml` are pinned intentionally. Strict model pins are the source-of-truth policy. `scripts/check_runtime_compatibility.py` reports operational availability and warnings; runtime fallback must be recorded in the routing ledger, but it does not loosen source validation.
 
+The skill UI metadata is stored in `.agents/skills/codex-orchestrate/agents/openai.yaml`. Shared harness constants for role/model routing, smoke terms, and durable-ledger triggers are stored in `evals/codex-orchestrate/routing-policy.json`; helper scripts and static checks read that manifest.
+
 Produce a durable post-run ledger for any Tier 3 or Tier 4 run, any model fallback, any security/privacy/migration/auth task, any run with more than two subagents, any failed validation, or any final-review blocker. Tier 1 and Tier 2 ledgers are optional unless one of those triggers appears. Inside MonskySkills, use `scripts/create_orchestration_ledger.py` to write an ignored local ledger and validate it immediately. Elsewhere, use `docs/codex-orchestrate/run-ledger-template.md` and `schemas/orchestration-ledger.schema.json` manually to record actual model/effort usage, fallbacks, validation, final review, and residual risk. Keep real ledgers local or sanitized unless they contain no private task data.
 
 Run the lightweight checker and sync check after changes:
@@ -119,6 +124,7 @@ python3 scripts/check_runtime_compatibility.py
 python3 scripts/check_orchestration_ledger.py evals/codex-orchestrate/sample-ledgers/*.json
 python3 scripts/check_orchestration_behavior.py evals/codex-orchestrate/sample-ledgers/*.json
 python3 scripts/run_orchestration_smoke.py
+python3 scripts/run_orchestration_smoke.py --scenario-id high-risk-security-change --json
 python3 scripts/sync_orchestration_skill.py --check
 codex debug prompt-input '/orchestrate model routing smoke test'
 ```

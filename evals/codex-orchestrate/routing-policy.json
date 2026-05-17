@@ -1,0 +1,169 @@
+{
+  "schema_version": "1.0",
+  "supported_models": [
+    "gpt-5.3-codex-spark",
+    "gpt-5.4-mini",
+    "gpt-5.4",
+    "gpt-5.5"
+  ],
+  "model_ladder": [
+    "gpt-5.3-codex-spark",
+    "gpt-5.4-mini",
+    "gpt-5.4",
+    "gpt-5.5"
+  ],
+  "default_root": {
+    "model": "gpt-5.5",
+    "reasoning_effort": "medium"
+  },
+  "roles": {
+    "architect": {
+      "model": "gpt-5.5",
+      "default_effort": "high",
+      "sandbox_mode": "read-only",
+      "built_in_fallback": "explorer",
+      "risk_class": "high"
+    },
+    "debugger": {
+      "model": "gpt-5.5",
+      "default_effort": "high",
+      "sandbox_mode": "workspace-write",
+      "built_in_fallback": "worker",
+      "risk_class": "high"
+    },
+    "docs_writer": {
+      "model": "gpt-5.4-mini",
+      "default_effort": "low",
+      "sandbox_mode": "workspace-write",
+      "built_in_fallback": "worker",
+      "risk_class": "lightweight"
+    },
+    "implementer": {
+      "model": "gpt-5.4",
+      "default_effort": "medium",
+      "sandbox_mode": "workspace-write",
+      "built_in_fallback": "worker",
+      "risk_class": "normal"
+    },
+    "implementer_simple": {
+      "model": "gpt-5.3-codex-spark",
+      "default_effort": "medium",
+      "sandbox_mode": "workspace-write",
+      "built_in_fallback": "worker",
+      "risk_class": "fast"
+    },
+    "implementer_strong": {
+      "model": "gpt-5.5",
+      "default_effort": "high",
+      "sandbox_mode": "workspace-write",
+      "built_in_fallback": "worker",
+      "risk_class": "high"
+    },
+    "mechanic": {
+      "model": "gpt-5.3-codex-spark",
+      "default_effort": "low",
+      "sandbox_mode": "workspace-write",
+      "built_in_fallback": "worker",
+      "risk_class": "fast"
+    },
+    "migration_analyst": {
+      "model": "gpt-5.5",
+      "default_effort": "high",
+      "sandbox_mode": "read-only",
+      "built_in_fallback": "explorer",
+      "risk_class": "high"
+    },
+    "performance_investigator": {
+      "model": "gpt-5.5",
+      "default_effort": "high",
+      "sandbox_mode": "workspace-write",
+      "built_in_fallback": "explorer",
+      "risk_class": "high"
+    },
+    "planner": {
+      "model": "gpt-5.4",
+      "default_effort": "medium",
+      "sandbox_mode": "read-only",
+      "built_in_fallback": "default",
+      "risk_class": "normal"
+    },
+    "repo_scout": {
+      "model": "gpt-5.3-codex-spark",
+      "default_effort": "low",
+      "sandbox_mode": "read-only",
+      "built_in_fallback": "explorer",
+      "risk_class": "fast"
+    },
+    "repo_scout_deep": {
+      "model": "gpt-5.4",
+      "default_effort": "medium",
+      "sandbox_mode": "read-only",
+      "built_in_fallback": "explorer",
+      "risk_class": "normal"
+    },
+    "reviewer": {
+      "model": "gpt-5.5",
+      "default_effort": "high",
+      "sandbox_mode": "read-only",
+      "built_in_fallback": "explorer",
+      "risk_class": "high"
+    },
+    "risk_controller": {
+      "model": "gpt-5.4",
+      "default_effort": "medium",
+      "sandbox_mode": "read-only",
+      "built_in_fallback": "default",
+      "risk_class": "normal"
+    },
+    "security_auditor": {
+      "model": "gpt-5.5",
+      "default_effort": "high",
+      "sandbox_mode": "read-only",
+      "built_in_fallback": "explorer",
+      "risk_class": "high"
+    },
+    "test_runner": {
+      "model": "gpt-5.4-mini",
+      "default_effort": "low",
+      "sandbox_mode": "workspace-write",
+      "built_in_fallback": "worker",
+      "risk_class": "lightweight"
+    },
+    "test_triage": {
+      "model": "gpt-5.4",
+      "default_effort": "medium",
+      "sandbox_mode": "workspace-write",
+      "built_in_fallback": "worker",
+      "risk_class": "normal"
+    }
+  },
+  "durable_ledger_triggers": [
+    "Tier 3 or Tier 4 run",
+    "model fallback",
+    "security/privacy/migration/auth task",
+    "more than two subagents",
+    "failed validation",
+    "final-review blocker"
+  ],
+  "required_smoke_terms": [
+    "/orchestrate",
+    "codex-orchestrate",
+    "model routing",
+    "source of truth",
+    "runtime fallback",
+    "routing ledger",
+    "controller loop",
+    "first-step classification",
+    "final senior review"
+  ],
+  "default_smoke_scenario_ids": [
+    "model-routing-smoke",
+    "fallback-smoke"
+  ],
+  "smoke_scenarios": {
+    "model-routing-smoke": "/orchestrate model routing smoke test",
+    "fallback-smoke": "/orchestrate Custom agent TOMLs are not callable here. Still orchestrate a repo investigation and small fix.",
+    "high-risk-security-change": "/orchestrate Change authorization behavior for this API and make sure it is safe.",
+    "tier0-upgrades-to-delegation": "/orchestrate What does this repo do? Actually, inspect the code and update the README if it is stale."
+  }
+}
