@@ -12,6 +12,16 @@ python3 scripts/create_orchestration_ledger.py
 
 It writes to ignored `local/orchestration-ledgers/` by default, runs `scripts/check_orchestration_ledger.py`, and runs `scripts/check_orchestration_behavior.py` when the `scenario_id` matches a committed scenario. In other repos, copy this JSON shape manually and keep private details local or sanitized.
 
+For repo validation after ledger or orchestration-policy edits, start with the tiered wrapper:
+
+```bash
+python3 scripts/orchestration_check.py --quick
+python3 scripts/orchestration_check.py --runtime
+python3 scripts/orchestration_check.py --full
+```
+
+Use `--quick` for committed fixtures, `--runtime` for installed/prompt behavior, and `--full` before committing broad harness changes.
+
 After creating or receiving a ledger, generate a quick after-action audit:
 
 ```bash

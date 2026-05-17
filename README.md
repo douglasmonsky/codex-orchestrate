@@ -108,32 +108,19 @@ Harness metadata lives in `.agents/skills/codex-orchestrate/agents/openai.yaml`.
 
 ## Validation
 
-Run the skill-pack checker before committing orchestration changes:
+Use the tiered validation wrapper first:
 
 ```bash
-python3 scripts/create_orchestration_ledger.py --help
-python3 scripts/check_orchestration_skill.py
-python3 scripts/check_runtime_compatibility.py
-python3 scripts/check_orchestration_context_packets.py evals/codex-orchestrate/sample-context-packets/*.json
-python3 scripts/check_orchestration_lifecycle.py evals/codex-orchestrate/sample-ledgers/*.json
-python3 scripts/check_orchestration_ledger.py evals/codex-orchestrate/sample-ledgers/*.json
-python3 scripts/check_orchestration_behavior.py evals/codex-orchestrate/sample-ledgers/*.json
-python3 scripts/report_orchestration_ledger.py evals/codex-orchestrate/sample-ledgers/small-patch.json
-python3 scripts/report_orchestration_ledger.py --json evals/codex-orchestrate/sample-ledgers/small-patch.json
-python3 scripts/serve_orchestration_ui.py --self-test
-python3 scripts/run_orchestration_smoke.py
-python3 scripts/run_orchestration_smoke.py --scenario-id lifecycle-smoke --json
-python3 scripts/run_orchestration_smoke.py --scenario-id context-packet-smoke --json
-python3 scripts/run_orchestration_smoke.py --scenario-id minimal-packet-smoke --json
-python3 scripts/run_orchestration_smoke.py --scenario-id timeout-recovery-smoke --json
-python3 scripts/run_orchestration_smoke.py --scenario-id high-risk-security-change --json
-python3 scripts/sync_orchestration_skill.py --check
-codex debug prompt-input '/orchestrate model routing smoke test'
+python3 scripts/orchestration_check.py --quick
+python3 scripts/orchestration_check.py --runtime
+python3 scripts/orchestration_check.py --full
 ```
 
-Recommended post-edit loop: creator help check, static checker, runtime compatibility check, context-packet validation, lifecycle validation, sample ledger validation, behavioral evidence check, ledger report smoke, prompt smoke harness, sync check/apply, `codex debug prompt-input`, commit, push.
+Use `--quick` during normal edits, `--runtime` after syncing installed copies or changing prompt-surface behavior, and `--full` before committing or after broader harness work. Add `--json` for machine-readable results and `--fail-fast` when triaging the first failure. The wrapper is read-only; it never syncs with `--apply`, commits, pushes, formats, or writes smoke artifacts.
 
-The checker validates required skill sections, activation contract, context packet protocol, lifecycle ledger policy, `agents/openai.yaml`, routing-policy completeness, fallback role mapping, model routing scenarios, routing-ledger expectations, durable ledger trigger rules, context-packet schema/fixture coverage, lifecycle fixture coverage, ledger schema/template coverage, synthetic run-ledger fixtures, behavioral evidence fixtures, ledger reporting, local dashboard assets, agent TOML parity with the routing policy, duplicate stuck-protocol cleanup, sync tooling, runtime compatibility tooling, ledger creator tooling, smoke tooling, and source-of-truth docs. `scripts/create_orchestration_ledger.py` creates private ledgers under `local/orchestration-ledgers/` by default and validates them immediately. `scripts/report_orchestration_ledger.py` turns a ledger into a post-run Markdown or JSON audit, including whether orchestration justified itself. `docs/codex-orchestrate/run-ledger-template.md` remains the manual template for substantial `/orchestrate` runs outside MonskySkills.
+Recommended post-edit loop: `--quick`, `--runtime` when runtime behavior matters, `--full` before commit, `python3 scripts/sync_orchestration_skill.py --apply`, `python3 scripts/sync_orchestration_skill.py --check`, commit, push. Existing individual scripts remain callable for focused debugging.
+
+The checker validates required skill sections, activation contract, context packet protocol, lifecycle ledger policy, `agents/openai.yaml`, routing-policy completeness, fallback role mapping, model routing scenarios, routing-ledger expectations, durable ledger trigger rules, context-packet schema/fixture coverage, lifecycle fixture coverage, ledger schema/template coverage, synthetic run-ledger fixtures, behavioral evidence fixtures, tiered validation, ledger reporting, local dashboard assets, agent TOML parity with the routing policy, duplicate stuck-protocol cleanup, sync tooling, runtime compatibility tooling, ledger creator tooling, smoke tooling, and source-of-truth docs. `scripts/create_orchestration_ledger.py` creates private ledgers under `local/orchestration-ledgers/` by default and validates them immediately. `scripts/report_orchestration_ledger.py` turns a ledger into a post-run Markdown or JSON audit, including whether orchestration justified itself. `docs/codex-orchestrate/run-ledger-template.md` remains the manual template for substantial `/orchestrate` runs outside MonskySkills.
 
 ## Local dashboard
 

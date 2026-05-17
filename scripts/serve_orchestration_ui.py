@@ -174,6 +174,10 @@ def runtime_payload() -> dict[str, Any]:
 
 def commands_payload() -> dict[str, Any]:
     return {
+        "check_quick": "python3 scripts/orchestration_check.py --quick",
+        "check_runtime": "python3 scripts/orchestration_check.py --runtime",
+        "check_full": "python3 scripts/orchestration_check.py --full",
+        "check_quick_json": "python3 scripts/orchestration_check.py --quick --json",
         "report_sample": "python3 scripts/report_orchestration_ledger.py evals/codex-orchestrate/sample-ledgers/small-patch.json",
         "report_json": "python3 scripts/report_orchestration_ledger.py --json evals/codex-orchestrate/sample-ledgers/small-patch.json",
         "report_validate": "python3 scripts/report_orchestration_ledger.py --validate local/orchestration-ledgers/<run>.json",
@@ -273,7 +277,7 @@ def self_test() -> None:
     if report.get("status") != "ok" or not report.get("reports"):
         raise UiError("report endpoint failed summary check")
     commands = commands_payload()
-    for key in ["report_sample", "create_ledger", "check_ledger", "runtime"]:
+    for key in ["check_quick", "check_runtime", "check_full", "report_sample", "create_ledger", "check_ledger", "runtime"]:
         if key not in commands:
             raise UiError(f"commands payload missing {key}")
 

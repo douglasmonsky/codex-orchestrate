@@ -34,6 +34,7 @@ SCENARIOS = ROOT / "evals" / "codex-orchestrate" / "scenarios.json"
 ROUTING_POLICY = ROOT / "evals" / "codex-orchestrate" / "routing-policy.json"
 SYNC_SCRIPT = ROOT / "scripts" / "sync_orchestration_skill.py"
 RUNTIME_SCRIPT = ROOT / "scripts" / "check_runtime_compatibility.py"
+ORCHESTRATION_CHECK_SCRIPT = ROOT / "scripts" / "orchestration_check.py"
 LEDGER_CHECK_SCRIPT = ROOT / "scripts" / "check_orchestration_ledger.py"
 BEHAVIOR_SCRIPT = ROOT / "scripts" / "check_orchestration_behavior.py"
 CREATOR_SCRIPT = ROOT / "scripts" / "create_orchestration_ledger.py"
@@ -191,6 +192,8 @@ def check_skill() -> None:
         "redelegate",
         "serve_orchestration_ui.py",
         "read-only dashboard review",
+        "orchestration_check.py",
+        "tiered validation",
     ]:
         require_contains(text, phrase, "SKILL.md")
 
@@ -491,6 +494,10 @@ def check_docs() -> None:
         "gpt-5.3-codex-spark",
         "gpt-5.5",
         "check_runtime_compatibility.py",
+        "orchestration_check.py",
+        "--quick",
+        "--runtime",
+        "--full",
         "check_orchestration_ledger.py",
         "check_orchestration_behavior.py",
         "create_orchestration_ledger.py",
@@ -528,8 +535,6 @@ def check_docs() -> None:
         "timed-out",
         "root takeover",
         "redelegate",
-        "timeout-recovery-smoke",
-        "minimal-packet-smoke",
     ]:
         require(re.search(re.escape(phrase), combined, re.IGNORECASE), f"docs missing: {phrase}")
 
@@ -569,6 +574,37 @@ def check_runtime_script() -> None:
         "return 1",
     ]:
         require_contains(text, phrase, "check_runtime_compatibility.py")
+
+
+def check_orchestration_wrapper() -> None:
+    text = read(ORCHESTRATION_CHECK_SCRIPT)
+    for phrase in [
+        "--quick",
+        "--runtime",
+        "--full",
+        "--json",
+        "--fail-fast",
+        "quick_checks",
+        "runtime_checks",
+        "full_only_checks",
+        "FORBIDDEN_COMMAND_FRAGMENTS",
+        "sync_orchestration_skill.py --apply",
+        "git commit",
+        "git push",
+        "strict secret scan",
+        "read-only",
+    ]:
+        require_contains(text, phrase, "orchestration_check.py")
+
+    completed = subprocess.run(
+        [sys.executable, str(ORCHESTRATION_CHECK_SCRIPT), "--help"],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    require(completed.returncode == 0, "orchestration_check.py --help failed")
+    for phrase in ["--quick", "--runtime", "--full", "--json", "--fail-fast"]:
+        require_contains(completed.stdout, phrase, "orchestration_check.py --help")
 
 
 def check_ledger_artifacts() -> None:
@@ -733,16 +769,6 @@ def check_context_packet_artifacts() -> None:
     }
     files = sorted(SAMPLE_CONTEXT_PACKETS.glob("*.json"))
     require({path.name for path in files} == expected_samples, "sample context-packet roster changed")
-    completed = subprocess.run(
-        [sys.executable, str(CONTEXT_PACKET_CHECK_SCRIPT), *[str(path) for path in files]],
-        check=False,
-        capture_output=True,
-        text=True,
-    )
-    require(
-        completed.returncode == 0,
-        f"sample context-packet validation failed: {completed.stderr.strip() or completed.stdout.strip()}",
-    )
 
 
 def check_ledger_creator() -> None:
@@ -762,20 +788,13 @@ def check_ledger_creator() -> None:
     ]:
         require_contains(text, phrase, "create_orchestration_ledger.py")
 
-    completed = subprocess.run(
-        [sys.executable, str(CREATOR_SCRIPT), "--help"],
-        check=False,
-        capture_output=True,
-        text=True,
-    )
-    require(completed.returncode == 0, "create_orchestration_ledger.py --help failed")
     for phrase in [
         "--output",
         "--scenario-id",
         "--task-summary",
         "--allow-tracked-output",
     ]:
-        require_contains(completed.stdout, phrase, "create_orchestration_ledger.py --help")
+        require_contains(text, phrase, "create_orchestration_ledger.py")
 
 
 def check_ledger_validator_and_samples() -> None:
@@ -808,26 +827,6 @@ def check_ledger_validator_and_samples() -> None:
     }
     files = sorted(SAMPLE_LEDGERS.glob("*.json"))
     require({path.name for path in files} == expected_samples, "sample ledger roster changed")
-    completed = subprocess.run(
-        [sys.executable, str(LEDGER_CHECK_SCRIPT), *[str(path) for path in files]],
-        check=False,
-        capture_output=True,
-        text=True,
-    )
-    require(
-        completed.returncode == 0,
-        f"sample ledger validation failed: {completed.stderr.strip() or completed.stdout.strip()}",
-    )
-    completed = subprocess.run(
-        [sys.executable, str(LEDGER_CHECK_SCRIPT), "--strict", str(SAMPLE_LEDGERS / "small-patch.json")],
-        check=False,
-        capture_output=True,
-        text=True,
-    )
-    require(
-        completed.returncode == 0,
-        f"strict small-patch ledger validation failed: {completed.stderr.strip() or completed.stdout.strip()}",
-    )
 
 
 def check_ledger_reporter() -> None:
@@ -850,45 +849,7 @@ def check_ledger_reporter() -> None:
     ]:
         require_contains(text, phrase, "report_orchestration_ledger.py")
 
-    sample = SAMPLE_LEDGERS / "small-patch.json"
-    markdown = subprocess.run(
-        [sys.executable, str(REPORT_SCRIPT), str(sample)],
-        check=False,
-        capture_output=True,
-        text=True,
-    )
-    require(
-        markdown.returncode == 0,
-        f"ledger report markdown failed: {markdown.stderr.strip() or markdown.stdout.strip()}",
-    )
-    for phrase in ["Did Orchestration Justify Itself?", "Answer: no", "Tier history"]:
-        require_contains(markdown.stdout, phrase, "report_orchestration_ledger.py markdown output")
-
-    machine = subprocess.run(
-        [sys.executable, str(REPORT_SCRIPT), "--json", str(sample)],
-        check=False,
-        capture_output=True,
-        text=True,
-    )
-    require(
-        machine.returncode == 0,
-        f"ledger report json failed: {machine.stderr.strip() or machine.stdout.strip()}",
-    )
-    payload = json.loads(machine.stdout)
-    require(payload.get("status") == "ok", "ledger report json status should be ok")
-    require(payload["reports"][0]["orchestration_value"]["answer"] == "no", "small-patch report should classify orchestration value as no")
-
-    files = sorted(SAMPLE_LEDGERS.glob("*.json"))
-    validated = subprocess.run(
-        [sys.executable, str(REPORT_SCRIPT), "--validate", *[str(path) for path in files]],
-        check=False,
-        capture_output=True,
-        text=True,
-    )
-    require(
-        validated.returncode == 0,
-        f"ledger report --validate failed: {validated.stderr.strip() or validated.stdout.strip()}",
-    )
+    require((SAMPLE_LEDGERS / "small-patch.json").exists(), "small-patch report sample is missing")
 
 
 def check_orchestration_ui() -> None:
@@ -913,6 +874,10 @@ def check_orchestration_ui() -> None:
         "/api/report",
         "/api/runtime",
         "/api/commands",
+        "orchestration_check.py",
+        "check_quick",
+        "check_runtime",
+        "check_full",
         "report_orchestration_ledger.py",
         "check_runtime_compatibility.py",
     ]:
@@ -954,16 +919,6 @@ def check_orchestration_ui() -> None:
     ]:
         require_contains(css, phrase, "ui/orchestration-dashboard/styles.css")
 
-    completed = subprocess.run(
-        [sys.executable, str(UI_SERVER_SCRIPT), "--self-test"],
-        check=False,
-        capture_output=True,
-        text=True,
-    )
-    require(
-        completed.returncode == 0,
-        f"orchestration UI self-test failed: {completed.stderr.strip() or completed.stdout.strip()}",
-    )
 
 
 def check_lifecycle_script() -> None:
@@ -980,17 +935,6 @@ def check_lifecycle_script() -> None:
     ]:
         require_contains(text, phrase, "check_orchestration_lifecycle.py")
 
-    files = sorted(SAMPLE_LEDGERS.glob("*.json"))
-    completed = subprocess.run(
-        [sys.executable, str(LIFECYCLE_SCRIPT), *[str(path) for path in files]],
-        check=False,
-        capture_output=True,
-        text=True,
-    )
-    require(
-        completed.returncode == 0,
-        f"sample lifecycle validation failed: {completed.stderr.strip() or completed.stdout.strip()}",
-    )
 
 
 def check_behavior_script() -> None:
@@ -1009,17 +953,6 @@ def check_behavior_script() -> None:
     ]:
         require_contains(text, phrase, "check_orchestration_behavior.py")
 
-    files = sorted(SAMPLE_LEDGERS.glob("*.json"))
-    completed = subprocess.run(
-        [sys.executable, str(BEHAVIOR_SCRIPT), *[str(path) for path in files]],
-        check=False,
-        capture_output=True,
-        text=True,
-    )
-    require(
-        completed.returncode == 0,
-        f"sample behavior validation failed: {completed.stderr.strip() or completed.stdout.strip()}",
-    )
 
 
 def check_smoke_script() -> None:
@@ -1051,6 +984,7 @@ def main() -> int:
         check_config_example,
         check_sync_script,
         check_runtime_script,
+        check_orchestration_wrapper,
         check_ledger_artifacts,
         check_context_packet_artifacts,
         check_ledger_creator,

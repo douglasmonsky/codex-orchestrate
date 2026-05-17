@@ -31,30 +31,15 @@ cd MonskySkills
 
 ## Verification Commands
 
-There is no build system yet. For skill changes, run focused structural checks:
+There is no build system yet. For orchestration skill changes, start with the tiered validation wrapper:
 
 ```bash
-python3 scripts/create_orchestration_ledger.py --help
-python3 scripts/check_orchestration_skill.py
-python3 scripts/check_runtime_compatibility.py
-python3 scripts/check_orchestration_context_packets.py evals/codex-orchestrate/sample-context-packets/*.json
-python3 scripts/check_orchestration_lifecycle.py evals/codex-orchestrate/sample-ledgers/*.json
-python3 scripts/check_orchestration_ledger.py evals/codex-orchestrate/sample-ledgers/*.json
-python3 scripts/check_orchestration_behavior.py evals/codex-orchestrate/sample-ledgers/*.json
-python3 scripts/report_orchestration_ledger.py evals/codex-orchestrate/sample-ledgers/small-patch.json
-python3 scripts/report_orchestration_ledger.py --json evals/codex-orchestrate/sample-ledgers/small-patch.json
-python3 scripts/serve_orchestration_ui.py --self-test
-python3 scripts/run_orchestration_smoke.py
-python3 scripts/run_orchestration_smoke.py --scenario-id lifecycle-smoke --json
-python3 scripts/run_orchestration_smoke.py --scenario-id context-packet-smoke --json
-python3 scripts/run_orchestration_smoke.py --scenario-id minimal-packet-smoke --json
-python3 scripts/run_orchestration_smoke.py --scenario-id timeout-recovery-smoke --json
-python3 scripts/run_orchestration_smoke.py --scenario-id high-risk-security-change --json
-python3 scripts/sync_orchestration_skill.py --check
-find .agents/skills -name SKILL.md -print
-find .codex/agents -name '*.toml' -print
-git diff --check
+python3 scripts/orchestration_check.py --quick
+python3 scripts/orchestration_check.py --runtime
+python3 scripts/orchestration_check.py --full
 ```
+
+Use `--quick` for normal source edits, `--runtime` for installed-skill/prompt-surface checks, and `--full` before committing broader harness changes. Add `--json` for automation or `--fail-fast` for triage. The wrapper is read-only and never syncs with `--apply`, commits, pushes, formats, or writes smoke artifacts.
 
 When TOML agent profiles change, inspect them for valid names, explicit model routing, reasoning effort, and clear instructions.
 
@@ -88,7 +73,10 @@ When a request starts with `/orchestrate`, use `codex-orchestrate`. Prompt assem
 - Skill instructions are clear enough to use after restarting Codex.
 - Companion agent profiles or docs are committed with the skill when required.
 - README or docs are updated when install behavior changes.
-- `python3 scripts/check_orchestration_skill.py` passes when `codex-orchestrate` changes.
+- `python3 scripts/orchestration_check.py --quick` passes when `codex-orchestrate` changes.
+- `python3 scripts/orchestration_check.py --runtime` passes after prompt-surface or installed-runtime changes.
+- `python3 scripts/orchestration_check.py --full` passes before committing substantial harness changes.
+- `python3 scripts/check_orchestration_skill.py` passes as the strict structural/source checker.
 - `python3 scripts/sync_orchestration_skill.py --check` passes after syncing global installs.
 - `python3 scripts/check_runtime_compatibility.py` runs and any runtime model warnings are understood.
 - `python3 scripts/check_orchestration_context_packets.py evals/codex-orchestrate/sample-context-packets/*.json` passes for committed synthetic packet fixtures.
