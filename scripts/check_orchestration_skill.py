@@ -22,6 +22,7 @@ SCENARIOS = ROOT / "evals" / "codex-orchestrate" / "scenarios.json"
 SYNC_SCRIPT = ROOT / "scripts" / "sync_orchestration_skill.py"
 RUNTIME_SCRIPT = ROOT / "scripts" / "check_runtime_compatibility.py"
 LEDGER_CHECK_SCRIPT = ROOT / "scripts" / "check_orchestration_ledger.py"
+BEHAVIOR_SCRIPT = ROOT / "scripts" / "check_orchestration_behavior.py"
 SMOKE_SCRIPT = ROOT / "scripts" / "run_orchestration_smoke.py"
 README = ROOT / "README.md"
 PACKAGE_README = ROOT / "docs" / "codex-orchestrate" / "package-readme.md"
@@ -39,6 +40,7 @@ REQUIRED_SKILL_SECTIONS = [
     "## Model Routing",
     "## Controller Loop",
     "## Routing Ledger",
+    "## When To Produce A Ledger",
     "## Delegation Defaults",
     "## Dispatch Brief",
     "## Subagent Contract",
@@ -190,6 +192,10 @@ def check_skill() -> None:
         "Tier 0 is rare",
         "immediately leave Tier 0",
         "routing ledger",
+        "durable post-run ledger",
+        "more than two subagents",
+        "failed validation",
+        "final-review blocker",
         "Final Senior Review",
         "gpt-5.3-codex-spark",
         "gpt-5.4-mini",
@@ -225,8 +231,11 @@ def check_references() -> None:
         require_contains(routing, phrase, "effort-model-routing.md")
 
     handoffs = read(REFERENCES / "handoff-contracts.md")
-    for phrase in ["Routing ledger template", "Runtime agent type", "Model selected", "Why this model is sufficient", "Stuck-state summary template"]:
+    for phrase in ["Routing ledger template", "When to produce a durable ledger", "Runtime agent type", "Model selected", "Why this model is sufficient", "Stuck-state summary template"]:
         require_contains(handoffs, phrase, "handoff-contracts.md")
+
+    for phrase in ["source-of-truth policy", "operational availability", "does not loosen source validation"]:
+        require_contains(routing, phrase, "effort-model-routing.md")
 
 
 def check_no_stale_effort_policy() -> None:
@@ -340,10 +349,15 @@ def check_docs() -> None:
         "gpt-5.5",
         "check_runtime_compatibility.py",
         "check_orchestration_ledger.py",
+        "check_orchestration_behavior.py",
         "run_orchestration_smoke.py",
         "run-ledger-template.md",
         "config.orchestration.example.toml",
         "sample-ledgers",
+        "strict model pins",
+        "source-of-truth policy",
+        "runtime fallback",
+        "behavioral evidence",
     ]:
         require(re.search(re.escape(phrase), combined, re.IGNORECASE), f"docs missing: {phrase}")
 
@@ -391,6 +405,7 @@ def check_ledger_artifacts() -> None:
     required = set(schema.get("required", []))
     for field in [
         "schema_version",
+        "scenario_id",
         "task_summary",
         "repo_state",
         "started_at",
@@ -424,8 +439,15 @@ def check_ledger_artifacts() -> None:
     template = read(LEDGER_TEMPLATE)
     for phrase in [
         "Keep real ledgers local or sanitized",
+        "Produce a durable post-run ledger",
+        "Tier 3 or Tier 4",
+        "model fallback",
+        "more than two subagents",
+        "failed validation",
+        "final-review blocker",
         "schemas/orchestration-ledger.schema.json",
         "schema_version",
+        "scenario_id",
         "task_summary",
         "repo_state",
         "root",
@@ -454,6 +476,7 @@ def check_ledger_validator_and_samples() -> None:
 
     expected_samples = {
         "small-patch.json",
+        "tier0-upgrade.json",
         "high-risk-security-fallback.json",
         "validation-failure.json",
         "over-fanout-risk-controller.json",
@@ -479,6 +502,32 @@ def check_ledger_validator_and_samples() -> None:
     require(
         completed.returncode == 0,
         f"strict small-patch ledger validation failed: {completed.stderr.strip() or completed.stdout.strip()}",
+    )
+
+
+def check_behavior_script() -> None:
+    text = read(BEHAVIOR_SCRIPT)
+    for phrase in [
+        "scenario_id",
+        "scenarios.json",
+        "routing_entries",
+        "runtime fallback",
+        "model fallback",
+        "final_review",
+        "recorded behavior",
+    ]:
+        require_contains(text, phrase, "check_orchestration_behavior.py")
+
+    files = sorted(SAMPLE_LEDGERS.glob("*.json"))
+    completed = subprocess.run(
+        [sys.executable, str(BEHAVIOR_SCRIPT), *[str(path) for path in files]],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    require(
+        completed.returncode == 0,
+        f"sample behavior validation failed: {completed.stderr.strip() or completed.stdout.strip()}",
     )
 
 
@@ -513,6 +562,7 @@ def main() -> int:
         check_runtime_script,
         check_ledger_artifacts,
         check_ledger_validator_and_samples,
+        check_behavior_script,
         check_smoke_script,
     ]
     try:

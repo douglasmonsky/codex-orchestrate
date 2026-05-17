@@ -1,5 +1,6 @@
 {
   "schema_version": "1.0",
+  "scenario_id": "over-fanout-risk-controller",
   "task_summary": "Synthetic broad request where fanout is paused and risk control narrows scope.",
   "repo_state": {
     "path": "synthetic-monorepo",

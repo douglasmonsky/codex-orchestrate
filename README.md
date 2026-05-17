@@ -27,6 +27,8 @@ AGENTS.md             Project-specific Codex instructions
 
 - `codex-orchestrate`: delegate-first Codex orchestration skill for routing repository work through subagents, selecting explicit models/effort, escalating stuck work, and requiring final root review.
 
+MonskySkills is currently optimized around this personal Codex orchestration layer. Add more skills when a workflow repeats enough to justify its own reusable skill package.
+
 ## Source of truth
 
 This repository is the source of truth for skills we create. For `codex-orchestrate`, the authoritative copy is:
@@ -91,6 +93,8 @@ gpt-5.5              high-risk or high-ambiguity architecture, review, security,
 
 Smaller models can preserve local-message usage limits, but subagent fanout still consumes usage. Stronger models are intentionally pinned for quality-sensitive roles.
 
+Strict model pins in `.codex/agents/*.toml` are the source-of-truth policy. `scripts/check_runtime_compatibility.py` reports operational availability and warnings; runtime fallback must be recorded in the routing ledger, but it does not loosen source validation.
+
 ## Validation
 
 Run the skill-pack checker before committing orchestration changes:
@@ -99,14 +103,15 @@ Run the skill-pack checker before committing orchestration changes:
 python3 scripts/check_orchestration_skill.py
 python3 scripts/check_runtime_compatibility.py
 python3 scripts/check_orchestration_ledger.py evals/codex-orchestrate/sample-ledgers/*.json
+python3 scripts/check_orchestration_behavior.py evals/codex-orchestrate/sample-ledgers/*.json
 python3 scripts/run_orchestration_smoke.py
 python3 scripts/sync_orchestration_skill.py --check
 codex debug prompt-input '/orchestrate model routing smoke test'
 ```
 
-Recommended post-edit loop: static checker, runtime compatibility check, sample ledger validation, prompt smoke harness, sync check/apply, `codex debug prompt-input`, commit, push.
+Recommended post-edit loop: static checker, runtime compatibility check, sample ledger validation, behavioral evidence check, prompt smoke harness, sync check/apply, `codex debug prompt-input`, commit, push.
 
-The checker validates required skill sections, fallback role mapping, model routing scenarios, routing-ledger expectations, ledger schema/template coverage, synthetic run-ledger fixtures, agent TOML model pins, duplicate stuck-protocol cleanup, sync tooling, runtime compatibility tooling, smoke tooling, and source-of-truth docs. `docs/codex-orchestrate/run-ledger-template.md` provides a sanitized post-run ledger template for substantial `/orchestrate` runs.
+The checker validates required skill sections, fallback role mapping, model routing scenarios, routing-ledger expectations, durable ledger trigger rules, ledger schema/template coverage, synthetic run-ledger fixtures, behavioral evidence fixtures, agent TOML model pins, duplicate stuck-protocol cleanup, sync tooling, runtime compatibility tooling, smoke tooling, and source-of-truth docs. `docs/codex-orchestrate/run-ledger-template.md` provides a sanitized post-run ledger template for substantial `/orchestrate` runs.
 
 ## Privacy
 

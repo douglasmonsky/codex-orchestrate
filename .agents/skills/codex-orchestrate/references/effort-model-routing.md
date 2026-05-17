@@ -146,7 +146,9 @@ gpt-5.3-codex-spark -> gpt-5.4-mini -> gpt-5.4 -> gpt-5.5
 - `gpt-5.4`: default normal-work model; use for ordinary implementation, planning, deep discovery, test triage, and risk control.
 - `gpt-5.5`: strongest demanding-work model; use for architecture, review, security, migration, performance, ambiguous debugging, and complex or high-risk implementation.
 
-If the pinned model is unavailable, choose the nearest available model that preserves safety. Record both intended and actual model in the routing ledger.
+Strict model pins in `.codex/agents/*.toml` are source-of-truth policy. `scripts/check_runtime_compatibility.py` reports operational availability and warnings; it does not loosen source validation.
+
+If the pinned model is unavailable, choose the nearest available model that preserves safety. Record both intended and actual model in the routing ledger and durable post-run ledger when the fallback trigger applies.
 
 ## Model classes
 

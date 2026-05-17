@@ -1,0 +1,83 @@
+{
+  "schema_version": "1.0",
+  "scenario_id": "tier0-upgrades-to-delegation",
+  "task_summary": "Synthetic Tier 0 question that becomes repo inspection and docs update.",
+  "repo_state": {
+    "path": "synthetic-docs-repo",
+    "branch": "main",
+    "starting_status": "clean",
+    "ending_status": "README updated",
+    "commit": "0000000"
+  },
+  "started_at": "2026-05-17T09:00:00Z",
+  "finished_at": "2026-05-17T09:14:00Z",
+  "root": {
+    "model": "gpt-5.5",
+    "reasoning_effort": "medium"
+  },
+  "routing_entries": [
+    {
+      "step": "Leave Tier 0 when the request turns into repo inspection.",
+      "tier": "Tier 2",
+      "agent_role": "repo_scout",
+      "runtime_type": "custom",
+      "intended_model": "gpt-5.3-codex-spark",
+      "actual_model": "gpt-5.3-codex-spark",
+      "reasoning_effort": "low",
+      "fallback_notes": "No fallback used.",
+      "why_model_is_sufficient": "The scout only maps repo purpose and README evidence.",
+      "evidence": [
+        "Repo purpose identified from synthetic source files.",
+        "README stale section located."
+      ],
+      "open_risks": [],
+      "next_decision": "Delegate README update to docs_writer.",
+      "final_review_gate": "Root checks README claims against scout evidence."
+    },
+    {
+      "step": "Update stale README claims using repo evidence.",
+      "tier": "Tier 2",
+      "agent_role": "docs_writer",
+      "runtime_type": "custom",
+      "intended_model": "gpt-5.4-mini",
+      "actual_model": "gpt-5.4-mini",
+      "reasoning_effort": "low",
+      "fallback_notes": "No fallback used.",
+      "why_model_is_sufficient": "The edit is bounded documentation work based on cited repo evidence.",
+      "evidence": [
+        "README updated to match synthetic repo purpose.",
+        "No code behavior changed."
+      ],
+      "open_risks": [],
+      "next_decision": "Return diff and evidence to root final review.",
+      "final_review_gate": "Root verifies doc claims before final response."
+    }
+  ],
+  "escalations": [],
+  "validation": [
+    {
+      "command": "not run - documentation-only synthetic fixture",
+      "result": "skipped",
+      "evidence": "No executable behavior changed; root reviewed README claims against synthetic evidence."
+    }
+  ],
+  "final_review": {
+    "status": "passed",
+    "reviewer": "root",
+    "evidence": [
+      "Tier 0 was exited once repo work appeared.",
+      "README claims matched scout evidence."
+    ],
+    "blockers": []
+  },
+  "residual_risks": [],
+  "usage_estimate": {
+    "subagent_count": 2,
+    "models_used": [
+      "gpt-5.3-codex-spark",
+      "gpt-5.4-mini",
+      "gpt-5.5"
+    ],
+    "notes": "Synthetic usage estimate only."
+  }
+}

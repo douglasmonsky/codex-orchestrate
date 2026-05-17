@@ -1,12 +1,15 @@
 # Codex Orchestration Run Ledger Template
 
-Use this template for substantial `/orchestrate` runs when a durable routing record is useful. Keep real ledgers local or sanitized by default; do not commit private task details, secrets, credentials, or user data.
+Use this template for substantial `/orchestrate` runs when a durable routing record is required. Keep real ledgers local or sanitized by default; do not commit private task details, secrets, credentials, or user data.
+
+Produce a durable post-run ledger for any Tier 3 or Tier 4 run, any model fallback, any security/privacy/migration/auth task, any run with more than two subagents, any failed validation, or any final-review blocker. Tier 1 and Tier 2 ledgers are optional unless one of those triggers appears.
 
 Schema: `schemas/orchestration-ledger.schema.json`
 
 ```json
 {
   "schema_version": "1.0",
+  "scenario_id": "",
   "task_summary": "",
   "repo_state": {
     "path": "",
@@ -72,6 +75,7 @@ Minimum final summary fields:
 
 ```text
 Task summary:
+Scenario ID:
 Tier history:
 Agent roles:
 Runtime type:

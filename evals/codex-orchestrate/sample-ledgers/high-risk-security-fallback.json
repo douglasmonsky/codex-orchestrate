@@ -1,5 +1,6 @@
 {
   "schema_version": "1.0",
+  "scenario_id": "high-risk-model-fallback",
   "task_summary": "Synthetic auth-sensitive change where the intended strong model was unavailable.",
   "repo_state": {
     "path": "synthetic-api",

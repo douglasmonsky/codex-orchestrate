@@ -3,6 +3,7 @@
 ## Table Of Contents
 
 - Routing ledger template
+- When to produce a durable ledger
 - Default subagent assignment template
 - Stuck-state summary template
 - Mechanic handoff
@@ -35,6 +36,12 @@ Next routing decision:
 Escalation status:
 Final-review gate:
 ```
+
+## When to produce a durable ledger
+
+Produce a durable post-run ledger for any Tier 3 or Tier 4 run, any model fallback, any security/privacy/migration/auth task, any run with more than two subagents, any failed validation, or any final-review blocker. Tier 1 and Tier 2 ledgers are optional unless one of those triggers appears.
+
+Use `docs/codex-orchestrate/run-ledger-template.md` for the durable version. Keep private ledgers local or sanitized before committing.
 
 ## Default subagent assignment template
 

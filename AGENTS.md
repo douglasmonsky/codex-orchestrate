@@ -34,6 +34,7 @@ There is no build system yet. For skill changes, run focused structural checks:
 python3 scripts/check_orchestration_skill.py
 python3 scripts/check_runtime_compatibility.py
 python3 scripts/check_orchestration_ledger.py evals/codex-orchestrate/sample-ledgers/*.json
+python3 scripts/check_orchestration_behavior.py evals/codex-orchestrate/sample-ledgers/*.json
 python3 scripts/run_orchestration_smoke.py
 python3 scripts/sync_orchestration_skill.py --check
 find .agents/skills -name SKILL.md -print
@@ -77,6 +78,7 @@ When a request starts with `/orchestrate`, use `codex-orchestrate`. Prompt assem
 - `python3 scripts/sync_orchestration_skill.py --check` passes after syncing global installs.
 - `python3 scripts/check_runtime_compatibility.py` runs and any runtime model warnings are understood.
 - `python3 scripts/check_orchestration_ledger.py evals/codex-orchestrate/sample-ledgers/*.json` passes for committed synthetic ledgers.
+- `python3 scripts/check_orchestration_behavior.py evals/codex-orchestrate/sample-ledgers/*.json` passes for scenario-to-ledger behavioral evidence.
 - `python3 scripts/run_orchestration_smoke.py` confirms `/orchestrate` prompt assembly exposes the core policy surface.
 - Model pins in `.codex/agents/*.toml` still match the documented `codex-orchestrate` model ladder.
 - Ledger schema and template docs stay aligned when routing-ledger behavior changes.

@@ -83,6 +83,12 @@ Final-review gate:
 
 The ledger is not a substitute for delegation. It is the root's control surface for remembering what has been delegated, what evidence exists, and why the next route is justified.
 
+## When To Produce A Ledger
+
+Produce a durable post-run ledger for any Tier 3 or Tier 4 run, any model fallback, any security/privacy/migration/auth task, any run with more than two subagents, any failed validation, or any final-review blocker. Tier 1 and Tier 2 ledgers are optional unless one of those triggers appears.
+
+Use `docs/codex-orchestrate/run-ledger-template.md` when a durable ledger is required. Keep private ledgers local or sanitized before committing.
+
 ## Delegation Defaults
 
 Delegate substantive repository/tool/research/design work unless one of these applies:

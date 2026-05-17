@@ -47,6 +47,7 @@ The model policy follows the current OpenAI Codex docs for subagent model pins, 
 docs/codex-orchestrate/run-ledger-template.md
 schemas/orchestration-ledger.schema.json
 scripts/check_orchestration_ledger.py
+scripts/check_orchestration_behavior.py
 scripts/run_orchestration_smoke.py
 evals/codex-orchestrate/sample-ledgers/*.json
 AGENTS.orchestration.snippet.md
@@ -104,9 +105,9 @@ The config example is merge-only. Do not overwrite an existing Codex config; kee
 
 Copy useful parts of `AGENTS.orchestration.snippet.md` into the repo's `AGENTS.md`.
 
-Model names in `.codex/agents/*.toml` are pinned intentionally. If a runtime lacks a pinned model, use the nearest safe available model and record the intended/actual model in the routing ledger.
+Model names in `.codex/agents/*.toml` are pinned intentionally. Strict model pins are the source-of-truth policy. `scripts/check_runtime_compatibility.py` reports operational availability and warnings; runtime fallback must be recorded in the routing ledger, but it does not loosen source validation.
 
-For substantial orchestrated runs, use `docs/codex-orchestrate/run-ledger-template.md` and `schemas/orchestration-ledger.schema.json` to record actual model/effort usage, fallbacks, validation, final review, and residual risk. Keep real ledgers local or sanitized unless they contain no private task data.
+Produce a durable post-run ledger for any Tier 3 or Tier 4 run, any model fallback, any security/privacy/migration/auth task, any run with more than two subagents, any failed validation, or any final-review blocker. Tier 1 and Tier 2 ledgers are optional unless one of those triggers appears. Use `docs/codex-orchestrate/run-ledger-template.md` and `schemas/orchestration-ledger.schema.json` to record actual model/effort usage, fallbacks, validation, final review, and residual risk. Keep real ledgers local or sanitized unless they contain no private task data.
 
 Run the lightweight checker and sync check after changes:
 
@@ -114,14 +115,15 @@ Run the lightweight checker and sync check after changes:
 python3 scripts/check_orchestration_skill.py
 python3 scripts/check_runtime_compatibility.py
 python3 scripts/check_orchestration_ledger.py evals/codex-orchestrate/sample-ledgers/*.json
+python3 scripts/check_orchestration_behavior.py evals/codex-orchestrate/sample-ledgers/*.json
 python3 scripts/run_orchestration_smoke.py
 python3 scripts/sync_orchestration_skill.py --check
 codex debug prompt-input '/orchestrate model routing smoke test'
 ```
 
-Recommended post-edit loop: static checker, runtime compatibility check, sample ledger validation, prompt smoke harness, sync check/apply, `codex debug prompt-input`, commit, push.
+Recommended post-edit loop: static checker, runtime compatibility check, sample ledger validation, behavioral evidence check, prompt smoke harness, sync check/apply, `codex debug prompt-input`, commit, push.
 
-Use `scripts/check_orchestration_ledger.py` on private local ledgers before trusting a substantial run summary. Use `scripts/run_orchestration_smoke.py` after instruction changes to confirm `/orchestrate` prompt assembly still exposes source-of-truth, runtime fallback, routing-ledger, model-routing, and final-review language.
+Use `scripts/check_orchestration_ledger.py` on private local ledgers before trusting a substantial run summary. Use `scripts/check_orchestration_behavior.py` to compare sanitized ledgers against scenario expectations; this validates recorded behavior, not future live model behavior. Use `scripts/run_orchestration_smoke.py` after instruction changes to confirm `/orchestrate` prompt assembly still exposes source-of-truth, runtime fallback, routing-ledger, model-routing, and final-review language.
 
 ## Invocation examples
 

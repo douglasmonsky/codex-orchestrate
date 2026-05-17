@@ -1,5 +1,6 @@
 {
   "schema_version": "1.0",
+  "scenario_id": "validation-failure-triage",
   "task_summary": "Synthetic patch where validation fails and final review blocks completion.",
   "repo_state": {
     "path": "synthetic-service",
