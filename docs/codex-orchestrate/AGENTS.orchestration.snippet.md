@@ -1,0 +1,78 @@
+# AGENTS.md snippet: Delegate-first orchestration defaults
+
+Use this snippet in a repo-level `AGENTS.md` or focused subdirectory `AGENTS.md`.
+
+## Subagent and orchestration policy
+
+For repository work, prefer `$codex-orchestrate`. The root thread should act as dispatcher, escalation controller, synthesizer, and final decision owner, not as the default worker.
+
+Delegate substantive work by default. For any task involving code, files, commands, logs, tests, implementation, review, design, migration, security, performance, documentation, or research, spawn at least one appropriately scoped subagent unless the user forbids subagents or the task is pure conversational Q&A.
+
+Use the cheapest safe agent first:
+
+- `mechanic`, `repo_scout`, `test_runner`, and `docs_writer` on `low` or `minimal` effort for mechanical work, search, known validation, simple docs, and log compression.
+- `implementer_simple` on low/medium effort for small patches.
+- `repo_scout_deep`, `implementer`, `planner`, `test_triage`, and `risk_controller` on medium effort for deeper mapping, ordinary multi-file work, failure interpretation, and cost/risk checks.
+- `architect`, `reviewer`, `security_auditor`, `debugger`, `migration_analyst`, `performance_investigator`, and `implementer_strong` on high effort only when ambiguity, risk, or cost of error justifies it.
+
+## Stuck-work escalation
+
+When a subagent is stuck, escalate effort/model level on the same narrow unresolved task before switching specialties.
+
+Treat a subagent as stuck when it cannot locate relevant files/commands, reports low confidence, produces an unvalidated patch, reproduces but cannot explain a failure, returns conflicting hypotheses, or asks for root judgment without enough evidence.
+
+Default ladders:
+
+```text
+repo_scout -> repo_scout_deep -> planner -> architect
+mechanic -> implementer_simple -> implementer -> implementer_strong
+test_runner -> test_triage -> debugger
+implementer_simple -> implementer -> implementer_strong or debugger, depending on blocker
+```
+
+Pass off to a different role only when the evidence shows role mismatch:
+
+- Design/API ambiguity: `architect`.
+- Unexplained test failure: `test_triage` or `debugger`.
+- Security/privacy/auth issue: `security_auditor`.
+- Migration ordering: `migration_analyst`.
+- Performance bottleneck: `performance_investigator`.
+- Patch correctness risk: `reviewer`.
+- Scope/cost drift: `risk_controller`.
+
+## Root context discipline
+
+Keep the root context clean:
+
+- Do not paste large logs into the root thread.
+- Ask subagents for compact evidence and exact file references.
+- Have validators summarize command output.
+- Escalate only the narrow hard part, not the entire task.
+- Preserve subagent uncertainty; do not turn low confidence into false consensus.
+
+## Code-change requirements
+
+For code changes:
+
+- Prefer one writer at a time unless patch scopes are disjoint.
+- Run the smallest relevant test/check first through `test_runner`.
+- Use `test_triage` or `debugger` when failures need interpretation.
+- Add or update tests when behavior changes.
+- Require independent review/audit for high-risk changes.
+- Report exact commands run and whether failures appear introduced or pre-existing.
+
+## Mandatory final root review
+
+The root must finish with a senior-level review of subagent work. This is required even if a `reviewer` subagent ran.
+
+Before finalizing, the root should check:
+
+- The result satisfies the user's actual request.
+- The scope is correct and no subagent broadened it unnecessarily.
+- Escalation happened when work got stuck, or the decision not to escalate is justified.
+- The final patch follows repository conventions.
+- Validation is proportionate to the change.
+- Security, data, migration, API, concurrency, and performance risks were considered when relevant.
+- Residual uncertainty is stated plainly.
+
+If final review finds a blocking issue, send the narrow issue back to the appropriate subagent at higher effort, pass to a specialist if role mismatch is clear, or make a bounded direct correction if cheaper and safe.
