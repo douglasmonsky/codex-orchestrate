@@ -1,0 +1,135 @@
+{
+  "schema_version": "1.0",
+  "scenario_id": "small-patch-with-validation",
+  "task_summary": "Synthetic small patch where a subagent requests one additional handle and completes.",
+  "repo_state": {
+    "path": "synthetic-package",
+    "branch": "main",
+    "starting_status": "clean",
+    "ending_status": "one bounded patch",
+    "commit": "0000000"
+  },
+  "started_at": "2026-05-17T14:00:00Z",
+  "finished_at": "2026-05-17T14:12:00Z",
+  "root": {
+    "model": "gpt-5.5",
+    "reasoning_effort": "medium"
+  },
+  "routing_entries": [
+    {
+      "packet_id": "packet-context-granted-001",
+      "step": "Retry the narrow implementation after granting one missing file handle.",
+      "tier": "Tier 2",
+      "agent_role": "implementer_simple",
+      "runtime_type": "custom",
+      "intended_model": "gpt-5.3-codex-spark",
+      "actual_model": "gpt-5.3-codex-spark",
+      "reasoning_effort": "medium",
+      "fallback_notes": "No fallback used.",
+      "why_model_is_sufficient": "The missing context was a single package entrypoint handle, and the fix remained narrow.",
+      "evidence": [
+        "Subagent requested file:src/package/__init__.py:1.",
+        "Root granted only the requested handle.",
+        "Subagent completed the bounded patch after receiving the handle."
+      ],
+      "open_risks": [],
+      "next_decision": "Return patch and lifecycle evidence to root final review.",
+      "final_review_gate": "Root verifies context expansion stayed narrow."
+    }
+  ],
+  "context_packets": [
+    {
+      "packet_id": "packet-context-granted-001",
+      "role": "implementer_simple",
+      "runtime_type": "custom",
+      "tier": "Tier 2",
+      "objective": "Complete the same narrow package fix without broadening scope.",
+      "scope": [
+        "file:src/package/config.py:10",
+        "ledger:stuck-summary-001"
+      ],
+      "non_goals": [
+        "Do not inspect unrelated package modules."
+      ],
+      "evidence_handles": [
+        "ledger:stuck-summary-001",
+        "file:src/package/config.py:10"
+      ],
+      "allowed_tools_paths": [
+        "src/package/config.py",
+        "src/package/__init__.py"
+      ],
+      "model": "gpt-5.3-codex-spark",
+      "reasoning_effort": "medium",
+      "writable": true,
+      "entry_condition": "Start when the stuck summary and suspected config handle are available.",
+      "exit_condition": "Return done, stuck, or a precise Context request.",
+      "output_budget_words": 330,
+      "context_request_rule": "Use Context request with reason, requested_handle, and decision_impact before asking for broader context.",
+      "expected_return": [
+        "Patch summary",
+        "Files changed",
+        "Context request",
+        "Validation result"
+      ]
+    }
+  ],
+  "subagent_lifecycle": [
+    {
+      "packet_id": "packet-context-granted-001",
+      "role": "implementer_simple",
+      "event": "started",
+      "timestamp": "2026-05-17T14:02:00Z",
+      "evidence": "Packet accepted; entry condition was clear."
+    },
+    {
+      "packet_id": "packet-context-granted-001",
+      "role": "implementer_simple",
+      "event": "context-requested",
+      "exit_status": "context-requested",
+      "timestamp": "2026-05-17T14:04:00Z",
+      "evidence": "Subagent requested exactly one package entrypoint handle.",
+      "root_decision": "Granted file:src/package/__init__.py:1 and did not broaden scope.",
+      "context_request": {
+        "reason": "The stuck summary references exported package behavior.",
+        "requested_handle": "file:src/package/__init__.py:1",
+        "decision_impact": "Determines whether the same implementer_simple can finish or must escalate to implementer."
+      }
+    },
+    {
+      "packet_id": "packet-context-granted-001",
+      "role": "implementer_simple",
+      "event": "completed",
+      "exit_status": "done",
+      "timestamp": "2026-05-17T14:10:00Z",
+      "evidence": "Subagent completed after receiving only the requested handle."
+    }
+  ],
+  "escalations": [],
+  "validation": [
+    {
+      "command": "python3 -m pytest tests/test_package_config.py",
+      "result": "passed",
+      "evidence": "Synthetic package config test passed."
+    }
+  ],
+  "final_review": {
+    "status": "passed",
+    "reviewer": "root",
+    "evidence": [
+      "Context request was tied to packet-context-granted-001.",
+      "Packet lifecycle had terminal exit after narrow context grant.",
+      "Focused validation passed."
+    ],
+    "blockers": []
+  },
+  "residual_risks": [],
+  "usage_estimate": {
+    "subagent_count": 1,
+    "models_used": [
+      "gpt-5.3-codex-spark",
+      "gpt-5.5"
+    ],
+    "notes": "Synthetic usage estimate only."
+  }
+}

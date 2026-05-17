@@ -119,27 +119,13 @@ The tier can move up or down. Escalate only the disputed or stuck slice; de-esca
 
 Before each delegation, produce or refresh a compact dispatch brief as a context packet:
 
-```text
-Goal:
-Current step:
-Delegation tier:
-Role requested:
-Runtime agent type:
-Model selected:
-Reasoning effort:
-Why this model is sufficient:
-Why delegation is needed:
-Scope:
-Non-goals:
-Escalation trigger:
-Done when:
-```
+Goal, current step, tier, role, runtime type, model, effort, model sufficiency, scope, non-goals, escalation trigger, and done condition.
 
 For custom-agent details, role definitions, and default routing ladders, read `references/agent-roster.md` and `references/effort-model-routing.md` only when needed.
 
 ## Context Packet Protocol
 
-Initial dispatch sends a context packet, not raw repo context, transcripts, or pasted logs. Include objective, scope, non-goals, known evidence handles, allowed tools/paths, model/effort, entry condition, exit condition, output budget, and context-request rule.
+Initial dispatch sends a context packet, not raw repo context, transcripts, or pasted logs. Include packet id, objective, scope, non-goals, known evidence handles, allowed tools/paths, model/effort, entry condition, exit condition, output budget, and context-request rule.
 
 Use context handles such as `file:path:line`, `cmd:name`, `diff:path`, `ledger:entry`, `artifact:path`, and `scenario:id`. Provide exact handles instead of broad summaries whenever possible.
 
@@ -155,6 +141,8 @@ Decision impact:
 ```
 
 Each context request triggers root reassessment: grant narrow context, escalate, pass off, repair the packet, or stop fanout.
+
+Track subagent lifecycle in durable ledgers when ledger production is required: packet id, start, terminal exit, context request, escalation, skipped state, and packet repair. Final review must confirm every active packet has a terminal exit.
 
 ## Subagent Contract
 

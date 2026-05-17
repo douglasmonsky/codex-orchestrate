@@ -65,6 +65,14 @@
       "minItems": 1,
       "items": {"$ref": "#/$defs/routing_entry"}
     },
+    "context_packets": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/context_packet"}
+    },
+    "subagent_lifecycle": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/lifecycle_event"}
+    },
     "escalations": {
       "type": "array",
       "items": {"$ref": "#/$defs/escalation"}
@@ -105,6 +113,13 @@
         },
         "notes": {"type": "string"}
       }
+    },
+    "fixture_expectations": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "lifecycle_result": {"enum": ["pass", "fail"]}
+      }
     }
   },
   "$defs": {
@@ -127,6 +142,7 @@
         "final_review_gate"
       ],
       "properties": {
+        "packet_id": {"type": "string"},
         "step": {"type": "string"},
         "tier": {"type": "string"},
         "agent_role": {"type": "string"},
@@ -146,6 +162,90 @@
         },
         "next_decision": {"type": "string"},
         "final_review_gate": {"type": "string"}
+      }
+    },
+    "context_packet": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "packet_id",
+        "role",
+        "runtime_type",
+        "tier",
+        "objective",
+        "scope",
+        "non_goals",
+        "evidence_handles",
+        "allowed_tools_paths",
+        "model",
+        "reasoning_effort",
+        "writable",
+        "entry_condition",
+        "exit_condition",
+        "output_budget_words",
+        "context_request_rule",
+        "expected_return"
+      ],
+      "properties": {
+        "schema_version": {"type": "string"},
+        "packet_id": {"type": "string"},
+        "scenario_id": {"type": "string"},
+        "role": {"type": "string"},
+        "runtime_type": {"type": "string"},
+        "tier": {"type": "string"},
+        "objective": {"type": "string"},
+        "scope": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "non_goals": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "evidence_handles": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "allowed_tools_paths": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "model": {"type": "string"},
+        "reasoning_effort": {"type": "string"},
+        "writable": {"type": "boolean"},
+        "entry_condition": {"type": "string"},
+        "exit_condition": {"type": "string"},
+        "output_budget_words": {"type": "integer", "minimum": 1},
+        "context_request_rule": {"type": "string"},
+        "expected_return": {
+          "type": "array",
+          "items": {"type": "string"}
+        }
+      }
+    },
+    "lifecycle_event": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["packet_id", "role", "event", "timestamp", "evidence"],
+      "properties": {
+        "packet_id": {"type": "string"},
+        "role": {"type": "string"},
+        "event": {"enum": ["started", "completed", "stuck", "blocked", "context-requested", "escalated", "skipped", "packet-repaired"]},
+        "exit_status": {"enum": ["done", "blocked", "stuck", "out-of-scope", "context-requested"]},
+        "timestamp": {"type": "string", "format": "date-time"},
+        "evidence": {"type": "string"},
+        "root_decision": {"type": "string"},
+        "context_request": {"$ref": "#/$defs/context_request"}
+      }
+    },
+    "context_request": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["reason", "requested_handle", "decision_impact"],
+      "properties": {
+        "reason": {"type": "string"},
+        "requested_handle": {"type": "string"},
+        "decision_impact": {"type": "string"}
       }
     },
     "escalation": {

@@ -39,6 +39,7 @@ BEHAVIOR_SCRIPT = ROOT / "scripts" / "check_orchestration_behavior.py"
 CREATOR_SCRIPT = ROOT / "scripts" / "create_orchestration_ledger.py"
 SMOKE_SCRIPT = ROOT / "scripts" / "run_orchestration_smoke.py"
 CONTEXT_PACKET_CHECK_SCRIPT = ROOT / "scripts" / "check_orchestration_context_packets.py"
+LIFECYCLE_SCRIPT = ROOT / "scripts" / "check_orchestration_lifecycle.py"
 README = ROOT / "README.md"
 PACKAGE_README = ROOT / "docs" / "codex-orchestrate" / "package-readme.md"
 SNIPPET = ROOT / "docs" / "codex-orchestrate" / "AGENTS.orchestration.snippet.md"
@@ -175,6 +176,10 @@ def check_skill() -> None:
         "Context request",
         "Entry condition",
         "Exit condition",
+        "packet id",
+        "subagent lifecycle",
+        "terminal exit",
+        "packet repair",
     ]:
         require_contains(text, phrase, "SKILL.md")
 
@@ -285,6 +290,10 @@ def check_routing_policy() -> dict:
         "context request",
         "entry condition",
         "exit condition",
+        "packet id",
+        "subagent lifecycle",
+        "terminal exit",
+        "packet repair",
         "controller loop",
         "first-step classification",
         "final senior review",
@@ -319,6 +328,7 @@ def check_references() -> None:
         "When to produce a durable ledger",
         "Context packet template",
         "Context request template",
+        "Subagent lifecycle ledger template",
         "Runtime agent type",
         "Model selected",
         "Why this model is sufficient",
@@ -465,8 +475,12 @@ def check_docs() -> None:
         "entry condition",
         "exit condition",
         "check_orchestration_context_packets.py",
+        "check_orchestration_lifecycle.py",
         "orchestration-context-packet.schema.json",
         "sample-context-packets",
+        "subagent lifecycle",
+        "terminal exit",
+        "packet repair",
         "activation contract",
         "run-ledger-template.md",
         "config.orchestration.example.toml",
@@ -555,6 +569,19 @@ def check_ledger_artifacts() -> None:
     ]:
         require(field in routing_required, f"ledger routing entry missing required field: {field}")
 
+    routing_properties = set(schema["$defs"]["routing_entry"]["properties"])
+    require("packet_id" in routing_properties, "ledger routing entry should allow packet_id")
+    for field in ["context_packets", "subagent_lifecycle"]:
+        require(field in schema["properties"], f"ledger schema missing optional field: {field}")
+    context_required = set(schema["$defs"]["context_packet"]["required"])
+    for field in ["packet_id", "role", "model", "reasoning_effort", "output_budget_words", "evidence_handles", "entry_condition", "exit_condition"]:
+        require(field in context_required, f"ledger context_packet missing required field: {field}")
+    lifecycle_required = set(schema["$defs"]["lifecycle_event"]["required"])
+    for field in ["packet_id", "role", "event", "timestamp", "evidence"]:
+        require(field in lifecycle_required, f"ledger lifecycle_event missing required field: {field}")
+    for event in ["started", "completed", "stuck", "blocked", "context-requested", "escalated", "skipped", "packet-repaired"]:
+        require(event in schema["$defs"]["lifecycle_event"]["properties"]["event"]["enum"], f"ledger lifecycle event missing enum: {event}")
+
     template = read(LEDGER_TEMPLATE)
     for phrase in [
         "Keep real ledgers local or sanitized",
@@ -580,6 +607,11 @@ def check_ledger_artifacts() -> None:
         "create_orchestration_ledger.py",
         "local/orchestration-ledgers",
         "check_orchestration_behavior.py",
+        "context_packets",
+        "subagent_lifecycle",
+        "packet_id",
+        "terminal exit",
+        "packet repair",
     ]:
         require_contains(template, phrase, "run-ledger-template.md")
 
@@ -699,6 +731,10 @@ def check_ledger_validator_and_samples() -> None:
         "high-risk-security-fallback.json",
         "validation-failure.json",
         "over-fanout-risk-controller.json",
+        "context-request-granted.json",
+        "context-request-denied-escalated.json",
+        "stale-packet-without-exit.json",
+        "over-budget-lifecycle-failure.json",
     }
     files = sorted(SAMPLE_LEDGERS.glob("*.json"))
     require({path.name for path in files} == expected_samples, "sample ledger roster changed")
@@ -721,6 +757,33 @@ def check_ledger_validator_and_samples() -> None:
     require(
         completed.returncode == 0,
         f"strict small-patch ledger validation failed: {completed.stderr.strip() or completed.stdout.strip()}",
+    )
+
+
+def check_lifecycle_script() -> None:
+    text = read(LIFECYCLE_SCRIPT)
+    for phrase in [
+        "check_orchestration_context_packets",
+        "subagent_lifecycle",
+        "context_packets",
+        "terminal exit",
+        "packet-repaired",
+        "fixture_expectations",
+        "lifecycle_result",
+        "--json",
+    ]:
+        require_contains(text, phrase, "check_orchestration_lifecycle.py")
+
+    files = sorted(SAMPLE_LEDGERS.glob("*.json"))
+    completed = subprocess.run(
+        [sys.executable, str(LIFECYCLE_SCRIPT), *[str(path) for path in files]],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    require(
+        completed.returncode == 0,
+        f"sample lifecycle validation failed: {completed.stderr.strip() or completed.stdout.strip()}",
     )
 
 
@@ -786,6 +849,7 @@ def main() -> int:
         check_context_packet_artifacts,
         check_ledger_creator,
         check_ledger_validator_and_samples,
+        check_lifecycle_script,
         check_behavior_script,
         check_smoke_script,
     ]

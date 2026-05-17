@@ -1,23 +1,23 @@
 {
   "schema_version": "1.0",
   "scenario_id": "small-patch-with-validation",
-  "task_summary": "Synthetic small one-file bug fix with focused validation.",
+  "task_summary": "Synthetic invalid lifecycle fixture where a packet starts but never reaches terminal exit.",
   "repo_state": {
     "path": "synthetic-repo",
     "branch": "main",
     "starting_status": "clean",
-    "ending_status": "one committed patch",
+    "ending_status": "missing lifecycle exit",
     "commit": "0000000"
   },
-  "started_at": "2026-05-17T10:00:00Z",
-  "finished_at": "2026-05-17T10:08:00Z",
+  "started_at": "2026-05-17T15:00:00Z",
+  "finished_at": "2026-05-17T15:05:00Z",
   "root": {
     "model": "gpt-5.5",
     "reasoning_effort": "medium"
   },
   "routing_entries": [
     {
-      "packet_id": "packet-small-patch-001",
+      "packet_id": "packet-stale-001",
       "step": "Patch a focused null-handling bug and run the narrowest check.",
       "tier": "Tier 1",
       "agent_role": "implementer_simple",
@@ -28,31 +28,28 @@
       "fallback_notes": "No fallback used.",
       "why_model_is_sufficient": "The fix is bounded to one file with a clear expected behavior.",
       "evidence": [
-        "Implemented one-file guard.",
-        "Focused unit test passed."
+        "Packet was started but the synthetic fixture omits terminal lifecycle evidence."
       ],
       "open_risks": [],
-      "next_decision": "Route final diff and validation summary back to root review.",
-      "final_review_gate": "Root checks the diff and validation evidence before final response."
+      "next_decision": "This fixture should be rejected by lifecycle validation.",
+      "final_review_gate": "Root should not pass without terminal packet lifecycle."
     }
   ],
   "context_packets": [
     {
-      "packet_id": "packet-small-patch-001",
+      "packet_id": "packet-stale-001",
       "role": "implementer_simple",
       "runtime_type": "custom",
       "tier": "Tier 1",
-      "objective": "Apply the bounded one-file fix and report focused validation.",
+      "objective": "Apply a bounded one-file fix.",
       "scope": [
-        "file:src/example.py:42",
-        "cmd:focused-unit-test"
+        "file:src/example.py:42"
       ],
       "non_goals": [
-        "Do not redesign surrounding behavior."
+        "Do not redesign behavior."
       ],
       "evidence_handles": [
         "file:src/example.py:42",
-        "diff:working-tree",
         "cmd:focused-unit-test"
       ],
       "allowed_tools_paths": [
@@ -62,33 +59,23 @@
       "model": "gpt-5.3-codex-spark",
       "reasoning_effort": "medium",
       "writable": true,
-      "entry_condition": "Start when the file target and expected behavior are clear.",
-      "exit_condition": "Return patch summary and validation evidence, or a structured Context request.",
+      "entry_condition": "Start when the target file and expected behavior are clear.",
+      "exit_condition": "Return done, blocked, stuck, or a Context request.",
       "output_budget_words": 320,
       "context_request_rule": "Use Context request with reason, requested_handle, and decision_impact before asking for broader context.",
       "expected_return": [
         "Patch summary",
-        "Files changed",
-        "Validation result",
-        "Stuck status"
+        "Validation result"
       ]
     }
   ],
   "subagent_lifecycle": [
     {
-      "packet_id": "packet-small-patch-001",
+      "packet_id": "packet-stale-001",
       "role": "implementer_simple",
       "event": "started",
-      "timestamp": "2026-05-17T10:01:00Z",
-      "evidence": "Context packet accepted with clear entry condition."
-    },
-    {
-      "packet_id": "packet-small-patch-001",
-      "role": "implementer_simple",
-      "event": "completed",
-      "exit_status": "done",
-      "timestamp": "2026-05-17T10:06:00Z",
-      "evidence": "Patch and focused validation summary returned to root."
+      "timestamp": "2026-05-17T15:01:00Z",
+      "evidence": "Packet accepted but terminal exit is intentionally missing."
     }
   ],
   "escalations": [],
@@ -96,7 +83,7 @@
     {
       "command": "python3 -m pytest tests/test_small_patch.py",
       "result": "passed",
-      "evidence": "1 passed"
+      "evidence": "Synthetic validation evidence present so only lifecycle validation fails."
     }
   ],
   "final_review": {
@@ -104,8 +91,7 @@
     "reviewer": "root",
     "evidence": [
       "Diff matches requested bug fix.",
-      "Focused validation passed.",
-      "Packet lifecycle had a terminal exit."
+      "Focused validation passed."
     ],
     "blockers": []
   },
@@ -116,6 +102,9 @@
       "gpt-5.3-codex-spark",
       "gpt-5.5"
     ],
-    "notes": "Synthetic usage estimate only."
+    "notes": "Synthetic lifecycle failure fixture."
+  },
+  "fixture_expectations": {
+    "lifecycle_result": "fail"
   }
 }

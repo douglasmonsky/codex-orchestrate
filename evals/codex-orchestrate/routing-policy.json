@@ -229,6 +229,10 @@
     "context request",
     "entry condition",
     "exit condition",
+    "packet id",
+    "subagent lifecycle",
+    "terminal exit",
+    "packet repair",
     "controller loop",
     "first-step classification",
     "final senior review"
@@ -236,13 +240,15 @@
   "default_smoke_scenario_ids": [
     "model-routing-smoke",
     "fallback-smoke",
-    "context-packet-smoke"
+    "context-packet-smoke",
+    "lifecycle-smoke"
   ],
   "smoke_scenarios": {
     "model-routing-smoke": "/orchestrate model routing smoke test",
     "fallback-smoke": "/orchestrate Custom agent TOMLs are not callable here. Still orchestrate a repo investigation and small fix.",
     "context-packet-smoke": "/orchestrate Use compact context packets and context handles for a small repo fix before asking subagents for extra context.",
     "context-request-smoke": "/orchestrate A subagent needs more evidence. Require a structured context request before adding more context.",
+    "lifecycle-smoke": "/orchestrate Record packet id, subagent lifecycle, terminal exit, and packet repair behavior for a small delegated task.",
     "high-risk-security-change": "/orchestrate Change authorization behavior for this API and make sure it is safe.",
     "tier0-upgrades-to-delegation": "/orchestrate What does this repo do? Actually, inspect the code and update the README if it is stale."
   }

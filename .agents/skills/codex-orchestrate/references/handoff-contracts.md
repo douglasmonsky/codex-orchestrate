@@ -6,6 +6,7 @@
 - When to produce a durable ledger
 - Context packet template
 - Context request template
+- Subagent lifecycle ledger template
 - Default subagent assignment template
 - Stuck-state summary template
 - Mechanic handoff
@@ -92,6 +93,23 @@ Decision impact:
 ```
 
 The root should reassess routing before granting context: provide only the narrow handle needed, escalate, pass off, repair the packet, or stop fanout.
+
+## Subagent lifecycle ledger template
+
+Use durable ledger lifecycle entries when a post-run ledger is required. Every delegated subagent should have a packet id, a start event, and a terminal exit.
+
+```text
+Subagent lifecycle:
+Packet id:
+Role:
+Event: <started | completed | stuck | blocked | context-requested | escalated | skipped | packet-repaired>
+Exit status: <done | blocked | stuck | out-of-scope | context-requested>
+Evidence:
+Context request:
+Root decision:
+```
+
+Entry failure returns to root as packet repair instead of broad exploration. Context requests must name packet id, reason, requested handle/path, and decision impact. Final root review checks that every active packet has terminal exit evidence.
 
 ## Default subagent assignment template
 

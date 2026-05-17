@@ -12,6 +12,8 @@ python3 scripts/create_orchestration_ledger.py
 
 It writes to ignored `local/orchestration-ledgers/` by default, runs `scripts/check_orchestration_ledger.py`, and runs `scripts/check_orchestration_behavior.py` when the `scenario_id` matches a committed scenario. In other repos, copy this JSON shape manually and keep private details local or sanitized.
 
+When context packets are used, link routing entries to `packet_id` and record `context_packets` plus `subagent_lifecycle`. Every active packet needs a started event and terminal exit evidence. Use `packet-repaired` when entry conditions were unclear and the root repaired the packet before redelegating; this is the durable packet repair record.
+
 Schema: `schemas/orchestration-ledger.schema.json`
 
 ```json
@@ -35,6 +37,7 @@ Schema: `schemas/orchestration-ledger.schema.json`
   "routing_entries": [
     {
       "step": "",
+      "packet_id": "",
       "tier": "",
       "agent_role": "",
       "runtime_type": "",
@@ -47,6 +50,45 @@ Schema: `schemas/orchestration-ledger.schema.json`
       "open_risks": [],
       "next_decision": "",
       "final_review_gate": ""
+    }
+  ],
+  "context_packets": [
+    {
+      "packet_id": "",
+      "role": "",
+      "runtime_type": "",
+      "tier": "",
+      "objective": "",
+      "scope": [],
+      "non_goals": [],
+      "evidence_handles": [],
+      "allowed_tools_paths": [],
+      "model": "",
+      "reasoning_effort": "",
+      "writable": false,
+      "entry_condition": "",
+      "exit_condition": "",
+      "output_budget_words": 350,
+      "context_request_rule": "",
+      "expected_return": []
+    }
+  ],
+  "subagent_lifecycle": [
+    {
+      "packet_id": "",
+      "role": "",
+      "event": "started",
+      "timestamp": "",
+      "evidence": ""
+    },
+    {
+      "packet_id": "",
+      "role": "",
+      "event": "completed",
+      "exit_status": "done",
+      "timestamp": "",
+      "evidence": "",
+      "root_decision": ""
     }
   ],
   "escalations": [
@@ -87,12 +129,16 @@ Scenario ID:
 Tier history:
 Agent roles:
 Runtime type:
+Packet ID:
 Intended model:
 Actual model:
 Reasoning effort:
 Fallback notes:
 Evidence:
 Escalations:
+Subagent lifecycle:
+Terminal exit:
+Packet repair:
 Validation:
 Final review:
 Residual risks:

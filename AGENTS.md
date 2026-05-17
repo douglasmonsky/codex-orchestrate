@@ -18,8 +18,8 @@ This repository stores reusable Codex skills, companion agent profiles, snippets
 - `.codex/agents/*.toml`: custom Codex agent profiles used by one or more skills.
 - `.codex/config.orchestration.example.toml`: merge-only sample config for bounded orchestration fanout.
 - `docs/`: install notes, snippets, examples, and rationale.
-- `evals/codex-orchestrate/routing-policy.json`: machine-readable orchestration role/model/context-packet policy used by checks and helper scripts.
-- `schemas/`: machine-readable contracts for skill output artifacts and context packets.
+- `evals/codex-orchestrate/routing-policy.json`: machine-readable orchestration role/model/context-packet and lifecycle policy used by checks and helper scripts.
+- `schemas/`: machine-readable contracts for skill output artifacts, lifecycle evidence, and context packets.
 
 ## Setup Commands
 
@@ -37,9 +37,11 @@ python3 scripts/create_orchestration_ledger.py --help
 python3 scripts/check_orchestration_skill.py
 python3 scripts/check_runtime_compatibility.py
 python3 scripts/check_orchestration_context_packets.py evals/codex-orchestrate/sample-context-packets/*.json
+python3 scripts/check_orchestration_lifecycle.py evals/codex-orchestrate/sample-ledgers/*.json
 python3 scripts/check_orchestration_ledger.py evals/codex-orchestrate/sample-ledgers/*.json
 python3 scripts/check_orchestration_behavior.py evals/codex-orchestrate/sample-ledgers/*.json
 python3 scripts/run_orchestration_smoke.py
+python3 scripts/run_orchestration_smoke.py --scenario-id lifecycle-smoke --json
 python3 scripts/run_orchestration_smoke.py --scenario-id context-packet-smoke --json
 python3 scripts/run_orchestration_smoke.py --scenario-id high-risk-security-change --json
 python3 scripts/sync_orchestration_skill.py --check
@@ -60,7 +62,7 @@ When TOML agent profiles change, inspect them for valid names, explicit model ro
 
 ## Orchestration Prompt Surface
 
-When a request starts with `/orchestrate`, use `codex-orchestrate`. Prompt assembly should expose the activation contract, controller loop, first-step classification, model routing, source of truth, runtime fallback, routing ledger, context packet, context handle, context request, entry condition, exit condition, and final senior review language so smoke checks can detect stale or missing orchestration instructions.
+When a request starts with `/orchestrate`, use `codex-orchestrate`. Prompt assembly should expose the activation contract, controller loop, first-step classification, model routing, source of truth, runtime fallback, routing ledger, context packet, context handle, context request, entry condition, exit condition, packet id, subagent lifecycle, terminal exit, packet repair, and final senior review language so smoke checks can detect stale or missing orchestration instructions.
 
 ## Data Privacy Rules
 
@@ -84,11 +86,12 @@ When a request starts with `/orchestrate`, use `codex-orchestrate`. Prompt assem
 - `python3 scripts/sync_orchestration_skill.py --check` passes after syncing global installs.
 - `python3 scripts/check_runtime_compatibility.py` runs and any runtime model warnings are understood.
 - `python3 scripts/check_orchestration_context_packets.py evals/codex-orchestrate/sample-context-packets/*.json` passes for committed synthetic packet fixtures.
+- `python3 scripts/check_orchestration_lifecycle.py evals/codex-orchestrate/sample-ledgers/*.json` passes for lifecycle-linked ledger fixtures, including expected lifecycle rejections.
 - `python3 scripts/create_orchestration_ledger.py --help` works and documents local-only ledger output.
 - `python3 scripts/check_orchestration_ledger.py evals/codex-orchestrate/sample-ledgers/*.json` passes for committed synthetic ledgers.
 - `python3 scripts/check_orchestration_behavior.py evals/codex-orchestrate/sample-ledgers/*.json` passes for scenario-to-ledger behavioral evidence.
 - `python3 scripts/run_orchestration_smoke.py` and a focused `--scenario-id` smoke confirm `/orchestrate` prompt assembly exposes the core policy surface.
 - Model pins in `.codex/agents/*.toml` still match `evals/codex-orchestrate/routing-policy.json`.
-- Ledger and context-packet schemas stay aligned when orchestration behavior changes.
+- Ledger, lifecycle, and context-packet schemas stay aligned when orchestration behavior changes.
 - `git diff --check` passes.
 - No secrets, tokens, or private data are staged.

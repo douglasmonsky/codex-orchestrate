@@ -1,0 +1,211 @@
+{
+  "schema_version": "1.0",
+  "scenario_id": "stuck-spark-escalation",
+  "task_summary": "Synthetic focused fix where a broad context request is denied and the task escalates narrowly.",
+  "repo_state": {
+    "path": "synthetic-package",
+    "branch": "main",
+    "starting_status": "clean",
+    "ending_status": "escalated narrow implementation",
+    "commit": "0000000"
+  },
+  "started_at": "2026-05-17T14:30:00Z",
+  "finished_at": "2026-05-17T14:45:00Z",
+  "root": {
+    "model": "gpt-5.5",
+    "reasoning_effort": "medium"
+  },
+  "routing_entries": [
+    {
+      "packet_id": "packet-context-denied-001",
+      "step": "Attempt the narrow implementation with compact packet context.",
+      "tier": "Tier 2",
+      "agent_role": "implementer_simple",
+      "runtime_type": "custom",
+      "intended_model": "gpt-5.3-codex-spark",
+      "actual_model": "gpt-5.3-codex-spark",
+      "reasoning_effort": "medium",
+      "fallback_notes": "No fallback used.",
+      "why_model_is_sufficient": "The first attempt was cheap and bounded, and failure was recoverable.",
+      "evidence": [
+        "Subagent requested broad repository context.",
+        "Root denied the broad context request and kept the objective narrow."
+      ],
+      "open_risks": [
+        "Spark attempt could not proceed without broadening."
+      ],
+      "next_decision": "Escalate the same narrow objective to implementer on gpt-5.4.",
+      "final_review_gate": "Root checks denial and escalation stayed scoped."
+    },
+    {
+      "packet_id": "packet-context-denied-002",
+      "step": "Escalate same narrow implementation to a stronger model.",
+      "tier": "Tier 2",
+      "agent_role": "implementer",
+      "runtime_type": "custom",
+      "intended_model": "gpt-5.4",
+      "actual_model": "gpt-5.4",
+      "reasoning_effort": "medium",
+      "fallback_notes": "No fallback used.",
+      "why_model_is_sufficient": "The task needed ordinary coding judgment after the cheap agent got stuck.",
+      "evidence": [
+        "Escalated packet reused the same objective.",
+        "Implementation completed without broad repo context."
+      ],
+      "open_risks": [],
+      "next_decision": "Return diff and lifecycle evidence to root final review.",
+      "final_review_gate": "Root verifies same-objective escalation and focused validation."
+    }
+  ],
+  "context_packets": [
+    {
+      "packet_id": "packet-context-denied-001",
+      "role": "implementer_simple",
+      "runtime_type": "custom",
+      "tier": "Tier 2",
+      "objective": "Attempt the same narrow fix without broadening scope.",
+      "scope": [
+        "file:src/package/config.py:10",
+        "ledger:stuck-summary-002"
+      ],
+      "non_goals": [
+        "Do not request full repository context."
+      ],
+      "evidence_handles": [
+        "ledger:stuck-summary-002",
+        "file:src/package/config.py:10"
+      ],
+      "allowed_tools_paths": [
+        "src/package/config.py"
+      ],
+      "model": "gpt-5.3-codex-spark",
+      "reasoning_effort": "medium",
+      "writable": true,
+      "entry_condition": "Start when the config handle and stuck summary are available.",
+      "exit_condition": "Return done, stuck, or a precise Context request.",
+      "output_budget_words": 330,
+      "context_request_rule": "Use Context request with reason, requested_handle, and decision_impact before asking for broader context.",
+      "expected_return": [
+        "Patch summary",
+        "Context request",
+        "Stuck status"
+      ]
+    },
+    {
+      "packet_id": "packet-context-denied-002",
+      "role": "implementer",
+      "runtime_type": "custom",
+      "tier": "Tier 2",
+      "objective": "Resolve the same narrow fix after Spark was stuck.",
+      "scope": [
+        "file:src/package/config.py:10",
+        "ledger:stuck-summary-002"
+      ],
+      "non_goals": [
+        "Do not inspect unrelated modules."
+      ],
+      "evidence_handles": [
+        "ledger:stuck-summary-002",
+        "diff:working-tree"
+      ],
+      "allowed_tools_paths": [
+        "src/package/config.py",
+        "tests/test_package_config.py"
+      ],
+      "model": "gpt-5.4",
+      "reasoning_effort": "medium",
+      "writable": true,
+      "entry_condition": "Start after root denies broad context and preserves the same objective.",
+      "exit_condition": "Return done, blocked, or stuck with evidence.",
+      "output_budget_words": 350,
+      "context_request_rule": "Use Context request with reason, requested_handle, and decision_impact before asking for broader context.",
+      "expected_return": [
+        "Patch summary",
+        "Files changed",
+        "Validation result"
+      ]
+    }
+  ],
+  "subagent_lifecycle": [
+    {
+      "packet_id": "packet-context-denied-001",
+      "role": "implementer_simple",
+      "event": "started",
+      "timestamp": "2026-05-17T14:32:00Z",
+      "evidence": "Cheap implementation packet accepted."
+    },
+    {
+      "packet_id": "packet-context-denied-001",
+      "role": "implementer_simple",
+      "event": "context-requested",
+      "exit_status": "context-requested",
+      "timestamp": "2026-05-17T14:34:00Z",
+      "evidence": "Subagent asked for broad context that would violate packet discipline.",
+      "root_decision": "Denied broad request and escalated the same narrow objective to implementer.",
+      "context_request": {
+        "reason": "The cheap agent could not infer the dependency boundary.",
+        "requested_handle": "artifact:full-repo-context",
+        "decision_impact": "Would broaden context beyond the packet budget; root chose same-objective escalation instead."
+      }
+    },
+    {
+      "packet_id": "packet-context-denied-001",
+      "role": "implementer_simple",
+      "event": "escalated",
+      "exit_status": "stuck",
+      "timestamp": "2026-05-17T14:35:00Z",
+      "evidence": "Spark attempt was stuck without broad context.",
+      "root_decision": "Escalated to packet-context-denied-002 on gpt-5.4."
+    },
+    {
+      "packet_id": "packet-context-denied-002",
+      "role": "implementer",
+      "event": "started",
+      "timestamp": "2026-05-17T14:36:00Z",
+      "evidence": "Same-objective escalation packet accepted."
+    },
+    {
+      "packet_id": "packet-context-denied-002",
+      "role": "implementer",
+      "event": "completed",
+      "exit_status": "done",
+      "timestamp": "2026-05-17T14:42:00Z",
+      "evidence": "Implementation completed with focused validation."
+    }
+  ],
+  "escalations": [
+    {
+      "from_role": "implementer_simple",
+      "to_role": "implementer",
+      "reason": "Cheap agent requested broad context instead of resolving the narrow fix.",
+      "result": "Same-objective escalation completed the patch."
+    }
+  ],
+  "validation": [
+    {
+      "command": "python3 -m pytest tests/test_package_config.py",
+      "result": "passed",
+      "evidence": "Synthetic package config test passed."
+    }
+  ],
+  "final_review": {
+    "status": "passed",
+    "reviewer": "root",
+    "evidence": [
+      "Packet lifecycle shows broad context was denied.",
+      "Terminal exit recorded for both packets.",
+      "Focused validation passed."
+    ],
+    "blockers": []
+  },
+  "residual_risks": [],
+  "usage_estimate": {
+    "subagent_count": 2,
+    "models_used": [
+      "gpt-5.3-codex-spark",
+      "gpt-5.4",
+      "gpt-5.5"
+    ],
+    "notes": "Synthetic usage estimate only."
+  }
+}
