@@ -1,0 +1,63 @@
+{
+  "schema_version": "1.0",
+  "task_summary": "Synthetic small one-file bug fix with focused validation.",
+  "repo_state": {
+    "path": "synthetic-repo",
+    "branch": "main",
+    "starting_status": "clean",
+    "ending_status": "one committed patch",
+    "commit": "0000000"
+  },
+  "started_at": "2026-05-17T10:00:00Z",
+  "finished_at": "2026-05-17T10:08:00Z",
+  "root": {
+    "model": "gpt-5.5",
+    "reasoning_effort": "medium"
+  },
+  "routing_entries": [
+    {
+      "step": "Patch a focused null-handling bug and run the narrowest check.",
+      "tier": "Tier 1",
+      "agent_role": "implementer_simple",
+      "runtime_type": "custom",
+      "intended_model": "gpt-5.3-codex-spark",
+      "actual_model": "gpt-5.3-codex-spark",
+      "reasoning_effort": "medium",
+      "fallback_notes": "No fallback used.",
+      "why_model_is_sufficient": "The fix is bounded to one file with a clear expected behavior.",
+      "evidence": [
+        "Implemented one-file guard.",
+        "Focused unit test passed."
+      ],
+      "open_risks": [],
+      "next_decision": "Route final diff and validation summary back to root review.",
+      "final_review_gate": "Root checks the diff and validation evidence before final response."
+    }
+  ],
+  "escalations": [],
+  "validation": [
+    {
+      "command": "python3 -m pytest tests/test_small_patch.py",
+      "result": "passed",
+      "evidence": "1 passed"
+    }
+  ],
+  "final_review": {
+    "status": "passed",
+    "reviewer": "root",
+    "evidence": [
+      "Diff matches requested bug fix.",
+      "Focused validation passed."
+    ],
+    "blockers": []
+  },
+  "residual_risks": [],
+  "usage_estimate": {
+    "subagent_count": 1,
+    "models_used": [
+      "gpt-5.3-codex-spark",
+      "gpt-5.5"
+    ],
+    "notes": "Synthetic usage estimate only."
+  }
+}

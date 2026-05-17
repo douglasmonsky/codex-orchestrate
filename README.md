@@ -17,6 +17,7 @@ Personal Codex skill repository for storing, reviewing, and reusing skills and c
 .codex/config.orchestration.example.toml
                       Merge-only sample config for bounded orchestration fanout
 docs/                 Install notes, snippets, and design rationale
+evals/                Static scenarios and synthetic run-ledger fixtures
 schemas/              Machine-readable contracts for repeatable skill outputs
 README.md             Repo overview and usage
 AGENTS.md             Project-specific Codex instructions
@@ -97,13 +98,15 @@ Run the skill-pack checker before committing orchestration changes:
 ```bash
 python3 scripts/check_orchestration_skill.py
 python3 scripts/check_runtime_compatibility.py
+python3 scripts/check_orchestration_ledger.py evals/codex-orchestrate/sample-ledgers/*.json
+python3 scripts/run_orchestration_smoke.py
 python3 scripts/sync_orchestration_skill.py --check
 codex debug prompt-input '/orchestrate model routing smoke test'
 ```
 
-Recommended post-edit loop: run the checker, run the runtime compatibility warning check, sync with `--apply` when needed, confirm `--check` passes, smoke-test prompt visibility, then commit and push.
+Recommended post-edit loop: static checker, runtime compatibility check, sample ledger validation, prompt smoke harness, sync check/apply, `codex debug prompt-input`, commit, push.
 
-The checker validates required skill sections, fallback role mapping, model routing scenarios, routing-ledger expectations, ledger schema/template coverage, agent TOML model pins, duplicate stuck-protocol cleanup, sync tooling, runtime compatibility tooling, and source-of-truth docs. `docs/codex-orchestrate/run-ledger-template.md` provides a sanitized post-run ledger template for substantial `/orchestrate` runs.
+The checker validates required skill sections, fallback role mapping, model routing scenarios, routing-ledger expectations, ledger schema/template coverage, synthetic run-ledger fixtures, agent TOML model pins, duplicate stuck-protocol cleanup, sync tooling, runtime compatibility tooling, smoke tooling, and source-of-truth docs. `docs/codex-orchestrate/run-ledger-template.md` provides a sanitized post-run ledger template for substantial `/orchestrate` runs.
 
 ## Privacy
 

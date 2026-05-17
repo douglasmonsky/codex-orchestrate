@@ -1,0 +1,74 @@
+{
+  "schema_version": "1.0",
+  "task_summary": "Synthetic auth-sensitive change where the intended strong model was unavailable.",
+  "repo_state": {
+    "path": "synthetic-api",
+    "branch": "main",
+    "starting_status": "clean",
+    "ending_status": "patch validated with residual fallback risk",
+    "commit": "0000000"
+  },
+  "started_at": "2026-05-17T11:00:00Z",
+  "finished_at": "2026-05-17T11:28:00Z",
+  "root": {
+    "model": "gpt-5.5",
+    "reasoning_effort": "high"
+  },
+  "routing_entries": [
+    {
+      "step": "Review authorization boundary before implementation.",
+      "tier": "Tier 4",
+      "agent_role": "security_auditor",
+      "runtime_type": "explorer fallback",
+      "intended_model": "gpt-5.5",
+      "actual_model": "gpt-5.4",
+      "reasoning_effort": "high",
+      "fallback_notes": "gpt-5.5 was unavailable; used nearest available model and recorded reduced confidence.",
+      "why_model_is_sufficient": "gpt-5.4 can perform the bounded audit, but root keeps residual risk visible.",
+      "evidence": [
+        "Identified the policy check and affected route.",
+        "No data-isolation bypass found in synthetic evidence."
+      ],
+      "open_risks": [
+        "Model fallback reduced confidence for auth-sensitive review."
+      ],
+      "next_decision": "Root requires explicit final review of the fallback and residual risk.",
+      "final_review_gate": "Do not finalize without naming the fallback and remaining risk."
+    }
+  ],
+  "escalations": [
+    {
+      "from_role": "security_auditor",
+      "to_role": "root",
+      "reason": "Strong model unavailable for auth-sensitive review.",
+      "result": "Root accepted bounded fallback with explicit residual risk."
+    }
+  ],
+  "validation": [
+    {
+      "command": "python3 -m pytest tests/test_auth_policy.py",
+      "result": "passed",
+      "evidence": "Synthetic auth policy test passed."
+    }
+  ],
+  "final_review": {
+    "status": "passed",
+    "reviewer": "root",
+    "evidence": [
+      "Security fallback was recorded.",
+      "Focused auth validation passed."
+    ],
+    "blockers": []
+  },
+  "residual_risks": [
+    "Synthetic example keeps model fallback risk visible for non-strict validation."
+  ],
+  "usage_estimate": {
+    "subagent_count": 1,
+    "models_used": [
+      "gpt-5.4",
+      "gpt-5.5"
+    ],
+    "notes": "Synthetic usage estimate only."
+  }
+}

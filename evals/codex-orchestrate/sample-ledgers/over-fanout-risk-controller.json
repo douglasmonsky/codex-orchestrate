@@ -1,0 +1,63 @@
+{
+  "schema_version": "1.0",
+  "task_summary": "Synthetic broad request where fanout is paused and risk control narrows scope.",
+  "repo_state": {
+    "path": "synthetic-monorepo",
+    "branch": "main",
+    "starting_status": "clean",
+    "ending_status": "no file changes",
+    "commit": ""
+  },
+  "started_at": "2026-05-17T13:00:00Z",
+  "finished_at": "2026-05-17T13:10:00Z",
+  "root": {
+    "model": "gpt-5.5",
+    "reasoning_effort": "medium"
+  },
+  "routing_entries": [
+    {
+      "step": "Pause broad fanout and choose the cheapest safe next route.",
+      "tier": "Tier 3",
+      "agent_role": "risk_controller",
+      "runtime_type": "custom",
+      "intended_model": "gpt-5.4",
+      "actual_model": "gpt-5.4",
+      "reasoning_effort": "medium",
+      "fallback_notes": "No fallback used.",
+      "why_model_is_sufficient": "The task is bounded orchestration risk control, not high-risk code judgment.",
+      "evidence": [
+        "Three candidate branches were reduced to one next step.",
+        "Stop condition was defined before more agents were spawned."
+      ],
+      "open_risks": [],
+      "next_decision": "Proceed with one scout before any implementation fanout.",
+      "final_review_gate": "Root verifies the next route is bounded before continuing."
+    }
+  ],
+  "escalations": [],
+  "validation": [
+    {
+      "command": "not run - routing-only checkpoint",
+      "result": "skipped",
+      "evidence": "No files changed; validation was not applicable to the fanout-control decision."
+    }
+  ],
+  "final_review": {
+    "status": "passed",
+    "reviewer": "root",
+    "evidence": [
+      "Fanout was paused.",
+      "Next route and stop condition were recorded."
+    ],
+    "blockers": []
+  },
+  "residual_risks": [],
+  "usage_estimate": {
+    "subagent_count": 1,
+    "models_used": [
+      "gpt-5.4",
+      "gpt-5.5"
+    ],
+    "notes": "Synthetic usage estimate only."
+  }
+}

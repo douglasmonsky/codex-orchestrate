@@ -1,0 +1,75 @@
+{
+  "schema_version": "1.0",
+  "task_summary": "Synthetic patch where validation fails and final review blocks completion.",
+  "repo_state": {
+    "path": "synthetic-service",
+    "branch": "main",
+    "starting_status": "clean",
+    "ending_status": "uncommitted blocked patch",
+    "commit": ""
+  },
+  "started_at": "2026-05-17T12:00:00Z",
+  "finished_at": "2026-05-17T12:18:00Z",
+  "root": {
+    "model": "gpt-5.5",
+    "reasoning_effort": "medium"
+  },
+  "routing_entries": [
+    {
+      "step": "Classify failing validation after an implementation attempt.",
+      "tier": "Tier 2",
+      "agent_role": "test_triage",
+      "runtime_type": "custom",
+      "intended_model": "gpt-5.4",
+      "actual_model": "gpt-5.4",
+      "reasoning_effort": "medium",
+      "fallback_notes": "No fallback used.",
+      "why_model_is_sufficient": "The task is failure classification, not ambiguous root-cause debugging yet.",
+      "evidence": [
+        "Focused command failed after patch.",
+        "Triage isolated failure to changed behavior."
+      ],
+      "open_risks": [
+        "Patch cannot be finalized until failing validation is addressed."
+      ],
+      "next_decision": "Route the narrow failure to debugger or block final response.",
+      "final_review_gate": "Root final review remains blocked until validation passes."
+    }
+  ],
+  "escalations": [
+    {
+      "from_role": "test_triage",
+      "to_role": "debugger",
+      "reason": "Failure was introduced and root cause was not resolved.",
+      "result": "Escalation recommended; final review blocked."
+    }
+  ],
+  "validation": [
+    {
+      "command": "python3 -m pytest tests/test_service_behavior.py",
+      "result": "failed",
+      "evidence": "Synthetic assertion failure in changed behavior."
+    }
+  ],
+  "final_review": {
+    "status": "blocked",
+    "reviewer": "root",
+    "evidence": [
+      "Validation failed with command evidence."
+    ],
+    "blockers": [
+      "Introduced validation failure remains unresolved."
+    ]
+  },
+  "residual_risks": [
+    "Patch is not shippable until debugger resolves the failing check."
+  ],
+  "usage_estimate": {
+    "subagent_count": 2,
+    "models_used": [
+      "gpt-5.4",
+      "gpt-5.5"
+    ],
+    "notes": "Synthetic usage estimate only."
+  }
+}

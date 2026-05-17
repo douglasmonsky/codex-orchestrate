@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import json
 import re
+import subprocess
 import sys
 import tomllib
 from pathlib import Path
@@ -20,12 +21,15 @@ AGENTS = ROOT / ".codex" / "agents"
 SCENARIOS = ROOT / "evals" / "codex-orchestrate" / "scenarios.json"
 SYNC_SCRIPT = ROOT / "scripts" / "sync_orchestration_skill.py"
 RUNTIME_SCRIPT = ROOT / "scripts" / "check_runtime_compatibility.py"
+LEDGER_CHECK_SCRIPT = ROOT / "scripts" / "check_orchestration_ledger.py"
+SMOKE_SCRIPT = ROOT / "scripts" / "run_orchestration_smoke.py"
 README = ROOT / "README.md"
 PACKAGE_README = ROOT / "docs" / "codex-orchestrate" / "package-readme.md"
 SNIPPET = ROOT / "docs" / "codex-orchestrate" / "AGENTS.orchestration.snippet.md"
 CONFIG_EXAMPLE = ROOT / ".codex" / "config.orchestration.example.toml"
 LEDGER_SCHEMA = ROOT / "schemas" / "orchestration-ledger.schema.json"
 LEDGER_TEMPLATE = ROOT / "docs" / "codex-orchestrate" / "run-ledger-template.md"
+SAMPLE_LEDGERS = ROOT / "evals" / "codex-orchestrate" / "sample-ledgers"
 
 
 REQUIRED_SKILL_SECTIONS = [
@@ -335,8 +339,11 @@ def check_docs() -> None:
         "gpt-5.3-codex-spark",
         "gpt-5.5",
         "check_runtime_compatibility.py",
+        "check_orchestration_ledger.py",
+        "run_orchestration_smoke.py",
         "run-ledger-template.md",
         "config.orchestration.example.toml",
+        "sample-ledgers",
     ]:
         require(re.search(re.escape(phrase), combined, re.IGNORECASE), f"docs missing: {phrase}")
 
@@ -433,6 +440,66 @@ def check_ledger_artifacts() -> None:
         require_contains(template, phrase, "run-ledger-template.md")
 
 
+def check_ledger_validator_and_samples() -> None:
+    text = read(LEDGER_CHECK_SCRIPT)
+    for phrase in [
+        "--strict",
+        "schemas/orchestration-ledger.schema.json",
+        "fallback_notes",
+        "validation",
+        "final_review",
+        "residual_risks",
+    ]:
+        require_contains(text, phrase, "check_orchestration_ledger.py")
+
+    expected_samples = {
+        "small-patch.json",
+        "high-risk-security-fallback.json",
+        "validation-failure.json",
+        "over-fanout-risk-controller.json",
+    }
+    files = sorted(SAMPLE_LEDGERS.glob("*.json"))
+    require({path.name for path in files} == expected_samples, "sample ledger roster changed")
+    completed = subprocess.run(
+        [sys.executable, str(LEDGER_CHECK_SCRIPT), *[str(path) for path in files]],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    require(
+        completed.returncode == 0,
+        f"sample ledger validation failed: {completed.stderr.strip() or completed.stdout.strip()}",
+    )
+    completed = subprocess.run(
+        [sys.executable, str(LEDGER_CHECK_SCRIPT), "--strict", str(SAMPLE_LEDGERS / "small-patch.json")],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    require(
+        completed.returncode == 0,
+        f"strict small-patch ledger validation failed: {completed.stderr.strip() or completed.stdout.strip()}",
+    )
+
+
+def check_smoke_script() -> None:
+    text = read(SMOKE_SCRIPT)
+    for phrase in [
+        "codex",
+        "debug",
+        "prompt-input",
+        "--json",
+        "--write-artifacts",
+        "codex-orchestrate",
+        "model routing",
+        "source of truth",
+        "runtime fallback",
+        "routing ledger",
+        "final senior review",
+    ]:
+        require_contains(text, phrase, "run_orchestration_smoke.py")
+
+
 def main() -> int:
     checks = [
         check_skill,
@@ -445,6 +512,8 @@ def main() -> int:
         check_sync_script,
         check_runtime_script,
         check_ledger_artifacts,
+        check_ledger_validator_and_samples,
+        check_smoke_script,
     ]
     try:
         for check in checks:
