@@ -5,6 +5,7 @@
 - Core principle
 - What counts as stuck
 - Stuck-state summary
+- Timeout / closed-agent recovery
 - Escalation ladder
 - Same-role escalation first
 - Pass-off triggers
@@ -36,6 +37,7 @@ Treat a subagent as stuck when it returns any of the following:
 - Multiple unresolved hypotheses without a next discriminating check.
 - Conflicting evidence that the agent cannot reconcile.
 - Excessive output without a decision-ready answer.
+- Timed out, was closed, or produced no useful changes before a terminal result.
 - A request for root judgment without enough evidence.
 - A result that violates scope, constraints, or non-goals.
 
@@ -59,6 +61,19 @@ Recommended next agent/model/effort:
 ```
 
 The next subagent should receive this summary and a narrower objective. Do not make the next agent repeat broad discovery unless prior evidence is unreliable.
+
+## Timeout / closed-agent recovery
+
+A timeout, closed subagent, or no-change terminal state is stuck evidence, not completion and not permission for root takeover. The root must record what is known, what is unknown, and whether files changed before continuing.
+
+The next action should be one of:
+
+- Repair unclear packet entry or exit conditions.
+- Split the objective into a smaller packet.
+- Redelegate the same narrow objective at the next model class and/or effort.
+- Pass off only when evidence shows role mismatch.
+
+The root may complete directly only for a deterministic micro-action that no longer needs delegated judgment. Implementing the remaining feature, game, migration, review, or debugging work in root after a timeout is a policy failure; delegating validation or review afterward does not compensate for missed implementation delegation.
 
 ## Escalation ladder
 
@@ -130,7 +145,8 @@ The root must:
 3. Choose same-role model/effort escalation unless role mismatch is clear.
 4. Keep the next prompt narrower than the prior prompt.
 5. Track why each escalation or pass-off happened.
-6. Stop escalation when additional attempts are unlikely to improve confidence proportionally.
+6. Avoid root takeover after timeout unless only a deterministic micro-action remains.
+7. Stop escalation when additional attempts are unlikely to improve confidence proportionally.
 
 ## Final senior-review gate
 

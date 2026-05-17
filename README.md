@@ -87,6 +87,8 @@ Initial subagent dispatch should use a compact context packet rather than raw re
 
 Durable ledgers can link each routing decision to a packet id and subagent lifecycle. When context packets are recorded, every packet must have start evidence and a terminal exit such as done, blocked, stuck, out-of-scope, or context-requested. Entry failures return to root as packet repair, and final review checks terminal lifecycle evidence before completion.
 
+A timed-out, closed, or no-change subagent is stuck evidence. Repair or split the packet, then redelegate or escalate the same narrow objective; do not let timeout recovery become root takeover except for deterministic micro-actions. Delegating validation or review after root implements the substantive work is not enough.
+
 ## Model routing
 
 `codex-orchestrate` treats model choice as a first-class routing decision:
@@ -122,6 +124,7 @@ python3 scripts/serve_orchestration_ui.py --self-test
 python3 scripts/run_orchestration_smoke.py
 python3 scripts/run_orchestration_smoke.py --scenario-id lifecycle-smoke --json
 python3 scripts/run_orchestration_smoke.py --scenario-id context-packet-smoke --json
+python3 scripts/run_orchestration_smoke.py --scenario-id timeout-recovery-smoke --json
 python3 scripts/run_orchestration_smoke.py --scenario-id high-risk-security-change --json
 python3 scripts/sync_orchestration_skill.py --check
 codex debug prompt-input '/orchestrate model routing smoke test'

@@ -1,0 +1,220 @@
+{
+  "schema_version": "1.0",
+  "scenario_id": "subagent-timeout-recovery",
+  "task_summary": "Synthetic browser-game implementation where an implementer times out without changes and root recovers through same-objective redelegation.",
+  "repo_state": {
+    "path": "synthetic-phaser-game",
+    "branch": "main",
+    "starting_status": "clean",
+    "ending_status": "delegated timeout recovery completed",
+    "commit": "0000000"
+  },
+  "started_at": "2026-05-17T18:00:00Z",
+  "finished_at": "2026-05-17T18:24:00Z",
+  "root": {
+    "model": "gpt-5.5",
+    "reasoning_effort": "medium"
+  },
+  "routing_entries": [
+    {
+      "packet_id": "packet-timeout-001",
+      "step": "Implement the bounded Phaser game loop from the initial packet.",
+      "tier": "Tier 2",
+      "agent_role": "implementer",
+      "runtime_type": "custom",
+      "intended_model": "gpt-5.4",
+      "actual_model": "gpt-5.4",
+      "reasoning_effort": "medium",
+      "fallback_notes": "No fallback used.",
+      "why_model_is_sufficient": "Ordinary implementation was enough for the first bounded game-loop attempt.",
+      "evidence": [
+        "Implementation packet timed out before producing useful changes.",
+        "Root recorded the packet as stuck rather than taking over feature implementation."
+      ],
+      "open_risks": [
+        "No browser-game implementation changes existed after the timeout."
+      ],
+      "next_decision": "Repair and narrow the packet, then redelegate the same implementation objective to implementer_strong.",
+      "final_review_gate": "Root verifies timeout recovery did not become root takeover."
+    },
+    {
+      "packet_id": "packet-timeout-002",
+      "step": "Complete the same bounded Phaser game loop after packet repair.",
+      "tier": "Tier 2",
+      "agent_role": "implementer_strong",
+      "runtime_type": "custom",
+      "intended_model": "gpt-5.5",
+      "actual_model": "gpt-5.5",
+      "reasoning_effort": "high",
+      "fallback_notes": "No fallback used.",
+      "why_model_is_sufficient": "A stronger implementation role is justified because the first implementation agent timed out without a result.",
+      "evidence": [
+        "Repaired packet kept the same bounded game objective.",
+        "Implementation completed through the delegated strong implementer path."
+      ],
+      "open_risks": [],
+      "next_decision": "Delegate validation and run root final review over diff, validation, and lifecycle evidence.",
+      "final_review_gate": "Root checks same-objective escalation, validation, and terminal lifecycle evidence."
+    }
+  ],
+  "context_packets": [
+    {
+      "packet_id": "packet-timeout-001",
+      "role": "implementer",
+      "runtime_type": "custom",
+      "tier": "Tier 2",
+      "objective": "Implement the bounded Phaser game loop from provided handles.",
+      "scope": [
+        "file:src/game/GameScene.ts:1",
+        "file:src/game/mathPrompt.ts:1",
+        "cmd:npm-test-game"
+      ],
+      "non_goals": [
+        "Do not redesign the app shell or add unrelated gameplay systems."
+      ],
+      "evidence_handles": [
+        "file:src/game/GameScene.ts:1",
+        "file:src/game/mathPrompt.ts:1",
+        "scenario:subagent-timeout-recovery"
+      ],
+      "allowed_tools_paths": [
+        "src/game/GameScene.ts",
+        "src/game/mathPrompt.ts",
+        "tests/mathPrompt.test.ts"
+      ],
+      "model": "gpt-5.4",
+      "reasoning_effort": "medium",
+      "writable": true,
+      "entry_condition": "Start when the Phaser scene and math prompt handles are available.",
+      "exit_condition": "Return done, blocked, stuck, or a precise Context request.",
+      "output_budget_words": 350,
+      "context_request_rule": "Use Context request with reason, requested_handle, and decision_impact before asking for broader context.",
+      "expected_return": [
+        "Files changed",
+        "Patch summary",
+        "Validation notes",
+        "Stuck status"
+      ]
+    },
+    {
+      "packet_id": "packet-timeout-002",
+      "role": "implementer_strong",
+      "runtime_type": "custom",
+      "tier": "Tier 2",
+      "objective": "Complete the same bounded Phaser game loop after timeout recovery.",
+      "scope": [
+        "file:src/game/GameScene.ts:1",
+        "file:src/game/mathPrompt.ts:1",
+        "ledger:timeout-stuck-summary-001",
+        "cmd:npm-test-game"
+      ],
+      "non_goals": [
+        "Do not broaden beyond the original game-loop objective."
+      ],
+      "evidence_handles": [
+        "ledger:timeout-stuck-summary-001",
+        "file:src/game/GameScene.ts:1",
+        "diff:working-tree"
+      ],
+      "allowed_tools_paths": [
+        "src/game/GameScene.ts",
+        "src/game/mathPrompt.ts",
+        "tests/mathPrompt.test.ts"
+      ],
+      "model": "gpt-5.5",
+      "reasoning_effort": "high",
+      "writable": true,
+      "entry_condition": "Start after root records timeout as stuck and narrows the packet.",
+      "exit_condition": "Return done, blocked, stuck, or a precise Context request.",
+      "output_budget_words": 350,
+      "context_request_rule": "Use Context request with reason, requested_handle, and decision_impact before asking for broader context.",
+      "expected_return": [
+        "Files changed",
+        "Patch summary",
+        "Validation notes",
+        "Residual risks"
+      ]
+    }
+  ],
+  "subagent_lifecycle": [
+    {
+      "packet_id": "packet-timeout-001",
+      "role": "implementer",
+      "event": "started",
+      "timestamp": "2026-05-17T18:02:00Z",
+      "evidence": "Implementation packet accepted with bounded Phaser handles."
+    },
+    {
+      "packet_id": "packet-timeout-001",
+      "role": "implementer",
+      "event": "stuck",
+      "exit_status": "stuck",
+      "timestamp": "2026-05-17T18:10:00Z",
+      "evidence": "Subagent timed out and closed without producing useful changes.",
+      "root_decision": "Record timeout as stuck evidence, repair the packet, and redelegate the same objective to implementer_strong instead of root takeover."
+    },
+    {
+      "packet_id": "packet-timeout-002",
+      "role": "implementer_strong",
+      "event": "packet-repaired",
+      "timestamp": "2026-05-17T18:11:00Z",
+      "evidence": "Root narrowed the packet to the game loop, math prompt module, and focused test command.",
+      "root_decision": "Use the repaired packet for same-objective escalation."
+    },
+    {
+      "packet_id": "packet-timeout-002",
+      "role": "implementer_strong",
+      "event": "started",
+      "timestamp": "2026-05-17T18:12:00Z",
+      "evidence": "Strong implementation packet accepted after timeout recovery."
+    },
+    {
+      "packet_id": "packet-timeout-002",
+      "role": "implementer_strong",
+      "event": "completed",
+      "exit_status": "done",
+      "timestamp": "2026-05-17T18:20:00Z",
+      "evidence": "Delegated implementation completed and returned focused validation notes."
+    }
+  ],
+  "escalations": [
+    {
+      "from_role": "implementer",
+      "to_role": "implementer_strong",
+      "reason": "The implementation packet timed out and produced no useful changes.",
+      "result": "Same-objective escalation completed the bounded game-loop implementation."
+    }
+  ],
+  "validation": [
+    {
+      "command": "npm test -- mathPrompt",
+      "result": "passed",
+      "evidence": "Synthetic focused math prompt test passed after delegated implementation."
+    },
+    {
+      "command": "npm run build",
+      "result": "passed",
+      "evidence": "Synthetic browser-game build passed after delegated implementation."
+    }
+  ],
+  "final_review": {
+    "status": "passed",
+    "reviewer": "root",
+    "evidence": [
+      "Packet lifecycle shows the timed-out implementation agent exited stuck.",
+      "Terminal exit recorded for both implementation packets.",
+      "Root repaired and redelegated the same objective instead of root takeover.",
+      "Validation and review were performed after delegated implementation, not as a substitute for it."
+    ],
+    "blockers": []
+  },
+  "residual_risks": [],
+  "usage_estimate": {
+    "subagent_count": 2,
+    "models_used": [
+      "gpt-5.4",
+      "gpt-5.5"
+    ],
+    "notes": "Synthetic timeout recovery fixture; no real usage data."
+  }
+}

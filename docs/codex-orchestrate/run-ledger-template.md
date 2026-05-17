@@ -32,6 +32,8 @@ Open `http://127.0.0.1:8765` to inspect sample ledgers and ignored private ledge
 
 When context packets are used, link routing entries to `packet_id` and record `context_packets` plus `subagent_lifecycle`. Every active packet needs a started event and terminal exit evidence. Use `packet-repaired` when entry conditions were unclear and the root repaired the packet before redelegating; this is the durable packet repair record.
 
+For a timed-out, closed, or no-change subagent, record a `stuck` lifecycle event with `exit_status: "stuck"`, evidence of the timeout/no-change result, and the root decision to repair, split, redelegate, or escalate. The final review should confirm root takeover did not replace substantive implementation delegation after the timeout.
+
 Schema: `schemas/orchestration-ledger.schema.json`
 
 ```json

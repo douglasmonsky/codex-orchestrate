@@ -47,6 +47,7 @@ python3 scripts/serve_orchestration_ui.py --self-test
 python3 scripts/run_orchestration_smoke.py
 python3 scripts/run_orchestration_smoke.py --scenario-id lifecycle-smoke --json
 python3 scripts/run_orchestration_smoke.py --scenario-id context-packet-smoke --json
+python3 scripts/run_orchestration_smoke.py --scenario-id timeout-recovery-smoke --json
 python3 scripts/run_orchestration_smoke.py --scenario-id high-risk-security-change --json
 python3 scripts/sync_orchestration_skill.py --check
 find .agents/skills -name SKILL.md -print
@@ -66,7 +67,7 @@ When TOML agent profiles change, inspect them for valid names, explicit model ro
 
 ## Orchestration Prompt Surface
 
-When a request starts with `/orchestrate`, use `codex-orchestrate`. Prompt assembly should expose the activation contract, controller loop, first-step classification, model routing, source of truth, runtime fallback, routing ledger, context packet, context handle, context request, entry condition, exit condition, packet id, subagent lifecycle, terminal exit, packet repair, and final senior review language so smoke checks can detect stale or missing orchestration instructions.
+When a request starts with `/orchestrate`, use `codex-orchestrate`. Prompt assembly should expose the activation contract, controller loop, first-step classification, model routing, source of truth, runtime fallback, routing ledger, context packet, context handle, context request, entry condition, exit condition, packet id, subagent lifecycle, terminal exit, packet repair, timed-out subagent recovery, root takeover prevention, redelegate/escalate same-objective recovery, and final senior review language so smoke checks can detect stale or missing orchestration instructions.
 
 ## Data Privacy Rules
 

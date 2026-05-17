@@ -111,6 +111,8 @@ Root decision:
 
 Entry failure returns to root as packet repair instead of broad exploration. Context requests must name packet id, reason, requested handle/path, and decision impact. Final root review checks that every active packet has terminal exit evidence.
 
+If a subagent times out, is closed, or produces no useful changes, record a `stuck` lifecycle event with `exit_status: stuck`, evidence that no usable result was produced, and a root decision to repair, split, redelegate, or escalate the same narrow objective. Do not turn that timeout into root implementation except for a deterministic micro-action.
+
 ## Default subagent assignment template
 
 ```text
@@ -195,7 +197,9 @@ Intended model:
 Actual model:
 Model fallback used:
 What was tried:
+Timeout/closed/no-change status:
 Files inspected/touched:
+Changes produced:
 Commands run:
 Observed evidence:
 What failed or remains unclear:

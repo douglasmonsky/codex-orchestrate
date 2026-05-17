@@ -233,6 +233,9 @@
     "subagent lifecycle",
     "terminal exit",
     "packet repair",
+    "timed-out subagent",
+    "root takeover",
+    "redelegate",
     "controller loop",
     "first-step classification",
     "final senior review"
@@ -241,7 +244,8 @@
     "model-routing-smoke",
     "fallback-smoke",
     "context-packet-smoke",
-    "lifecycle-smoke"
+    "lifecycle-smoke",
+    "timeout-recovery-smoke"
   ],
   "smoke_scenarios": {
     "model-routing-smoke": "/orchestrate model routing smoke test",
@@ -249,6 +253,7 @@
     "context-packet-smoke": "/orchestrate Use compact context packets and context handles for a small repo fix before asking subagents for extra context.",
     "context-request-smoke": "/orchestrate A subagent needs more evidence. Require a structured context request before adding more context.",
     "lifecycle-smoke": "/orchestrate Record packet id, subagent lifecycle, terminal exit, and packet repair behavior for a small delegated task.",
+    "timeout-recovery-smoke": "/orchestrate An implementation subagent timed out without changes. Recover without root takeover by repairing the packet, redelegating, or escalating the same narrow objective.",
     "high-risk-security-change": "/orchestrate Change authorization behavior for this API and make sure it is safe.",
     "tier0-upgrades-to-delegation": "/orchestrate What does this repo do? Actually, inspect the code and update the README if it is stale."
   }

@@ -10,7 +10,7 @@ If the user starts with `/orchestrate`, treat that as an explicit request for co
 
 Activation must initialize the controller loop, routing ledger, first-step classification, model/effort selection, and final-review gate before substantive work.
 
-Treat delegation as a continuous routing loop, not a one-time upfront choice. Reevaluate whether to delegate, escalate, pass off, de-escalate, or continue directly after each user clarification, direct root step, subagent result, validation result, scope change, or new risk. If the root initially answers directly but the next step becomes repository, command, research, design, implementation, validation, review, or documentation work, leave direct mode and spawn the cheapest safe subagent for that new step.
+Treat delegation as a continuous routing loop, not a one-time upfront choice. Reevaluate whether to delegate, escalate, pass off, de-escalate, or continue directly after each user clarification, direct root step, subagent result, timed-out or closed subagent, validation result, scope change, or new risk. If the root initially answers directly but the next step becomes repository, command, research, design, implementation, validation, review, or documentation work, leave direct mode and spawn the cheapest safe subagent for that new step.
 
 Initial subagent dispatch should use a compact context packet rather than raw repo context, transcripts, or pasted logs. Include packet id, objective, scope, non-goals, context handles, allowed tools/paths, model/effort, entry condition, exit condition, output budget, and context-request rule. Use handles such as `file:path:line`, `cmd:name`, `diff:path`, `ledger:entry`, `artifact:path`, and `scenario:id`.
 
@@ -39,7 +39,9 @@ Use the cheapest safe agent/model/effort first:
 
 When a subagent is stuck, escalate model class and/or reasoning effort on the same narrow unresolved task before switching specialties. Raise model class first when the current model lacks capability; raise effort first when the model is right but needs deeper deliberation.
 
-Treat a subagent as stuck when it cannot locate relevant files/commands, reports low confidence, produces an unvalidated patch, reproduces but cannot explain a failure, returns conflicting hypotheses, or asks for root judgment without enough evidence.
+Treat a subagent as stuck when it cannot locate relevant files/commands, reports low confidence, produces an unvalidated patch, reproduces but cannot explain a failure, times out or closes without useful changes, returns conflicting hypotheses, or asks for root judgment without enough evidence.
+
+A timeout, closed agent, or no-change implementation packet must trigger packet repair, split, redelegation, or same-objective escalation before substantive implementation continues. Do not let timeout recovery become root takeover except for deterministic micro-actions; validation/review delegation after root implements the feature is not enough.
 
 Default ladders:
 

@@ -20,15 +20,15 @@ The global copy in `~/.codex/skills/codex-orchestrate/` is an installed runtime 
 
 ## New policy emphasis
 
-This version adds seven hard policies:
+This version adds eight hard policies:
 
 1. **Activation initializes the controller.** `/orchestrate` and `$codex-orchestrate` initialize the controller loop, routing ledger, first-step classification, model/effort selection, and final-review gate.
-2. **Routing is continuous.** The root reevaluates delegation after each user clarification, direct root step, subagent result, validation result, scope change, or new risk. If a Tier 0 direct answer grows into repository or tool work, the root leaves Tier 0 and delegates the next step.
+2. **Routing is continuous.** The root reevaluates delegation after each user clarification, direct root step, subagent result, timed-out or closed subagent, validation result, scope change, or new risk. If a Tier 0 direct answer grows into repository or tool work, the root leaves Tier 0 and delegates the next step.
 3. **Runtime fallback preserves role intent.** If custom agent profiles are unavailable, read-only work maps to `explorer`, implementation/test/docs work maps to `worker`, and planning/synthesis maps to `default`.
 4. **Model routing is explicit.** The root chooses a concrete model and reasoning effort for each subagent. Use `gpt-5.3-codex-spark` for ultra-fast text-only coding loops, `gpt-5.4-mini` for lightweight general support, `gpt-5.4` for normal judgment, and `gpt-5.5` for high-risk or high-ambiguity specialists.
 5. **Initial context is packetized.** Initial dispatch uses a compact context packet with packet id, objective, scope, non-goals, context handles, allowed tools/paths, model/effort, entry condition, exit condition, output budget, and a Context request rule.
 6. **Lifecycle evidence is ledger-linked.** Durable ledgers can link packet id, subagent lifecycle, context requests, packet repair, and terminal exit evidence to routing decisions.
-7. **Stuck work escalates model and/or effort first.** When a subagent gets stuck, retry the same narrow unresolved task at the next model class and/or reasoning-effort level. Pass off to a different specialist only when the evidence shows role mismatch.
+7. **Stuck work escalates model and/or effort first.** When a subagent gets stuck, retry the same narrow unresolved task at the next model class and/or reasoning-effort level. A timed-out, closed, or no-change subagent is stuck evidence, not a root takeover license. Pass off to a different specialist only when the evidence shows role mismatch.
 8. **The root performs final senior review.** The top-level/root agent must finish by reviewing subagent output as a senior developer, code reviewer, and architect. This is a check-and-balance gate; it is not fully outsourced to a reviewer subagent.
 
 The model policy follows the current OpenAI Codex docs for subagent model pins, Codex model selection, and usage-limit tradeoffs:
@@ -126,6 +126,8 @@ Initial subagent dispatch should use compact context packets, not raw repo conte
 
 When a durable ledger is required, connect each delegated subagent to packet id and subagent lifecycle evidence. Every active packet should have a start event and terminal exit such as done, blocked, stuck, out-of-scope, or context-requested. Entry failures should return as packet repair, and final review should verify terminal exit evidence before completion.
 
+If an implementation packet times out, closes, or produces no useful changes, record it as stuck, repair or split the packet, and redelegate or escalate the same narrow objective before implementation continues. Delegating validation or review after root implements the substantive work does not satisfy delegate-first orchestration.
+
 Produce a durable post-run ledger for any Tier 3 or Tier 4 run, any model fallback, any security/privacy/migration/auth task, any run with more than two subagents, any failed validation, or any final-review blocker. Tier 1 and Tier 2 ledgers are optional unless one of those triggers appears. Inside MonskySkills, use `scripts/create_orchestration_ledger.py` to write an ignored local ledger and validate it immediately. Elsewhere, use `docs/codex-orchestrate/run-ledger-template.md` and `schemas/orchestration-ledger.schema.json` manually to record actual model/effort usage, fallbacks, validation, final review, and residual risk. Keep real ledgers local or sanitized unless they contain no private task data.
 
 Run the lightweight checker and sync check after changes:
@@ -144,6 +146,7 @@ python3 scripts/serve_orchestration_ui.py --self-test
 python3 scripts/run_orchestration_smoke.py
 python3 scripts/run_orchestration_smoke.py --scenario-id lifecycle-smoke --json
 python3 scripts/run_orchestration_smoke.py --scenario-id context-packet-smoke --json
+python3 scripts/run_orchestration_smoke.py --scenario-id timeout-recovery-smoke --json
 python3 scripts/run_orchestration_smoke.py --scenario-id high-risk-security-change --json
 python3 scripts/sync_orchestration_skill.py --check
 codex debug prompt-input '/orchestrate model routing smoke test'

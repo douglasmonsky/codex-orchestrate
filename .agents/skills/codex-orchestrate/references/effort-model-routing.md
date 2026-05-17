@@ -22,7 +22,7 @@ The repo-level harness stores the machine-readable role/model policy in `evals/c
 
 ## Routing principle
 
-Use the cheapest adequate worker, concrete model, and reasoning effort for the current step. Routing is not fixed at the start of the task: reassess before each new phase, after every subagent result, after direct root work, and whenever new evidence changes scope or risk. Escalate only a narrow hard part, not the whole task.
+Use the cheapest adequate worker, concrete model, and reasoning effort for the current step. Routing is not fixed at the start of the task: reassess before each new phase, after every subagent result, after any timed-out or closed subagent, after direct root work, and whenever new evidence changes scope or risk. Escalate only a narrow hard part, not the whole task.
 
 A strong root model should behave like a controller: classify, delegate, synthesize, escalate, and verify decisions. It should not perform broad search, log digestion, routine edits, or ordinary validation when a cheaper subagent can do them.
 
@@ -63,6 +63,8 @@ Dispatch the first subagent with a compact context packet instead of broad repo 
 The routing policy manifest defines the required packet fields, allowed handle prefixes, required Context request fields, and role-specific output budgets. Treat those budgets as initial-output ceilings, not permission to omit necessary evidence.
 
 If a subagent needs more context, it must return a structured Context request with reason, requested handle/path, and decision impact. The root reassesses before granting context; this can lead to a narrower packet, model/effort escalation, pass-off, or stopping fanout.
+
+If a subagent times out, is closed, or produces no useful changes, keep the intended role objective alive: repair or split the packet, then redelegate or escalate the same narrow work. Do not let timeout recovery become root takeover except for a deterministic micro-action.
 
 ## Effort levels
 

@@ -43,6 +43,7 @@ SMOKE_SCRIPT = ROOT / "scripts" / "run_orchestration_smoke.py"
 CONTEXT_PACKET_CHECK_SCRIPT = ROOT / "scripts" / "check_orchestration_context_packets.py"
 LIFECYCLE_SCRIPT = ROOT / "scripts" / "check_orchestration_lifecycle.py"
 README = ROOT / "README.md"
+AGENTS_MD = ROOT / "AGENTS.md"
 PACKAGE_README = ROOT / "docs" / "codex-orchestrate" / "package-readme.md"
 SNIPPET = ROOT / "docs" / "codex-orchestrate" / "AGENTS.orchestration.snippet.md"
 CONFIG_EXAMPLE = ROOT / ".codex" / "config.orchestration.example.toml"
@@ -95,6 +96,7 @@ FORBIDDEN_STALE_POLICY_PHRASES = [
     "effort/model level",
     "fast" + "-mini",
     "model class" + " only",
+    "remaining bounded correction is cheaper and safer for the root",
 ]
 
 REQUIRED_SCENARIO_EXPECTED_FIELDS = [
@@ -183,6 +185,9 @@ def check_skill() -> None:
         "subagent lifecycle",
         "terminal exit",
         "packet repair",
+        "timed-out subagent",
+        "root takeover",
+        "redelegate",
         "serve_orchestration_ui.py",
         "read-only dashboard review",
     ]:
@@ -299,6 +304,9 @@ def check_routing_policy() -> dict:
         "subagent lifecycle",
         "terminal exit",
         "packet repair",
+        "timed-out subagent",
+        "root takeover",
+        "redelegate",
         "controller loop",
         "first-step classification",
         "final senior review",
@@ -399,6 +407,7 @@ def check_scenarios() -> None:
         "model-fallback",
         "final-review-failure",
         "risk-controller",
+        "timeout-recovery",
     }:
         require(required in categories, f"missing scenario category: {required}")
 
@@ -456,7 +465,7 @@ def check_agents() -> None:
 
 
 def check_docs() -> None:
-    combined = "\n".join(read(path) for path in [README, PACKAGE_README, SNIPPET])
+    combined = "\n".join(read(path) for path in [README, AGENTS_MD, PACKAGE_README, SNIPPET])
     for phrase in [
         "source of truth",
         "authoritative",
@@ -501,6 +510,10 @@ def check_docs() -> None:
         "read-only local dashboard",
         "http://127.0.0.1:8765",
         "local/orchestration-ledgers",
+        "timed-out",
+        "root takeover",
+        "redelegate",
+        "timeout-recovery-smoke",
     ]:
         require(re.search(re.escape(phrase), combined, re.IGNORECASE), f"docs missing: {phrase}")
 
@@ -626,6 +639,8 @@ def check_ledger_artifacts() -> None:
         "packet_id",
         "terminal exit",
         "packet repair",
+        "timed-out",
+        "root takeover",
     ]:
         require_contains(template, phrase, "run-ledger-template.md")
 
@@ -749,6 +764,7 @@ def check_ledger_validator_and_samples() -> None:
         "context-request-denied-escalated.json",
         "stale-packet-without-exit.json",
         "over-budget-lifecycle-failure.json",
+        "subagent-timeout-recovery.json",
     }
     files = sorted(SAMPLE_LEDGERS.glob("*.json"))
     require({path.name for path in files} == expected_samples, "sample ledger roster changed")

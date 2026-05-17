@@ -228,5 +228,28 @@
       "escalation": "root decision if no clear stop condition exists",
       "final_review": "root verifies fanout control and scope boundary"
     }
+  },
+  {
+    "id": "subagent-timeout-recovery",
+    "prompt": "/orchestrate The implementer timed out without changes while building a browser game. Continue correctly without root taking over implementation.",
+    "category": "timeout-recovery",
+    "expected": {
+      "route": "Treat timeout, closed agent, or no useful changes as stuck evidence and rerun routing before implementation continues.",
+      "delegation": "Repair or split the implementation packet and redelegate the same narrow objective to implementer, implementer_strong, or fallback worker; root may only do deterministic micro-actions.",
+      "escalation": "Escalate the same implementation objective by model class and/or effort; pass off only on role mismatch.",
+      "model_routing": "Record the prior implementer model/effort, then use a stronger implementation role/model if capability or timeout was the bottleneck.",
+      "final_review": "Root verifies implementation remained delegated after timeout and validation/review were not used as substitutes for implementation delegation.",
+      "must_delegate": true,
+      "runtime_fallback": "worker"
+    },
+    "expected_ledger": {
+      "tier": "Tier 2",
+      "role": "implementer then implementer_strong",
+      "runtime_type": "implementer/implementer_strong or worker fallback",
+      "model": "gpt-5.4 then gpt-5.5",
+      "effort": "medium then high",
+      "escalation": "timeout or no-change result becomes stuck evidence, followed by packet repair and same-objective redelegation",
+      "final_review": "root confirms no root takeover occurred after timeout"
+    }
   }
 ]

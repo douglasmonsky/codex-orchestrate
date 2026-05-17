@@ -59,7 +59,7 @@ Delegation is a continuous control loop, not a one-time routing decision. At eve
 1. Intake and classify the current step.
 2. Update the routing ledger.
 3. Delegate the smallest substantive step to the cheapest safe role.
-4. Reassess after each user clarification, root inspection, subagent result, failed command, validation result, conflict, scope change, or new risk.
+4. Reassess after each user clarification, root inspection, subagent result, timed-out or closed subagent, failed command, validation result, conflict, scope change, or new risk.
 5. Escalate, de-escalate, pass off, or continue directly only for the next bounded step.
 6. Perform final root senior review before answering.
 
@@ -100,7 +100,7 @@ Delegate substantive repository/tool/research/design work unless one of these ap
 - The user explicitly forbids subagents.
 - The request is pure conversational Q&A.
 - The step is a deterministic micro-action and delegation overhead is larger than the work.
-- A subagent already failed and the remaining bounded correction is cheaper and safer for the root to complete directly.
+- A failed or timed-out subagent leaves only a deterministic micro-action, and the root records why redelegation would add no useful evidence.
 - The root is performing the final senior review over cited evidence, diffs, and validation summaries.
 
 Use the lowest tier that safely satisfies the current step:
@@ -183,7 +183,9 @@ Use `references/handoff-contracts.md` for concrete prompt templates.
 
 ## Escalation And Pass-Off
 
-A subagent is stuck when it reports low confidence, cannot locate the relevant surface, returns conflicting hypotheses, produces an unvalidated patch, reproduces but cannot explain a failure, exceeds its output budget without resolving the objective, or asks the root to decide without enough evidence.
+A subagent is stuck when it reports low confidence, cannot locate the relevant surface, returns conflicting hypotheses, produces an unvalidated patch, reproduces but cannot explain a failure, times out or closes without useful changes, exceeds its output budget without resolving the objective, or asks the root to decide without enough evidence.
+
+A timed-out subagent is not permission for root takeover. Record it as stuck lifecycle evidence, repair or split the packet, then redelegate or escalate the same narrow objective. Validation/review delegation after root implements the substantive work does not satisfy delegate-first orchestration.
 
 Default escalation sequence:
 
