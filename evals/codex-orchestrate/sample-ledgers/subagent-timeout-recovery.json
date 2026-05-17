@@ -61,8 +61,6 @@
     {
       "packet_id": "packet-timeout-001",
       "role": "implementer",
-      "runtime_type": "custom",
-      "tier": "Tier 2",
       "objective": "Implement the bounded Phaser game loop from provided handles.",
       "scope": [
         "file:src/game/GameScene.ts:1",
@@ -77,16 +75,16 @@
         "file:src/game/mathPrompt.ts:1",
         "scenario:subagent-timeout-recovery"
       ],
-      "allowed_tools_paths": [
+      "allowed_actions_and_paths": [
         "src/game/GameScene.ts",
         "src/game/mathPrompt.ts",
         "tests/mathPrompt.test.ts"
       ],
-      "model": "gpt-5.4",
-      "reasoning_effort": "medium",
-      "writable": true,
-      "entry_condition": "Start when the Phaser scene and math prompt handles are available.",
-      "exit_condition": "Return done, blocked, stuck, or a precise Context request.",
+      "constraints": [
+        "Only edit files listed in allowed_actions_and_paths.",
+        "Stay within assigned scope and return concise evidence, not pasted outputs."
+      ],
+      "done_condition": "Return done, blocked, stuck, or a precise Context request.",
       "output_budget_words": 350,
       "context_request_rule": "Use Context request with reason, requested_handle, and decision_impact before asking for broader context.",
       "expected_return": [
@@ -99,8 +97,6 @@
     {
       "packet_id": "packet-timeout-002",
       "role": "implementer_strong",
-      "runtime_type": "custom",
-      "tier": "Tier 2",
       "objective": "Complete the same bounded Phaser game loop after timeout recovery.",
       "scope": [
         "file:src/game/GameScene.ts:1",
@@ -116,16 +112,16 @@
         "file:src/game/GameScene.ts:1",
         "diff:working-tree"
       ],
-      "allowed_tools_paths": [
+      "allowed_actions_and_paths": [
         "src/game/GameScene.ts",
         "src/game/mathPrompt.ts",
         "tests/mathPrompt.test.ts"
       ],
-      "model": "gpt-5.5",
-      "reasoning_effort": "high",
-      "writable": true,
-      "entry_condition": "Start after root records timeout as stuck and narrows the packet.",
-      "exit_condition": "Return done, blocked, stuck, or a precise Context request.",
+      "constraints": [
+        "Only edit files listed in allowed_actions_and_paths.",
+        "Stay within assigned scope and return concise evidence, not pasted outputs."
+      ],
+      "done_condition": "Return done, blocked, stuck, or a precise Context request.",
       "output_budget_words": 350,
       "context_request_rule": "Use Context request with reason, requested_handle, and decision_impact before asking for broader context.",
       "expected_return": [

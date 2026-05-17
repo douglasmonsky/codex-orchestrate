@@ -41,8 +41,6 @@
     {
       "packet_id": "packet-context-granted-001",
       "role": "implementer_simple",
-      "runtime_type": "custom",
-      "tier": "Tier 2",
       "objective": "Complete the same narrow package fix without broadening scope.",
       "scope": [
         "file:src/package/config.py:10",
@@ -55,15 +53,15 @@
         "ledger:stuck-summary-001",
         "file:src/package/config.py:10"
       ],
-      "allowed_tools_paths": [
+      "allowed_actions_and_paths": [
         "src/package/config.py",
         "src/package/__init__.py"
       ],
-      "model": "gpt-5.3-codex-spark",
-      "reasoning_effort": "medium",
-      "writable": true,
-      "entry_condition": "Start when the stuck summary and suspected config handle are available.",
-      "exit_condition": "Return done, stuck, or a precise Context request.",
+      "constraints": [
+        "Only edit files listed in allowed_actions_and_paths.",
+        "Stay within assigned scope and return concise evidence, not pasted outputs."
+      ],
+      "done_condition": "Return done, stuck, or a precise Context request.",
       "output_budget_words": 330,
       "context_request_rule": "Use Context request with reason, requested_handle, and decision_impact before asking for broader context.",
       "expected_return": [
@@ -80,7 +78,7 @@
       "role": "implementer_simple",
       "event": "started",
       "timestamp": "2026-05-17T14:02:00Z",
-      "evidence": "Packet accepted; entry condition was clear."
+      "evidence": "Packet accepted; done condition was clear."
     },
     {
       "packet_id": "packet-context-granted-001",

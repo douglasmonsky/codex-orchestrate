@@ -179,8 +179,9 @@ def check_skill() -> None:
         "context packet",
         "context handle",
         "Context request",
-        "Entry condition",
-        "Exit condition",
+        "minimal packet",
+        "done condition",
+        "root-only routing metadata",
         "packet id",
         "subagent lifecycle",
         "terminal exit",
@@ -257,24 +258,31 @@ def check_routing_policy() -> dict:
         "required_context_request_fields",
         "handle_prefixes",
         "role_output_budgets_words",
+        "root_only_packet_fields",
+        "fixture_only_packet_fields",
         "raw_dump_forbidden_keys",
         "raw_dump_markers",
     ]:
         require(field in context_policy, f"routing-policy context_packet missing field: {field}")
+    require(context_policy["schema_version"] == "2.0", "context packet policy should use schema_version 2.0")
     for field in [
         "objective",
         "scope",
         "non_goals",
         "evidence_handles",
-        "allowed_tools_paths",
-        "model",
-        "reasoning_effort",
-        "entry_condition",
-        "exit_condition",
+        "allowed_actions_and_paths",
+        "constraints",
+        "done_condition",
         "output_budget_words",
         "context_request_rule",
+        "expected_return",
     ]:
         require(field in context_policy["required_packet_fields"], f"context packet required fields missing: {field}")
+    root_only = set(context_policy["root_only_packet_fields"])
+    for field in ["model", "reasoning_effort", "runtime_type", "tier", "model_sufficiency", "preferred_concrete_model", "escalation_target"]:
+        require(field in root_only, f"context packet root-only fields missing: {field}")
+        require(field not in context_policy["required_packet_fields"], f"root-only field is still required in subagent packet: {field}")
+    require("scenario_id" in context_policy["fixture_only_packet_fields"], "scenario_id should be fixture-only for context packets")
     for field in ["reason", "requested_handle", "decision_impact"]:
         require(field in context_policy["required_context_request_fields"], f"context request required fields missing: {field}")
     for prefix in ["file:", "cmd:", "diff:", "ledger:", "artifact:", "scenario:"]:
@@ -298,8 +306,9 @@ def check_routing_policy() -> dict:
         "context packet",
         "context handle",
         "context request",
-        "entry condition",
-        "exit condition",
+        "done condition",
+        "minimal packet",
+        "root-only routing metadata",
         "packet id",
         "subagent lifecycle",
         "terminal exit",
@@ -342,9 +351,10 @@ def check_references() -> None:
         "Context packet template",
         "Context request template",
         "Subagent lifecycle ledger template",
-        "Runtime agent type",
         "Model selected",
         "Why this model is sufficient",
+        "Root-only routing metadata stays out",
+        "minimal packet template",
         "Stuck-state summary template",
     ]:
         require_contains(handoffs, phrase, "handoff-contracts.md")
@@ -408,6 +418,10 @@ def check_scenarios() -> None:
         "final-review-failure",
         "risk-controller",
         "timeout-recovery",
+        "validation-laundering",
+        "role-mismatch-loop",
+        "contradictory-outputs",
+        "scope-expansion",
     }:
         require(required in categories, f"missing scenario category: {required}")
 
@@ -489,8 +503,9 @@ def check_docs() -> None:
         "context packet",
         "context handle",
         "context request",
-        "entry condition",
-        "exit condition",
+        "minimal packet",
+        "done condition",
+        "root-only routing metadata",
         "check_orchestration_context_packets.py",
         "check_orchestration_lifecycle.py",
         "orchestration-context-packet.schema.json",
@@ -514,6 +529,7 @@ def check_docs() -> None:
         "root takeover",
         "redelegate",
         "timeout-recovery-smoke",
+        "minimal-packet-smoke",
     ]:
         require(re.search(re.escape(phrase), combined, re.IGNORECASE), f"docs missing: {phrase}")
 
@@ -598,8 +614,23 @@ def check_ledger_artifacts() -> None:
     for field in ["context_packets", "subagent_lifecycle"]:
         require(field in schema["properties"], f"ledger schema missing optional field: {field}")
     context_required = set(schema["$defs"]["context_packet"]["required"])
-    for field in ["packet_id", "role", "model", "reasoning_effort", "output_budget_words", "evidence_handles", "entry_condition", "exit_condition"]:
+    for field in [
+        "packet_id",
+        "role",
+        "objective",
+        "scope",
+        "non_goals",
+        "evidence_handles",
+        "allowed_actions_and_paths",
+        "constraints",
+        "done_condition",
+        "output_budget_words",
+        "context_request_rule",
+        "expected_return",
+    ]:
         require(field in context_required, f"ledger context_packet missing required field: {field}")
+    for field in ["model", "reasoning_effort", "runtime_type", "tier", "writable", "entry_condition", "exit_condition", "allowed_tools_paths"]:
+        require(field not in context_required, f"ledger context_packet still requires root-only or stale field: {field}")
     lifecycle_required = set(schema["$defs"]["lifecycle_event"]["required"])
     for field in ["packet_id", "role", "event", "timestamp", "evidence"]:
         require(field in lifecycle_required, f"ledger lifecycle_event missing required field: {field}")
@@ -639,6 +670,8 @@ def check_ledger_artifacts() -> None:
         "packet_id",
         "terminal exit",
         "packet repair",
+        "minimal packet",
+        "root-only routing metadata",
         "timed-out",
         "root takeover",
     ]:
@@ -649,29 +682,28 @@ def check_context_packet_artifacts() -> None:
     schema_text = read(CONTEXT_PACKET_SCHEMA)
     schema = json.loads(schema_text)
     require(schema.get("title") == "Codex Orchestration Context Packet", "context packet schema title changed")
+    require(schema["properties"]["schema_version"].get("const") == "2.0", "context packet schema should use version 2.0")
     required = set(schema.get("required", []))
     for field in [
-        "schema_version",
         "packet_id",
-        "scenario_id",
         "role",
-        "runtime_type",
-        "tier",
         "objective",
         "scope",
         "non_goals",
         "evidence_handles",
-        "allowed_tools_paths",
-        "model",
-        "reasoning_effort",
-        "writable",
-        "entry_condition",
-        "exit_condition",
+        "allowed_actions_and_paths",
+        "constraints",
+        "done_condition",
         "output_budget_words",
         "context_request_rule",
         "expected_return",
     ]:
         require(field in required, f"context packet schema missing required field: {field}")
+    require("schema_version" in schema.get("properties", {}), "context packet schema should allow optional schema_version")
+    for field in ["model", "reasoning_effort", "runtime_type", "tier", "writable", "entry_condition", "exit_condition", "allowed_tools_paths"]:
+        require(field not in required, f"context packet schema still requires root-only or stale field: {field}")
+        require(field not in schema.get("properties", {}), f"context packet schema still exposes root-only or stale field: {field}")
+    require("scenario_id" in schema.get("properties", {}), "context packet schema should allow scenario_id only for committed eval fixtures")
     request_required = set(schema["$defs"]["context_request"]["required"])
     for field in ["reason", "requested_handle", "decision_impact"]:
         require(field in request_required, f"context request schema missing required field: {field}")
@@ -683,6 +715,8 @@ def check_context_packet_artifacts() -> None:
         "role_context_budget_map",
         "expected_result",
         "raw dump",
+        "root-only routing metadata",
+        "validate_no_root_only_metadata",
         "handle_prefixes",
         "required_context_request_fields",
         "--json",
@@ -694,6 +728,8 @@ def check_context_packet_artifacts() -> None:
         "security-review.json",
         "stuck-context-request.json",
         "over-broad-packet-rejection.json",
+        "minimal-packet-v2.json",
+        "root-metadata-rejection.json",
     }
     files = sorted(SAMPLE_CONTEXT_PACKETS.glob("*.json"))
     require({path.name for path in files} == expected_samples, "sample context-packet roster changed")
@@ -765,6 +801,10 @@ def check_ledger_validator_and_samples() -> None:
         "stale-packet-without-exit.json",
         "over-budget-lifecycle-failure.json",
         "subagent-timeout-recovery.json",
+        "validation-only-laundering-failure.json",
+        "role-mismatch-loop-recovery.json",
+        "contradictory-subagent-outputs.json",
+        "scope-expansion-blocked.json",
     }
     files = sorted(SAMPLE_LEDGERS.glob("*.json"))
     require({path.name for path in files} == expected_samples, "sample ledger roster changed")

@@ -170,18 +170,13 @@
       "required": [
         "packet_id",
         "role",
-        "runtime_type",
-        "tier",
         "objective",
         "scope",
         "non_goals",
         "evidence_handles",
-        "allowed_tools_paths",
-        "model",
-        "reasoning_effort",
-        "writable",
-        "entry_condition",
-        "exit_condition",
+        "allowed_actions_and_paths",
+        "constraints",
+        "done_condition",
         "output_budget_words",
         "context_request_rule",
         "expected_return"
@@ -191,8 +186,6 @@
         "packet_id": {"type": "string"},
         "scenario_id": {"type": "string"},
         "role": {"type": "string"},
-        "runtime_type": {"type": "string"},
-        "tier": {"type": "string"},
         "objective": {"type": "string"},
         "scope": {
           "type": "array",
@@ -206,15 +199,15 @@
           "type": "array",
           "items": {"type": "string"}
         },
-        "allowed_tools_paths": {
+        "allowed_actions_and_paths": {
           "type": "array",
           "items": {"type": "string"}
         },
-        "model": {"type": "string"},
-        "reasoning_effort": {"type": "string"},
-        "writable": {"type": "boolean"},
-        "entry_condition": {"type": "string"},
-        "exit_condition": {"type": "string"},
+        "constraints": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "done_condition": {"type": "string"},
         "output_budget_words": {"type": "integer", "minimum": 1},
         "context_request_rule": {"type": "string"},
         "expected_return": {

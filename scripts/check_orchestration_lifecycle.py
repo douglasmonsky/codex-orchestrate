@@ -50,7 +50,7 @@ def expected_lifecycle_result(ledger: dict[str, Any]) -> str:
 
 def packet_for_validation(packet: dict[str, Any], scenario_id: str) -> dict[str, Any]:
     normalized = dict(packet)
-    normalized.setdefault("schema_version", "1.0")
+    normalized.setdefault("schema_version", "2.0")
     normalized.setdefault("scenario_id", scenario_id)
     return normalized
 

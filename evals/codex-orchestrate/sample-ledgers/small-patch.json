@@ -40,8 +40,6 @@
     {
       "packet_id": "packet-small-patch-001",
       "role": "implementer_simple",
-      "runtime_type": "custom",
-      "tier": "Tier 1",
       "objective": "Apply the bounded one-file fix and report focused validation.",
       "scope": [
         "file:src/example.py:42",
@@ -55,15 +53,15 @@
         "diff:working-tree",
         "cmd:focused-unit-test"
       ],
-      "allowed_tools_paths": [
+      "allowed_actions_and_paths": [
         "src/example.py",
         "tests/test_small_patch.py"
       ],
-      "model": "gpt-5.3-codex-spark",
-      "reasoning_effort": "medium",
-      "writable": true,
-      "entry_condition": "Start when the file target and expected behavior are clear.",
-      "exit_condition": "Return patch summary and validation evidence, or a structured Context request.",
+      "constraints": [
+        "Only edit files listed in allowed_actions_and_paths.",
+        "Stay within assigned scope and return concise evidence, not pasted outputs."
+      ],
+      "done_condition": "Return patch summary and validation evidence, or a structured Context request.",
       "output_budget_words": 320,
       "context_request_rule": "Use Context request with reason, requested_handle, and decision_impact before asking for broader context.",
       "expected_return": [
@@ -80,7 +78,7 @@
       "role": "implementer_simple",
       "event": "started",
       "timestamp": "2026-05-17T10:01:00Z",
-      "evidence": "Context packet accepted with clear entry condition."
+      "evidence": "Context packet accepted with clear done condition."
     },
     {
       "packet_id": "packet-small-patch-001",

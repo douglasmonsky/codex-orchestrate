@@ -1,0 +1,190 @@
+{
+  "schema_version": "1.0",
+  "scenario_id": "validation-only-laundering-failure",
+  "task_summary": "Synthetic run where root implemented substantive work and only delegated validation/review after the fact.",
+  "repo_state": {
+    "path": "synthetic-repo",
+    "branch": "main",
+    "starting_status": "clean",
+    "ending_status": "synthetic fixture",
+    "commit": "0000000"
+  },
+  "started_at": "2026-05-17T19:00:00Z",
+  "finished_at": "2026-05-17T19:16:00Z",
+  "root": {
+    "model": "gpt-5.5",
+    "reasoning_effort": "medium"
+  },
+  "routing_entries": [
+    {
+      "packet_id": "packet-launder-test-001",
+      "step": "Run validation after root-local implementation.",
+      "tier": "Tier 2",
+      "agent_role": "test_runner",
+      "runtime_type": "custom",
+      "intended_model": "gpt-5.4-mini",
+      "actual_model": "gpt-5.4-mini",
+      "reasoning_effort": "low",
+      "fallback_notes": "No fallback used.",
+      "why_model_is_sufficient": "The selected model matches the role risk and bounded task complexity.",
+      "evidence": [
+        "Validation was delegated only after root-local implementation."
+      ],
+      "open_risks": [],
+      "next_decision": "Block final response and route substantive implementation back through delegation.",
+      "final_review_gate": "Root checks ledger, packet lifecycle, and validation evidence."
+    },
+    {
+      "packet_id": "packet-launder-review-001",
+      "step": "Review whether delegate-first implementation evidence exists.",
+      "tier": "Tier 2",
+      "agent_role": "reviewer",
+      "runtime_type": "custom",
+      "intended_model": "gpt-5.5",
+      "actual_model": "gpt-5.5",
+      "reasoning_effort": "high",
+      "fallback_notes": "No fallback used.",
+      "why_model_is_sufficient": "The selected model matches the role risk and bounded task complexity.",
+      "evidence": [
+        "Reviewer found no delegated implementation packet before validation."
+      ],
+      "open_risks": [
+        "Delegate-first implementation evidence is missing."
+      ],
+      "next_decision": "Block final response; root must delegate substantive implementation or report blocker.",
+      "final_review_gate": "Root checks ledger, packet lifecycle, and validation evidence."
+    }
+  ],
+  "context_packets": [
+    {
+      "schema_version": "2.0",
+      "packet_id": "packet-launder-test-001",
+      "role": "test_runner",
+      "objective": "Run the focused validation command and report result only.",
+      "scope": [
+        "cmd:npm-test"
+      ],
+      "non_goals": [
+        "Do not broaden beyond the packet scope."
+      ],
+      "evidence_handles": [
+        "cmd:npm-test",
+        "ledger:routing-entry"
+      ],
+      "allowed_actions_and_paths": [
+        "tests/"
+      ],
+      "constraints": [
+        "Read validation surfaces only; do not change files."
+      ],
+      "done_condition": "Return done, blocked, stuck, out-of-scope, or a precise Context request.",
+      "output_budget_words": 240,
+      "context_request_rule": "Use Context request with reason, requested_handle, and decision_impact before asking for broader context.",
+      "expected_return": [
+        "Findings",
+        "Evidence",
+        "Stuck status"
+      ]
+    },
+    {
+      "schema_version": "2.0",
+      "packet_id": "packet-launder-review-001",
+      "role": "reviewer",
+      "objective": "Determine whether this run laundered root-local implementation through validation-only delegation.",
+      "scope": [
+        "ledger:routing-entry",
+        "diff:working-tree"
+      ],
+      "non_goals": [
+        "Do not broaden beyond the packet scope."
+      ],
+      "evidence_handles": [
+        "ledger:routing-entry",
+        "diff:working-tree",
+        "ledger:routing-entry"
+      ],
+      "allowed_actions_and_paths": [
+        "diff:working-tree"
+      ],
+      "constraints": [
+        "Read-only review; do not change files."
+      ],
+      "done_condition": "Return done, blocked, stuck, out-of-scope, or a precise Context request.",
+      "output_budget_words": 380,
+      "context_request_rule": "Use Context request with reason, requested_handle, and decision_impact before asking for broader context.",
+      "expected_return": [
+        "Findings",
+        "Evidence",
+        "Stuck status"
+      ]
+    }
+  ],
+  "subagent_lifecycle": [
+    {
+      "packet_id": "packet-launder-test-001",
+      "role": "test_runner",
+      "event": "started",
+      "timestamp": "2026-05-17T19:04:00Z",
+      "evidence": "Minimal packet accepted with clear done condition."
+    },
+    {
+      "packet_id": "packet-launder-test-001",
+      "role": "test_runner",
+      "event": "completed",
+      "exit_status": "done",
+      "timestamp": "2026-05-17T19:08:00Z",
+      "evidence": "Validation result returned, but implementation delegation was not evidenced."
+    },
+    {
+      "packet_id": "packet-launder-review-001",
+      "role": "reviewer",
+      "event": "started",
+      "timestamp": "2026-05-17T19:09:00Z",
+      "evidence": "Minimal packet accepted with clear done condition."
+    },
+    {
+      "packet_id": "packet-launder-review-001",
+      "role": "reviewer",
+      "event": "completed",
+      "exit_status": "done",
+      "timestamp": "2026-05-17T19:13:00Z",
+      "evidence": "Review found validation-only laundering blocker."
+    }
+  ],
+  "escalations": [
+    {
+      "from_role": "test_runner",
+      "to_role": "reviewer",
+      "reason": "Validation evidence could not prove substantive implementation was delegated.",
+      "result": "Reviewer confirmed final review must block."
+    }
+  ],
+  "validation": [
+    {
+      "command": "npm test",
+      "result": "passed",
+      "evidence": "Synthetic tests passed, but this does not satisfy delegate-first implementation evidence."
+    }
+  ],
+  "final_review": {
+    "status": "blocked",
+    "reviewer": "root",
+    "evidence": [
+      "Packet lifecycle had terminal exits.",
+      "Root final review identified validation-only laundering.",
+      "Substantive implementation was not delegated before validation."
+    ],
+    "blockers": [
+      "Validation-only delegation cannot substitute for delegated implementation."
+    ]
+  },
+  "residual_risks": [],
+  "usage_estimate": {
+    "subagent_count": 2,
+    "models_used": [
+      "gpt-5.4-mini",
+      "gpt-5.5"
+    ],
+    "notes": "Synthetic laundering fixture."
+  }
+}

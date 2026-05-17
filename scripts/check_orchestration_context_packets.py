@@ -14,7 +14,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
-from orchestration_policy import context_packet_policy, load_policy, role_context_budget_map, role_effort_map, role_model_map
+from orchestration_policy import context_packet_policy, load_policy, role_context_budget_map
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -87,32 +87,25 @@ def validate_required_fields(packet: dict[str, Any], schema: dict[str, Any], con
 
 def validate_basic_types(packet: dict[str, Any]) -> list[str]:
     issues: list[str] = []
-    if packet.get("schema_version") != "1.0":
-        issues.append("schema_version must be 1.0")
+    if "schema_version" in packet and packet.get("schema_version") != "2.0":
+        issues.append("schema_version must be 2.0")
     for field in [
         "packet_id",
         "scenario_id",
         "role",
-        "runtime_type",
-        "tier",
         "objective",
-        "model",
-        "reasoning_effort",
-        "entry_condition",
-        "exit_condition",
+        "done_condition",
         "context_request_rule",
     ]:
         if field in packet and not isinstance(packet[field], str):
             issues.append(f"{field} must be a string")
         elif field in packet and not packet[field].strip():
             issues.append(f"{field} must be non-empty")
-    for field in ["scope", "non_goals", "evidence_handles", "allowed_tools_paths", "expected_return"]:
+    for field in ["scope", "non_goals", "evidence_handles", "allowed_actions_and_paths", "constraints", "expected_return"]:
         if field in packet and not isinstance(packet[field], list):
             issues.append(f"{field} must be an array")
-        elif field in {"scope", "non_goals", "expected_return"} and field in packet and not packet[field]:
+        elif field in {"scope", "non_goals", "allowed_actions_and_paths", "constraints", "expected_return"} and field in packet and not packet[field]:
             issues.append(f"{field} must not be empty")
-    if "writable" in packet and not isinstance(packet["writable"], bool):
-        issues.append("writable must be boolean")
     if "output_budget_words" in packet and not isinstance(packet["output_budget_words"], int):
         issues.append("output_budget_words must be integer")
     return issues
@@ -120,20 +113,22 @@ def validate_basic_types(packet: dict[str, Any]) -> list[str]:
 
 def validate_routing(packet: dict[str, Any], full_policy: dict[str, Any]) -> list[str]:
     issues: list[str] = []
-    models = role_model_map(full_policy)
-    efforts = role_effort_map(full_policy)
     budgets = role_context_budget_map(full_policy)
     role = packet.get("role")
-    if role not in models:
+    if role not in budgets:
         issues.append(f"unknown role: {role}")
         return issues
-    if packet.get("model") != models[role]:
-        issues.append(f"{role} packet should use {models[role]}, found {packet.get('model')}")
-    if packet.get("reasoning_effort") != efforts[role]:
-        issues.append(f"{role} packet should use {efforts[role]} effort, found {packet.get('reasoning_effort')}")
     budget = packet.get("output_budget_words")
     if isinstance(budget, int) and budget > budgets[role]:
         issues.append(f"{role} output budget {budget} exceeds policy budget {budgets[role]}")
+    return issues
+
+
+def validate_no_root_only_metadata(packet: dict[str, Any], context_policy: dict[str, Any]) -> list[str]:
+    issues: list[str] = []
+    root_only = set(context_policy.get("root_only_packet_fields", []))
+    for field in sorted(root_only.intersection(packet)):
+        issues.append(f"root-only routing metadata is forbidden in subagent packet: {field}")
     return issues
 
 
@@ -184,7 +179,7 @@ def validate_no_raw_dump(packet: dict[str, Any], context_policy: dict[str, Any])
         for marker in markers:
             if marker in normalized:
                 issues.append(f"raw dump marker found: {marker}")
-    for field in ["objective", "entry_condition", "exit_condition", "context_request_rule"]:
+    for field in ["objective", "done_condition", "context_request_rule"]:
         if field in packet and word_count(packet[field]) > 80:
             issues.append(f"{field} is too verbose for an initial packet")
     return issues
@@ -200,6 +195,7 @@ def validate_packet(
     issues.extend(validate_required_fields(packet, schema, context_policy))
     issues.extend(validate_basic_types(packet))
     issues.extend(validate_routing(packet, full_policy))
+    issues.extend(validate_no_root_only_metadata(packet, context_policy))
     issues.extend(validate_handles(packet, context_policy))
     issues.extend(validate_context_requests(packet, context_policy, schema))
     issues.extend(validate_no_raw_dump(packet, context_policy))

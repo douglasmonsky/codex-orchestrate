@@ -83,9 +83,9 @@ When a user starts a request with `/orchestrate`, treat it as an explicit instru
 
 Activation must initialize the controller loop, routing ledger, first-step classification, model/effort selection, and final-review gate before substantive work.
 
-Initial subagent dispatch should use a compact context packet rather than raw repo context, transcripts, or pasted logs. Packets use context handles such as `file:path:line`, `cmd:name`, `diff:path`, `ledger:entry`, `artifact:path`, and `scenario:id`; subagents ask for more context through a structured Context request with reason, requested handle/path, and decision impact. Entry condition and exit condition fields make it explicit when a subagent can start and when it should return to the root.
+Initial subagent dispatch should use a minimal context packet rather than raw repo context, transcripts, pasted logs, or root routing rationale. The Minimal Packet v2 rule is: send what to do, where to do it, what not to do, and how to return. The subagent-visible packet contains packet id, role/mission, objective, scope, non-goals, context handles, allowed actions/paths, constraints, done condition, output budget, expected return, and the Context request rule. Model, reasoning effort, tier, runtime fallback, model sufficiency, and escalation targets are root-only routing metadata kept in ledgers and reports.
 
-Durable ledgers can link each routing decision to a packet id and subagent lifecycle. When context packets are recorded, every packet must have start evidence and a terminal exit such as done, blocked, stuck, out-of-scope, or context-requested. Entry failures return to root as packet repair, and final review checks terminal lifecycle evidence before completion.
+Durable ledgers can link each routing decision to a packet id and subagent lifecycle. When context packets are recorded, every packet must have start evidence and a terminal exit such as done, blocked, stuck, out-of-scope, or context-requested. Unclear packets return to root as packet repair, and final review checks terminal lifecycle evidence before completion.
 
 A timed-out, closed, or no-change subagent is stuck evidence. Repair or split the packet, then redelegate or escalate the same narrow objective; do not let timeout recovery become root takeover except for deterministic micro-actions. Delegating validation or review after root implements the substantive work is not enough.
 
@@ -124,6 +124,7 @@ python3 scripts/serve_orchestration_ui.py --self-test
 python3 scripts/run_orchestration_smoke.py
 python3 scripts/run_orchestration_smoke.py --scenario-id lifecycle-smoke --json
 python3 scripts/run_orchestration_smoke.py --scenario-id context-packet-smoke --json
+python3 scripts/run_orchestration_smoke.py --scenario-id minimal-packet-smoke --json
 python3 scripts/run_orchestration_smoke.py --scenario-id timeout-recovery-smoke --json
 python3 scripts/run_orchestration_smoke.py --scenario-id high-risk-security-change --json
 python3 scripts/sync_orchestration_skill.py --check

@@ -2,12 +2,10 @@
   "fixture_id": "over-broad-packet-rejection",
   "expected_result": "fail",
   "packet": {
-    "schema_version": "1.0",
+    "schema_version": "2.0",
     "packet_id": "packet-over-broad-001",
     "scenario_id": "over-fanout-risk-controller",
     "role": "repo_scout",
-    "runtime_type": "explorer fallback preserving repo_scout role",
-    "tier": "Tier 3",
     "objective": "Review the full log and entire conversation before choosing a route.",
     "scope": [
       "paste:full-log"
@@ -19,14 +17,14 @@
       "paste:full-log",
       "file:README.md:1"
     ],
-    "allowed_tools_paths": [
+    "allowed_actions_and_paths": [
       "."
     ],
-    "model": "gpt-5.3-codex-spark",
-    "reasoning_effort": "low",
-    "writable": false,
-    "entry_condition": "Start after receiving complete terminal output and raw log text.",
-    "exit_condition": "Summarize everything.",
+    "constraints": [
+      "Read-only; do not modify files.",
+      "Stay within assigned scope and return concise evidence, not pasted outputs."
+    ],
+    "done_condition": "Summarize everything.",
     "output_budget_words": 900,
     "context_request_rule": "Ask for anything else needed.",
     "expected_return": [

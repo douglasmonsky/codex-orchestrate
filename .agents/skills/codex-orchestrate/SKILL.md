@@ -119,19 +119,21 @@ The tier can move up or down. Escalate only the disputed or stuck slice; de-esca
 
 Before each delegation, produce or refresh a compact dispatch brief as a context packet:
 
-Goal, current step, tier, role, runtime type, model, effort, model sufficiency, scope, non-goals, escalation trigger, and done condition.
+Packet id, role/mission, objective, scope, non-goals, evidence handles, allowed actions/paths, constraints, done condition, output budget, expected return, and context-request rule.
+
+Keep model, reasoning effort, tier, runtime mapping, model sufficiency, preferred model, and escalation target in the root routing ledger only. Do not put root-only routing metadata in the subagent-visible packet.
 
 For custom-agent details, role definitions, and default routing ladders, read `references/agent-roster.md` and `references/effort-model-routing.md` only when needed.
 
 ## Context Packet Protocol
 
-Initial dispatch sends a context packet, not raw repo context, transcripts, or pasted logs. Include packet id, objective, scope, non-goals, known evidence handles, allowed tools/paths, model/effort, entry condition, exit condition, output budget, and context-request rule.
+Initial dispatch sends a minimal packet, not raw repo context, transcripts, pasted logs, or root routing rationale. Include only packet id, role/mission, objective, scope, non-goals, known evidence handles, allowed actions/paths, constraints, done condition, output budget, expected return, and context-request rule.
 
 Use context handles such as `file:path:line`, `cmd:name`, `diff:path`, `ledger:entry`, `artifact:path`, and `scenario:id`. Provide exact handles instead of broad summaries whenever possible.
 
-Entry condition: subagents start only when objective, scope, model/effort, writable or read-only status, and done condition are clear. If entry conditions are unclear, return a packet-repair request instead of broad exploration.
+Subagents start only when the minimal packet makes objective, scope, constraints, allowed actions/paths, and done condition clear. If not, return a packet-repair request instead of broad exploration.
 
-Exit condition: subagents exit when done, blocked, stuck, out of scope, or needing specific context. They may request more context only with:
+Subagents exit when done, blocked, stuck, out of scope, or needing specific context. They may request more context only with:
 
 ```text
 Context request:
@@ -149,19 +151,18 @@ Track subagent lifecycle in durable ledgers when ledger production is required: 
 Every subagent prompt must include:
 
 ```text
-Role:
+Packet id:
+Role/mission:
 Objective:
-Why this agent exists:
 Scope:
 Constraints:
 Non-goals:
-Reasoning effort:
-Model selected:
-Preferred concrete model:
+Evidence handles:
+Allowed actions/paths:
+Done condition:
 Output budget:
-Escalation trigger:
-Escalation target if stuck:
-Return format:
+Expected return:
+Context request rule:
 ```
 
 Default return format:
@@ -175,7 +176,7 @@ Files touched or inspected:
 Commands run:
 Risks / uncertainty:
 Stuck status:
-Escalation recommendation:
+Context request:
 Confidence:
 ```
 
@@ -186,6 +187,14 @@ Use `references/handoff-contracts.md` for concrete prompt templates.
 A subagent is stuck when it reports low confidence, cannot locate the relevant surface, returns conflicting hypotheses, produces an unvalidated patch, reproduces but cannot explain a failure, times out or closes without useful changes, exceeds its output budget without resolving the objective, or asks the root to decide without enough evidence.
 
 A timed-out subagent is not permission for root takeover. Record it as stuck lifecycle evidence, repair or split the packet, then redelegate or escalate the same narrow objective. Validation/review delegation after root implements the substantive work does not satisfy delegate-first orchestration.
+
+Other derailment guards:
+
+- Do not launder root implementation by delegating only validation or review afterward.
+- If two same-role attempts fail for different reasons, route to `risk_controller`, `planner`, or the correct specialist instead of retrying blindly.
+- If subagents contradict each other, route conflict resolution to `reviewer`, `architect`, or `debugger` before continuing.
+- If implementation broadens beyond packet scope, final review blocks and routes correction or review.
+- After two concurrent branches, record why more fanout is justified or call `risk_controller`.
 
 Default escalation sequence:
 

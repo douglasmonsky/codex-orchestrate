@@ -48,15 +48,12 @@ When working inside MonskySkills, use `python3 scripts/create_orchestration_ledg
 
 ## Context packet template
 
-Initial subagent dispatch should use a compact context packet. Do not paste raw transcripts, full logs, or broad repo summaries into the first handoff.
+Initial subagent dispatch should use a minimal context packet. Do not paste raw transcripts, full logs, broad repo summaries, or root routing rationale into the first handoff.
 
 ```text
 Context packet:
 Packet id:
-Scenario id:
-Role:
-Runtime agent type:
-Tier:
+Role/mission:
 Objective:
 Scope:
 - <file:path:line | folder | command surface>
@@ -64,22 +61,22 @@ Non-goals:
 - <explicit exclusion>
 Known evidence handles:
 - <file:path:line | cmd:name | diff:path | ledger:entry | artifact:path | scenario:id>
-Allowed tools/paths:
-- <read/write boundary>
-Model:
-Reasoning effort:
-Writable:
-Entry condition:
-Exit condition:
+Allowed actions/paths:
+- <read/write/command boundary>
+Constraints:
+- <behavior, scope, privacy, or style constraint>
+Done condition:
 Output budget:
 Context-request rule:
 Use the Context request block before asking for broader context.
 Expected return:
 ```
 
-Entry condition must make the task startable: objective, scope, model/effort, writable or read-only status, and done condition are clear. If not, the subagent should request packet repair rather than widening scope.
+The packet must make the task startable: objective, scope, allowed actions/paths, constraints, and done condition are clear. If not, the subagent should request packet repair rather than widening scope.
 
-Exit condition must define when the subagent returns: done, blocked, stuck, out of scope, or needing a specific additional context handle.
+Subagents should return when done, blocked, stuck, out of scope, or needing a specific additional context handle.
+
+Root-only routing metadata stays out of the subagent-visible packet: model, reasoning effort, tier, runtime mapping, model sufficiency, preferred concrete model, and escalation target belong in the routing ledger.
 
 ## Context request template
 
@@ -109,7 +106,7 @@ Context request:
 Root decision:
 ```
 
-Entry failure returns to root as packet repair instead of broad exploration. Context requests must name packet id, reason, requested handle/path, and decision impact. Final root review checks that every active packet has terminal exit evidence.
+An unclear packet returns to root as packet repair instead of broad exploration. Context requests must name packet id, reason, requested handle/path, and decision impact. Final root review checks that every active packet has terminal exit evidence.
 
 If a subagent times out, is closed, or produces no useful changes, record a `stuck` lifecycle event with `exit_status: stuck`, evidence that no usable result was produced, and a root decision to repair, split, redelegate, or escalate the same narrow objective. Do not turn that timeout into root implementation except for a deterministic micro-action.
 
@@ -120,25 +117,10 @@ Role:
 You are the <agent role> for this Codex task.
 
 Context packet:
-<use the compact packet template above>
+<use the minimal packet template above>
 
 Objective:
 <one specific outcome>
-
-Why this agent exists:
-<what root-model work, uncertainty, or risk this delegation avoids>
-
-Delegation tier:
-<Tier 1 | Tier 2 | Tier 3 | Tier 4>
-
-Runtime agent type:
-<custom role if callable | explorer | worker | default>
-
-Model selected:
-<actual model, for example gpt-5.3-codex-spark | gpt-5.4-mini | gpt-5.4 | gpt-5.5>
-
-Why this model is sufficient:
-<bounded reason tied to task risk and ambiguity>
 
 Scope:
 <files, folders, commands, docs, or error logs>
@@ -157,20 +139,11 @@ Non-goals:
 - <what not to solve>
 - <what not to change>
 
-Reasoning effort:
-<minimal | low | medium | high | xhigh if supported>
-
-Preferred concrete model:
-<gpt-5.3-codex-spark | gpt-5.4-mini | gpt-5.4 | gpt-5.5>
-
 Output budget:
 <= <word count> words unless exact patch details or essential command output require more.
 
-Escalation trigger:
-<what conditions mean this attempt is stuck>
-
-Escalation target if stuck:
-<same-role higher model/effort target first, then pass-off target if role mismatch is found>
+Done condition:
+<what counts as done, blocked, stuck, out of scope, or needing a Context request>
 
 Return format:
 Summary:
@@ -182,7 +155,7 @@ Commands run:
 Risks / uncertainty:
 Stuck status: <not stuck | stuck | blocked by scope | blocked by environment | role mismatch>
 Context request: <none | structured request>
-Escalation recommendation: <none | same role at higher model/effort | pass to role X | root decision needed>
+Recommended next route: <none | same objective needs stronger route | pass to role X | root decision needed>
 Confidence:
 ```
 
@@ -192,10 +165,7 @@ Use this when a subagent cannot complete the assigned objective.
 
 ```text
 Original objective:
-Agent/effort/model used:
-Intended model:
-Actual model:
-Model fallback used:
+Agent role used:
 What was tried:
 Timeout/closed/no-change status:
 Files inspected/touched:
@@ -204,7 +174,7 @@ Commands run:
 Observed evidence:
 What failed or remains unclear:
 Smallest unresolved question:
-Recommended next agent/model/effort:
+Recommended next role/action:
 Confidence:
 ```
 
@@ -232,20 +202,8 @@ Constraints:
 - Preserve formatting and style.
 - If the edit requires judgment, stop and recommend escalation.
 
-Reasoning effort:
-minimal or low
-
-Preferred concrete model:
-gpt-5.3-codex-spark
-
-Model selected:
-gpt-5.3-codex-spark
-
 Escalation trigger:
 Any ambiguity, behavior change, validation failure, or need to inspect unrelated files.
-
-Escalation target if stuck:
-implementer_simple at medium effort.
 
 Return format:
 Files changed:
@@ -254,7 +212,7 @@ Validation:
 Assumptions:
 Stuck status:
 Context request:
-Escalation recommendation:
+Recommended next route:
 ```
 
 ## Scout handoff
@@ -278,20 +236,8 @@ Constraints:
 - Keep output <= 300 words.
 - If relevant surface is unclear, return the best evidence and recommend escalation.
 
-Reasoning effort:
-low
-
-Preferred concrete model:
-gpt-5.3-codex-spark
-
-Model selected:
-gpt-5.3-codex-spark
-
 Escalation trigger:
 Relevant files/commands not found, multiple unrelated candidate surfaces, or low confidence.
-
-Escalation target if stuck:
-repo_scout_deep at medium effort; planner or architect only if the issue is sequencing or design.
 
 Return format:
 Relevant files:
@@ -301,7 +247,7 @@ Conventions:
 Risks/open questions:
 Stuck status:
 Context request:
-Escalation recommendation:
+Recommended next route:
 ```
 
 ## Deep scout handoff
@@ -324,17 +270,8 @@ Constraints:
 - Do not implement.
 - Return only the smallest decision-ready map.
 
-Reasoning effort:
-medium
-
-Preferred concrete model:
-gpt-5.4
-
 Escalation trigger:
 Design/API uncertainty, migration ordering, or unresolved failure analysis.
-
-Escalation target if stuck:
-planner, architect, debugger, or migration_analyst depending on failure mode.
 
 Return format:
 Resolved surface:
@@ -379,20 +316,8 @@ Constraints:
 - Report exact files changed.
 - If validation fails and the cause is unclear, stop and recommend test_triage or debugger.
 
-Reasoning effort:
-<low | medium | high>
-
-Preferred concrete model:
-<gpt-5.3-codex-spark | gpt-5.4 | gpt-5.5>
-
-Model selected:
-<gpt-5.3-codex-spark for Implementer Simple | gpt-5.4 for Implementer | gpt-5.5 for Implementer Strong>
-
 Escalation trigger:
 Unable to implement within scope, unclear design, unexplained validation failure, or low confidence patch.
-
-Escalation target if stuck:
-Same implementation role at one higher model/effort if available; otherwise implementer_strong, debugger, architect, or reviewer according to failure mode.
 
 Return format:
 Patch summary:
@@ -403,7 +328,7 @@ Assumptions:
 Residual risk:
 Stuck status:
 Context request:
-Escalation recommendation:
+Recommended next route:
 Confidence:
 ```
 
@@ -426,20 +351,8 @@ Review priorities:
 4. Maintainability risk
 5. Scope creep
 
-Reasoning effort:
-high
-
-Preferred concrete model:
-gpt-5.5
-
-Model selected:
-gpt-5.5
-
 Escalation trigger:
 Blocking issue requires design, security, migration, root-cause debugging, or higher model/effort disputed judgment.
-
-Escalation target if stuck:
-architect, security_auditor, migration_analyst, debugger, or reviewer at xhigh if supported and justified.
 
 Return format:
 Blocking issues:
@@ -448,7 +361,7 @@ Missing tests/checks:
 Suggested fixes:
 Stuck status:
 Context request:
-Escalation recommendation:
+Recommended next route:
 Confidence:
 ```
 
@@ -470,20 +383,8 @@ Constraints:
 - Identify whether failures appear introduced or pre-existing.
 - If the failure cannot be interpreted, recommend debugger rather than guessing.
 
-Reasoning effort:
-low for known commands; medium for failure interpretation.
-
-Preferred concrete model:
-gpt-5.4-mini for known commands; gpt-5.4 for triage.
-
-Model selected:
-gpt-5.4-mini for known commands; gpt-5.4 for triage.
-
 Escalation trigger:
 Unknown command surface, flaky behavior, unexplained failure, environment blocker, or ambiguous introduced/pre-existing classification.
-
-Escalation target if stuck:
-test_triage or debugger.
 
 Return format:
 Commands run:
@@ -493,7 +394,7 @@ Interpretation:
 Recommended next check:
 Stuck status:
 Context request:
-Escalation recommendation:
+Recommended next route:
 Confidence:
 ```
 
@@ -509,7 +410,7 @@ Objective:
 Resolve this narrow unresolved issue: <issue>
 
 Prior attempt summary:
-Original agent/effort/model:
+Original role:
 What was tried:
 Files inspected/touched:
 Commands run:
@@ -526,15 +427,6 @@ Constraints:
 - Do not repeat broad discovery unless prior evidence is unreliable.
 - Focus on the unresolved issue.
 - Return a decision-ready recommendation.
-
-Reasoning effort:
-<medium | high | xhigh if supported>
-
-Preferred concrete model:
-<gpt-5.4 | gpt-5.5>
-
-Model selected:
-<gpt-5.4 | gpt-5.5>
 
 Return format:
 Resolved issue:

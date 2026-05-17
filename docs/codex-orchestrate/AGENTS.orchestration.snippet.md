@@ -12,11 +12,13 @@ Activation must initialize the controller loop, routing ledger, first-step class
 
 Treat delegation as a continuous routing loop, not a one-time upfront choice. Reevaluate whether to delegate, escalate, pass off, de-escalate, or continue directly after each user clarification, direct root step, subagent result, timed-out or closed subagent, validation result, scope change, or new risk. If the root initially answers directly but the next step becomes repository, command, research, design, implementation, validation, review, or documentation work, leave direct mode and spawn the cheapest safe subagent for that new step.
 
-Initial subagent dispatch should use a compact context packet rather than raw repo context, transcripts, or pasted logs. Include packet id, objective, scope, non-goals, context handles, allowed tools/paths, model/effort, entry condition, exit condition, output budget, and context-request rule. Use handles such as `file:path:line`, `cmd:name`, `diff:path`, `ledger:entry`, `artifact:path`, and `scenario:id`.
+Initial subagent dispatch should use a minimal context packet rather than raw repo context, transcripts, pasted logs, or root routing rationale. Include only packet id, role/mission, objective, scope, non-goals, context handles, allowed actions/paths, constraints, done condition, output budget, expected return, and context-request rule. Use handles such as `file:path:line`, `cmd:name`, `diff:path`, `ledger:entry`, `artifact:path`, and `scenario:id`.
 
-Subagents start only when the packet makes objective, scope, model/effort, writable or read-only status, and done condition clear. If more context is needed, they should return a structured Context request with reason, requested handle/path, and decision impact; the root reassesses before granting that context.
+Model, reasoning effort, tier, runtime fallback, model sufficiency, preferred concrete model, and escalation targets are root-only routing metadata. Keep them in the routing ledger, lifecycle ledger, reports, and checker artifacts rather than the subagent-visible packet.
 
-When a durable ledger is required, record packet id and subagent lifecycle events. Every active packet needs start evidence and a terminal exit: done, blocked, stuck, out-of-scope, or context-requested. Entry failure returns to root as packet repair, and final review checks terminal exit evidence.
+Subagents start only when the packet makes objective, scope, allowed actions/paths, constraints, and done condition clear. If more context is needed, they should return a structured Context request with reason, requested handle/path, and decision impact; the root reassesses before granting that context.
+
+When a durable ledger is required, record packet id and subagent lifecycle events. Every active packet needs start evidence and a terminal exit: done, blocked, stuck, out-of-scope, or context-requested. Unclear packets return to root as packet repair, and final review checks terminal exit evidence.
 
 When custom agent profiles such as `repo_scout`, `mechanic`, or `test_runner` are not callable in the current runtime, preserve the intended role in the prompt and use built-in fallbacks:
 

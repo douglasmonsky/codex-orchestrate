@@ -146,27 +146,34 @@
     "final-review blocker"
   ],
   "context_packet": {
-    "schema_version": "1.0",
+    "schema_version": "2.0",
     "required_packet_fields": [
-      "schema_version",
       "packet_id",
-      "scenario_id",
       "role",
-      "runtime_type",
-      "tier",
       "objective",
       "scope",
       "non_goals",
       "evidence_handles",
-      "allowed_tools_paths",
-      "model",
-      "reasoning_effort",
-      "writable",
-      "entry_condition",
-      "exit_condition",
+      "allowed_actions_and_paths",
+      "constraints",
+      "done_condition",
       "output_budget_words",
       "context_request_rule",
       "expected_return"
+    ],
+    "root_only_packet_fields": [
+      "model",
+      "reasoning_effort",
+      "runtime_type",
+      "tier",
+      "model_sufficiency",
+      "why_model_is_sufficient",
+      "preferred_concrete_model",
+      "escalation_target",
+      "escalation_target_if_stuck"
+    ],
+    "fixture_only_packet_fields": [
+      "scenario_id"
     ],
     "required_context_request_fields": [
       "reason",
@@ -227,8 +234,9 @@
     "context packet",
     "context handle",
     "context request",
-    "entry condition",
-    "exit condition",
+    "done condition",
+    "root-only routing metadata",
+    "minimal packet",
     "packet id",
     "subagent lifecycle",
     "terminal exit",
@@ -245,12 +253,14 @@
     "fallback-smoke",
     "context-packet-smoke",
     "lifecycle-smoke",
-    "timeout-recovery-smoke"
+    "timeout-recovery-smoke",
+    "minimal-packet-smoke"
   ],
   "smoke_scenarios": {
     "model-routing-smoke": "/orchestrate model routing smoke test",
     "fallback-smoke": "/orchestrate Custom agent TOMLs are not callable here. Still orchestrate a repo investigation and small fix.",
     "context-packet-smoke": "/orchestrate Use compact context packets and context handles for a small repo fix before asking subagents for extra context.",
+    "minimal-packet-smoke": "/orchestrate Use a minimal packet where model, reasoning effort, tier, and runtime mapping stay as root-only routing metadata.",
     "context-request-smoke": "/orchestrate A subagent needs more evidence. Require a structured context request before adding more context.",
     "lifecycle-smoke": "/orchestrate Record packet id, subagent lifecycle, terminal exit, and packet repair behavior for a small delegated task.",
     "timeout-recovery-smoke": "/orchestrate An implementation subagent timed out without changes. Recover without root takeover by repairing the packet, redelegating, or escalating the same narrow objective.",

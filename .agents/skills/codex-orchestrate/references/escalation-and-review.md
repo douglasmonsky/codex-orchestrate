@@ -47,17 +47,14 @@ Before retrying or passing off, compress the state into this form:
 
 ```text
 Original objective:
-Agent/effort/model used:
-Intended model:
-Actual model:
-Model fallback used:
+Agent role used:
 What was tried:
 Files inspected/touched:
 Commands run:
 Observed evidence:
 What failed or remains unclear:
 Smallest unresolved question:
-Recommended next agent/model/effort:
+Recommended next role/action:
 ```
 
 The next subagent should receive this summary and a narrower objective. Do not make the next agent repeat broad discovery unless prior evidence is unreliable.
@@ -68,7 +65,7 @@ A timeout, closed subagent, or no-change terminal state is stuck evidence, not c
 
 The next action should be one of:
 
-- Repair unclear packet entry or exit conditions.
+- Repair unclear packet objective, scope, constraints, allowed actions/paths, or done condition.
 - Split the objective into a smaller packet.
 - Redelegate the same narrow objective at the next model class and/or effort.
 - Pass off only when evidence shows role mismatch.

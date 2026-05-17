@@ -2,12 +2,10 @@
   "fixture_id": "small-patch-context-packet",
   "expected_result": "pass",
   "packet": {
-    "schema_version": "1.0",
+    "schema_version": "2.0",
     "packet_id": "packet-small-patch-001",
     "scenario_id": "small-patch-with-validation",
     "role": "implementer_simple",
-    "runtime_type": "worker fallback preserving implementer_simple role",
-    "tier": "Tier 1",
     "objective": "Apply the bounded one-file fix and report the focused validation result.",
     "scope": [
       "file:src/example.py:42",
@@ -22,15 +20,15 @@
       "diff:working-tree",
       "cmd:focused-unit-test"
     ],
-    "allowed_tools_paths": [
+    "allowed_actions_and_paths": [
       "src/example.py",
       "tests/test_example.py"
     ],
-    "model": "gpt-5.3-codex-spark",
-    "reasoning_effort": "medium",
-    "writable": true,
-    "entry_condition": "Start only if the target file, intended behavior, and focused check are clear.",
-    "exit_condition": "Return patch summary and validation evidence, or a Context request if the target handle is insufficient.",
+    "constraints": [
+      "Only edit files listed in allowed_actions_and_paths.",
+      "Stay within assigned scope and return concise evidence, not pasted outputs."
+    ],
+    "done_condition": "Return patch summary and validation evidence, or a Context request if the target handle is insufficient.",
     "output_budget_words": 320,
     "context_request_rule": "Use Context request with reason, requested_handle, and decision_impact before asking for broader context.",
     "expected_return": [

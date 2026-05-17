@@ -143,6 +143,10 @@ def check_validation(path: Path, scenario: dict[str, Any], ledger: dict[str, Any
 def check_final_review(path: Path, scenario: dict[str, Any], ledger: dict[str, Any]) -> None:
     category = scenario.get("category", "")
     status = ledger.get("final_review", {}).get("status")
+    if category in {"validation-laundering", "scope-expansion"}:
+        if status != "blocked":
+            raise BehaviorError(f"{path}: {category} scenario must block final review")
+        return
     if category in {"validation-failure", "final-review-failure"}:
         if status not in {"blocked", "failed", "passed"}:
             raise BehaviorError(f"{path}: final review status is invalid for validation-failure scenario")

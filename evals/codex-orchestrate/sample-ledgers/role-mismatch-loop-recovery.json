@@ -1,0 +1,191 @@
+{
+  "schema_version": "1.0",
+  "scenario_id": "role-mismatch-loop-recovery",
+  "task_summary": "Synthetic run where two same-role attempts fail and a risk controller selects the correct next route.",
+  "repo_state": {
+    "path": "synthetic-repo",
+    "branch": "main",
+    "starting_status": "clean",
+    "ending_status": "synthetic fixture",
+    "commit": "0000000"
+  },
+  "started_at": "2026-05-17T19:20:00Z",
+  "finished_at": "2026-05-17T19:40:00Z",
+  "root": {
+    "model": "gpt-5.5",
+    "reasoning_effort": "medium"
+  },
+  "routing_entries": [
+    {
+      "packet_id": "packet-loop-risk-001",
+      "step": "Classify two failed same-role attempts and choose a non-blind route.",
+      "tier": "Tier 3",
+      "agent_role": "risk_controller",
+      "runtime_type": "custom",
+      "intended_model": "gpt-5.4",
+      "actual_model": "gpt-5.4",
+      "reasoning_effort": "medium",
+      "fallback_notes": "No fallback used.",
+      "why_model_is_sufficient": "The selected model matches the role risk and bounded task complexity.",
+      "evidence": [
+        "Two implementer attempts failed for different reasons.",
+        "Risk controller identified role mismatch instead of capability-only failure."
+      ],
+      "open_risks": [],
+      "next_decision": "Route to planner for scoped decomposition.",
+      "final_review_gate": "Root checks ledger, packet lifecycle, and validation evidence."
+    },
+    {
+      "packet_id": "packet-loop-plan-001",
+      "step": "Decompose the mismatched task into the correct specialist slice.",
+      "tier": "Tier 3",
+      "agent_role": "planner",
+      "runtime_type": "custom",
+      "intended_model": "gpt-5.4",
+      "actual_model": "gpt-5.4",
+      "reasoning_effort": "medium",
+      "fallback_notes": "No fallback used.",
+      "why_model_is_sufficient": "The selected model matches the role risk and bounded task complexity.",
+      "evidence": [
+        "Planner split the task into config diagnosis and bounded implementation."
+      ],
+      "open_risks": [],
+      "next_decision": "Proceed with specialist route rather than another blind implementer retry.",
+      "final_review_gate": "Root checks ledger, packet lifecycle, and validation evidence."
+    }
+  ],
+  "context_packets": [
+    {
+      "schema_version": "2.0",
+      "packet_id": "packet-loop-risk-001",
+      "role": "risk_controller",
+      "objective": "Decide whether repeated same-role failures mean role mismatch, over-scope, or true stuck work.",
+      "scope": [
+        "ledger:attempt-1",
+        "ledger:attempt-2",
+        "diff:working-tree"
+      ],
+      "non_goals": [
+        "Do not broaden beyond the packet scope."
+      ],
+      "evidence_handles": [
+        "ledger:attempt-1",
+        "ledger:attempt-2",
+        "ledger:routing-entry"
+      ],
+      "allowed_actions_and_paths": [
+        "ledger:attempt-1",
+        "ledger:attempt-2"
+      ],
+      "constraints": [
+        "Read-only risk checkpoint."
+      ],
+      "done_condition": "Return done, blocked, stuck, out-of-scope, or a precise Context request.",
+      "output_budget_words": 330,
+      "context_request_rule": "Use Context request with reason, requested_handle, and decision_impact before asking for broader context.",
+      "expected_return": [
+        "Findings",
+        "Evidence",
+        "Stuck status"
+      ]
+    },
+    {
+      "schema_version": "2.0",
+      "packet_id": "packet-loop-plan-001",
+      "role": "planner",
+      "objective": "Turn the role-mismatch finding into the next bounded specialist route.",
+      "scope": [
+        "ledger:role-mismatch-finding",
+        "file:config/app.toml:1"
+      ],
+      "non_goals": [
+        "Do not broaden beyond the packet scope."
+      ],
+      "evidence_handles": [
+        "ledger:role-mismatch-finding",
+        "file:config/app.toml:1",
+        "ledger:routing-entry"
+      ],
+      "allowed_actions_and_paths": [
+        "PLANS.md"
+      ],
+      "constraints": [
+        "Plan only; do not implement."
+      ],
+      "done_condition": "Return done, blocked, stuck, out-of-scope, or a precise Context request.",
+      "output_budget_words": 330,
+      "context_request_rule": "Use Context request with reason, requested_handle, and decision_impact before asking for broader context.",
+      "expected_return": [
+        "Findings",
+        "Evidence",
+        "Stuck status"
+      ]
+    }
+  ],
+  "subagent_lifecycle": [
+    {
+      "packet_id": "packet-loop-risk-001",
+      "role": "risk_controller",
+      "event": "started",
+      "timestamp": "2026-05-17T19:24:00Z",
+      "evidence": "Minimal packet accepted with clear done condition."
+    },
+    {
+      "packet_id": "packet-loop-risk-001",
+      "role": "risk_controller",
+      "event": "completed",
+      "exit_status": "done",
+      "timestamp": "2026-05-17T19:30:00Z",
+      "evidence": "Risk controller recommended planner instead of blind retry."
+    },
+    {
+      "packet_id": "packet-loop-plan-001",
+      "role": "planner",
+      "event": "started",
+      "timestamp": "2026-05-17T19:31:00Z",
+      "evidence": "Minimal packet accepted with clear done condition."
+    },
+    {
+      "packet_id": "packet-loop-plan-001",
+      "role": "planner",
+      "event": "completed",
+      "exit_status": "done",
+      "timestamp": "2026-05-17T19:36:00Z",
+      "evidence": "Planner returned specialist route and stop condition."
+    }
+  ],
+  "escalations": [
+    {
+      "from_role": "implementer",
+      "to_role": "risk_controller",
+      "reason": "Two same-role attempts failed for different reasons.",
+      "result": "Risk controller stopped blind retry loop and routed planner."
+    }
+  ],
+  "validation": [
+    {
+      "command": "python3 scripts/check_orchestration_behavior.py evals/codex-orchestrate/sample-ledgers/role-mismatch-loop-recovery.json",
+      "result": "passed",
+      "evidence": "Synthetic behavior fixture validates loop recovery policy."
+    }
+  ],
+  "final_review": {
+    "status": "passed",
+    "reviewer": "root",
+    "evidence": [
+      "Packet lifecycle had terminal exits.",
+      "Repeated failures were classified before another retry.",
+      "New route matches role mismatch evidence."
+    ],
+    "blockers": []
+  },
+  "residual_risks": [],
+  "usage_estimate": {
+    "subagent_count": 2,
+    "models_used": [
+      "gpt-5.4",
+      "gpt-5.5"
+    ],
+    "notes": "Synthetic role mismatch fixture."
+  }
+}

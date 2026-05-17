@@ -58,11 +58,11 @@ The correct next route may be cheaper, stronger, or a different role than the pr
 
 ## Context packet routing
 
-Dispatch the first subagent with a compact context packet instead of broad repo context. Use handles such as `file:path:line`, `cmd:name`, `diff:path`, `ledger:entry`, `artifact:path`, and `scenario:id` so the subagent can request precise context later.
+Dispatch the first subagent with a minimal context packet instead of broad repo context or root routing rationale. Use handles such as `file:path:line`, `cmd:name`, `diff:path`, `ledger:entry`, `artifact:path`, and `scenario:id` so the subagent can request precise context later.
 
-The routing policy manifest defines the required packet fields, allowed handle prefixes, required Context request fields, and role-specific output budgets. Treat those budgets as initial-output ceilings, not permission to omit necessary evidence.
+The routing policy manifest defines the required packet fields, root-only routing metadata, allowed handle prefixes, required Context request fields, and role-specific output budgets. Treat those budgets as initial-output ceilings, not permission to omit necessary evidence. Keep model, reasoning effort, tier, runtime fallback, model sufficiency, and escalation targets in the root routing ledger rather than the subagent-visible packet.
 
-If a subagent needs more context, it must return a structured Context request with reason, requested handle/path, and decision impact. The root reassesses before granting context; this can lead to a narrower packet, model/effort escalation, pass-off, or stopping fanout.
+If a subagent needs more context, it must return a structured Context request with reason, requested handle/path, and decision impact. The root reassesses before granting context; this can lead to a narrower packet, routing escalation, pass-off, or stopping fanout.
 
 If a subagent times out, is closed, or produces no useful changes, keep the intended role objective alive: repair or split the packet, then redelegate or escalate the same narrow work. Do not let timeout recovery become root takeover except for a deterministic micro-action.
 

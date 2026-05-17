@@ -1,0 +1,195 @@
+{
+  "schema_version": "1.0",
+  "scenario_id": "scope-expansion-blocked",
+  "task_summary": "Synthetic run where an implementation agent broadened beyond packet scope and final review blocks completion.",
+  "repo_state": {
+    "path": "synthetic-repo",
+    "branch": "main",
+    "starting_status": "clean",
+    "ending_status": "synthetic fixture",
+    "commit": "0000000"
+  },
+  "started_at": "2026-05-17T20:10:00Z",
+  "finished_at": "2026-05-17T20:30:00Z",
+  "root": {
+    "model": "gpt-5.5",
+    "reasoning_effort": "medium"
+  },
+  "routing_entries": [
+    {
+      "packet_id": "packet-scope-review-001",
+      "step": "Review whether implementation exceeded the packet scope.",
+      "tier": "Tier 3",
+      "agent_role": "reviewer",
+      "runtime_type": "custom",
+      "intended_model": "gpt-5.5",
+      "actual_model": "gpt-5.5",
+      "reasoning_effort": "high",
+      "fallback_notes": "No fallback used.",
+      "why_model_is_sufficient": "The selected model matches the role risk and bounded task complexity.",
+      "evidence": [
+        "Reviewer found edits outside allowed_actions_and_paths."
+      ],
+      "open_risks": [
+        "Out-of-scope changes may alter unrelated behavior."
+      ],
+      "next_decision": "Block final response and route bounded correction.",
+      "final_review_gate": "Root checks ledger, packet lifecycle, and validation evidence."
+    },
+    {
+      "packet_id": "packet-scope-correct-001",
+      "step": "Remove or isolate out-of-scope edits while preserving the requested fix.",
+      "tier": "Tier 2",
+      "agent_role": "mechanic",
+      "runtime_type": "custom",
+      "intended_model": "gpt-5.3-codex-spark",
+      "actual_model": "gpt-5.3-codex-spark",
+      "reasoning_effort": "low",
+      "fallback_notes": "No fallback used.",
+      "why_model_is_sufficient": "The selected model matches the role risk and bounded task complexity.",
+      "evidence": [
+        "Correction packet identified only the out-of-scope files."
+      ],
+      "open_risks": [
+        "Correction not yet proven in this blocker fixture."
+      ],
+      "next_decision": "Final review remains blocked until correction validation is present.",
+      "final_review_gate": "Root checks ledger, packet lifecycle, and validation evidence."
+    }
+  ],
+  "context_packets": [
+    {
+      "schema_version": "2.0",
+      "packet_id": "packet-scope-review-001",
+      "role": "reviewer",
+      "objective": "Check whether the implementation broadened beyond its packet scope.",
+      "scope": [
+        "diff:working-tree",
+        "ledger:original-packet"
+      ],
+      "non_goals": [
+        "Do not broaden beyond the packet scope."
+      ],
+      "evidence_handles": [
+        "diff:working-tree",
+        "ledger:original-packet",
+        "ledger:routing-entry"
+      ],
+      "allowed_actions_and_paths": [
+        "diff:working-tree"
+      ],
+      "constraints": [
+        "Read-only review; do not modify files."
+      ],
+      "done_condition": "Return done, blocked, stuck, out-of-scope, or a precise Context request.",
+      "output_budget_words": 380,
+      "context_request_rule": "Use Context request with reason, requested_handle, and decision_impact before asking for broader context.",
+      "expected_return": [
+        "Findings",
+        "Evidence",
+        "Stuck status"
+      ]
+    },
+    {
+      "schema_version": "2.0",
+      "packet_id": "packet-scope-correct-001",
+      "role": "mechanic",
+      "objective": "Prepare the bounded correction for out-of-scope edits only.",
+      "scope": [
+        "diff:working-tree",
+        "file:src/requested_fix.py:1"
+      ],
+      "non_goals": [
+        "Do not broaden beyond the packet scope."
+      ],
+      "evidence_handles": [
+        "diff:working-tree",
+        "file:src/requested_fix.py:1",
+        "ledger:routing-entry"
+      ],
+      "allowed_actions_and_paths": [
+        "src/requested_fix.py"
+      ],
+      "constraints": [
+        "Only touch the requested fix surface.",
+        "Do not keep unrelated edits."
+      ],
+      "done_condition": "Return done, blocked, stuck, out-of-scope, or a precise Context request.",
+      "output_budget_words": 190,
+      "context_request_rule": "Use Context request with reason, requested_handle, and decision_impact before asking for broader context.",
+      "expected_return": [
+        "Findings",
+        "Evidence",
+        "Stuck status"
+      ]
+    }
+  ],
+  "subagent_lifecycle": [
+    {
+      "packet_id": "packet-scope-review-001",
+      "role": "reviewer",
+      "event": "started",
+      "timestamp": "2026-05-17T20:14:00Z",
+      "evidence": "Minimal packet accepted with clear done condition."
+    },
+    {
+      "packet_id": "packet-scope-review-001",
+      "role": "reviewer",
+      "event": "completed",
+      "exit_status": "done",
+      "timestamp": "2026-05-17T20:20:00Z",
+      "evidence": "Reviewer confirmed scope expansion."
+    },
+    {
+      "packet_id": "packet-scope-correct-001",
+      "role": "mechanic",
+      "event": "started",
+      "timestamp": "2026-05-17T20:21:00Z",
+      "evidence": "Minimal packet accepted with clear done condition."
+    },
+    {
+      "packet_id": "packet-scope-correct-001",
+      "role": "mechanic",
+      "event": "completed",
+      "exit_status": "blocked",
+      "timestamp": "2026-05-17T20:26:00Z",
+      "evidence": "Correction requires root decision on whether to discard unrelated edits."
+    }
+  ],
+  "escalations": [
+    {
+      "from_role": "implementer",
+      "to_role": "reviewer",
+      "reason": "Implementation output included edits outside packet scope.",
+      "result": "Reviewer blocked completion and routed correction."
+    }
+  ],
+  "validation": [
+    {
+      "command": "git diff --check",
+      "result": "passed",
+      "evidence": "Formatting check passed, but scope blocker remains unresolved."
+    }
+  ],
+  "final_review": {
+    "status": "blocked",
+    "reviewer": "root",
+    "evidence": [
+      "Packet lifecycle had terminal exits.",
+      "Scope review found edits outside the original packet.",
+      "Final review blocks until out-of-scope changes are resolved."
+    ],
+    "blockers": [
+      "Out-of-scope implementation changes require correction or explicit acceptance."
+    ]
+  },
+  "residual_risks": [],
+  "usage_estimate": {
+    "subagent_count": 2,
+    "models_used": [
+      "gpt-5.5",
+      "gpt-5.3-codex-spark"
+    ],
+    "notes": "Synthetic scope expansion fixture."
+  }
+}

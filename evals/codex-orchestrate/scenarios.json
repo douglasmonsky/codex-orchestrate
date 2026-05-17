@@ -251,5 +251,97 @@
       "escalation": "timeout or no-change result becomes stuck evidence, followed by packet repair and same-objective redelegation",
       "final_review": "root confirms no root takeover occurred after timeout"
     }
+  },
+  {
+    "id": "validation-only-laundering-failure",
+    "prompt": "/orchestrate The root implemented most of the feature locally, then only delegated validation and review. Detect and block validation-only laundering.",
+    "category": "validation-laundering",
+    "expected": {
+      "route": "Block completion when substantive implementation was not delegated and only validation/review was delegated after the fact.",
+      "delegation": "Route the substantive implementation objective back to implementer or implementer_strong unless the remaining work is deterministic micro-action.",
+      "escalation": "Escalate to risk_controller if the root cannot prove implementation delegation happened before validation.",
+      "model_routing": "Use gpt-5.4 implementer for ordinary implementation and gpt-5.4-mini test_runner for validation; do not count validation alone as implementation delegation.",
+      "final_review": "Root final review blocks until substantive work has delegated evidence or a blocker is reported.",
+      "must_delegate": true,
+      "runtime_fallback": "worker for implementation and validation fallback"
+    },
+    "expected_ledger": {
+      "tier": "Tier 2",
+      "role": "test_runner then reviewer or risk_controller",
+      "runtime_type": "test_runner/reviewer or worker/explorer fallback",
+      "model": "gpt-5.4-mini then gpt-5.5 or gpt-5.4",
+      "effort": "low then high or medium",
+      "escalation": "root records laundering blocker and routes implementation or risk decision instead of finalizing",
+      "final_review": "blocked because validation-only delegation does not satisfy delegate-first implementation"
+    }
+  },
+  {
+    "id": "role-mismatch-loop-recovery",
+    "prompt": "/orchestrate Two same-role attempts failed for different reasons. Stop retrying blindly and route the mismatch correctly.",
+    "category": "role-mismatch-loop",
+    "expected": {
+      "route": "After two failed same-role attempts, route to risk_controller, planner, or the correct specialist instead of retrying blindly.",
+      "delegation": "Use risk_controller for the loop decision and then the correct specialist role for the next bounded step.",
+      "escalation": "Escalate from repeated same-role failure to role mismatch analysis, not another blind same-role retry.",
+      "model_routing": "Use gpt-5.4 risk_controller or planner, then gpt-5.5 specialist only if ambiguity or risk requires it.",
+      "final_review": "Root confirms the repeated failures were classified and the new route matches the evidence.",
+      "must_delegate": true,
+      "runtime_fallback": "default for risk/planning fallback; worker or explorer for specialist fallback"
+    },
+    "expected_ledger": {
+      "tier": "Tier 3",
+      "role": "risk_controller then planner or specialist",
+      "runtime_type": "risk_controller/planner or default fallback",
+      "model": "gpt-5.4",
+      "effort": "medium",
+      "escalation": "role mismatch loop triggers risk_controller instead of blind retry",
+      "final_review": "root verifies loop recovery and next route evidence"
+    }
+  },
+  {
+    "id": "contradictory-subagent-outputs",
+    "prompt": "/orchestrate Two subagents disagree about the source of a failing test. Resolve the conflict with evidence before continuing.",
+    "category": "contradictory-outputs",
+    "expected": {
+      "route": "Route contradictory outputs to reviewer, architect, or debugger depending on conflict type before implementation continues.",
+      "delegation": "Use debugger for ambiguous failure-source conflicts or reviewer for diff/review conflicts.",
+      "escalation": "Escalate only the conflict resolution slice to a stronger role/model when the evidence is contradictory.",
+      "model_routing": "Use gpt-5.5 debugger or reviewer for high-ambiguity conflict resolution.",
+      "final_review": "Root cites the conflict, the resolution evidence, and the accepted next action.",
+      "must_delegate": true,
+      "runtime_fallback": "worker for debugger fallback; explorer for reviewer fallback"
+    },
+    "expected_ledger": {
+      "tier": "Tier 3",
+      "role": "debugger or reviewer",
+      "runtime_type": "debugger/reviewer or worker/explorer fallback",
+      "model": "gpt-5.5",
+      "effort": "high",
+      "escalation": "contradiction is routed to conflict resolution before continuing",
+      "final_review": "root verifies conflict resolution evidence"
+    }
+  },
+  {
+    "id": "scope-expansion-blocked",
+    "prompt": "/orchestrate An implementation agent broadened beyond its packet scope. Block completion and route correction.",
+    "category": "scope-expansion",
+    "expected": {
+      "route": "Final review blocks when a writer broadens beyond packet scope, then routes a correction or review packet.",
+      "delegation": "Use reviewer to confirm scope expansion and implementer/mechanic for bounded correction.",
+      "escalation": "Escalate to root decision or risk_controller if the expanded scope cannot be safely separated.",
+      "model_routing": "Use gpt-5.5 reviewer for high-impact scope review, then the cheapest safe correction agent.",
+      "final_review": "Root final review remains blocked until out-of-scope changes are reverted, justified, or explicitly accepted.",
+      "must_delegate": true,
+      "runtime_fallback": "explorer for review fallback; worker for correction fallback"
+    },
+    "expected_ledger": {
+      "tier": "Tier 2 or Tier 3",
+      "role": "reviewer then mechanic or implementer",
+      "runtime_type": "reviewer/mechanic or explorer/worker fallback",
+      "model": "gpt-5.5 then gpt-5.3-codex-spark or gpt-5.4",
+      "effort": "high then low or medium",
+      "escalation": "scope expansion blocks final review and routes bounded correction",
+      "final_review": "blocked until scope expansion is resolved"
+    }
   }
 ]

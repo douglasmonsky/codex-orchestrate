@@ -6,7 +6,7 @@ This package contains an instruction-only Codex skill and custom agent configs f
 
 The root agent acts as dispatcher, escalation controller, synthesizer, and final senior reviewer. For repository work, it delegates substantive exploration, implementation, validation, debugging, review, or documentation to subagents by default, then reconciles the results.
 
-The goal is not to minimize total tokens in every case. Subagents do their own model and tool work. The goal is to keep the root context clean, dispatch compact context packets with precise context handles, continuously route each new task phase to the cheapest safe agent/model/effort, escalate only the narrow unresolved issue when work gets stuck, and reserve high-capability reasoning for genuinely hard decisions and final judgment.
+The goal is not to minimize total tokens in every case. Subagents do their own model and tool work. The goal is to keep the root context clean, dispatch minimal context packets with precise context handles, continuously route each new task phase to the cheapest safe agent/model/effort, escalate only the narrow unresolved issue when work gets stuck, and reserve high-capability reasoning for genuinely hard decisions and final judgment.
 
 ## Source of truth
 
@@ -26,7 +26,7 @@ This version adds eight hard policies:
 2. **Routing is continuous.** The root reevaluates delegation after each user clarification, direct root step, subagent result, timed-out or closed subagent, validation result, scope change, or new risk. If a Tier 0 direct answer grows into repository or tool work, the root leaves Tier 0 and delegates the next step.
 3. **Runtime fallback preserves role intent.** If custom agent profiles are unavailable, read-only work maps to `explorer`, implementation/test/docs work maps to `worker`, and planning/synthesis maps to `default`.
 4. **Model routing is explicit.** The root chooses a concrete model and reasoning effort for each subagent. Use `gpt-5.3-codex-spark` for ultra-fast text-only coding loops, `gpt-5.4-mini` for lightweight general support, `gpt-5.4` for normal judgment, and `gpt-5.5` for high-risk or high-ambiguity specialists.
-5. **Initial context is packetized.** Initial dispatch uses a compact context packet with packet id, objective, scope, non-goals, context handles, allowed tools/paths, model/effort, entry condition, exit condition, output budget, and a Context request rule.
+5. **Initial context is packetized.** Initial dispatch uses a minimal context packet with packet id, role/mission, objective, scope, non-goals, context handles, allowed actions/paths, constraints, done condition, output budget, expected return, and a Context request rule. Model, reasoning effort, tier, runtime fallback, model sufficiency, and escalation targets stay as root-only routing metadata in ledgers and reports.
 6. **Lifecycle evidence is ledger-linked.** Durable ledgers can link packet id, subagent lifecycle, context requests, packet repair, and terminal exit evidence to routing decisions.
 7. **Stuck work escalates model and/or effort first.** When a subagent gets stuck, retry the same narrow unresolved task at the next model class and/or reasoning-effort level. A timed-out, closed, or no-change subagent is stuck evidence, not a root takeover license. Pass off to a different specialist only when the evidence shows role mismatch.
 8. **The root performs final senior review.** The top-level/root agent must finish by reviewing subagent output as a senior developer, code reviewer, and architect. This is a check-and-balance gate; it is not fully outsourced to a reviewer subagent.
@@ -122,9 +122,9 @@ Model names in `.codex/agents/*.toml` are pinned intentionally. Strict model pin
 
 The skill UI metadata is stored in `.agents/skills/codex-orchestrate/agents/openai.yaml`. Shared harness constants for role/model routing, smoke terms, context-packet budgets, and durable-ledger triggers are stored in `evals/codex-orchestrate/routing-policy.json`; helper scripts and static checks read that manifest.
 
-Initial subagent dispatch should use compact context packets, not raw repo context, transcripts, or pasted logs. Use context handles such as `file:path:line`, `cmd:name`, `diff:path`, `ledger:entry`, `artifact:path`, and `scenario:id`. If a subagent needs more context, it must return a structured Context request with reason, requested handle/path, and decision impact; that request triggers root reassessment before more context is granted.
+Initial subagent dispatch should use minimal context packets, not raw repo context, transcripts, pasted logs, or root routing rationale. Use context handles such as `file:path:line`, `cmd:name`, `diff:path`, `ledger:entry`, `artifact:path`, and `scenario:id`. If a subagent needs more context, it must return a structured Context request with reason, requested handle/path, and decision impact; that request triggers root reassessment before more context is granted.
 
-When a durable ledger is required, connect each delegated subagent to packet id and subagent lifecycle evidence. Every active packet should have a start event and terminal exit such as done, blocked, stuck, out-of-scope, or context-requested. Entry failures should return as packet repair, and final review should verify terminal exit evidence before completion.
+When a durable ledger is required, connect each delegated subagent to packet id and subagent lifecycle evidence. Every active packet should have a start event and terminal exit such as done, blocked, stuck, out-of-scope, or context-requested. Unclear packets should return as packet repair, and final review should verify terminal exit evidence before completion.
 
 If an implementation packet times out, closes, or produces no useful changes, record it as stuck, repair or split the packet, and redelegate or escalate the same narrow objective before implementation continues. Delegating validation or review after root implements the substantive work does not satisfy delegate-first orchestration.
 
@@ -146,6 +146,7 @@ python3 scripts/serve_orchestration_ui.py --self-test
 python3 scripts/run_orchestration_smoke.py
 python3 scripts/run_orchestration_smoke.py --scenario-id lifecycle-smoke --json
 python3 scripts/run_orchestration_smoke.py --scenario-id context-packet-smoke --json
+python3 scripts/run_orchestration_smoke.py --scenario-id minimal-packet-smoke --json
 python3 scripts/run_orchestration_smoke.py --scenario-id timeout-recovery-smoke --json
 python3 scripts/run_orchestration_smoke.py --scenario-id high-risk-security-change --json
 python3 scripts/sync_orchestration_skill.py --check

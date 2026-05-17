@@ -30,7 +30,9 @@ python3 scripts/serve_orchestration_ui.py --port 8765
 
 Open `http://127.0.0.1:8765` to inspect sample ledgers and ignored private ledgers under `local/orchestration-ledgers/`. The dashboard does not edit ledgers or run write operations.
 
-When context packets are used, link routing entries to `packet_id` and record `context_packets` plus `subagent_lifecycle`. Every active packet needs a started event and terminal exit evidence. Use `packet-repaired` when entry conditions were unclear and the root repaired the packet before redelegating; this is the durable packet repair record.
+When context packets are used, link routing entries to `packet_id` and record `context_packets` plus `subagent_lifecycle`. Every active packet needs a started event and terminal exit evidence. Use `packet-repaired` when the minimal packet was unclear and the root repaired the objective, scope, constraints, allowed actions/paths, or done condition before redelegating; this is the durable packet repair record.
+
+The subagent-visible packet is intentionally smaller than the routing ledger. Do not put root-only routing metadata such as model, reasoning effort, runtime type, tier, model sufficiency, preferred concrete model, escalation target, or routine scenario id into `context_packets`. Keep those fields in `routing_entries`, reports, and checker fixtures where they belong.
 
 For a timed-out, closed, or no-change subagent, record a `stuck` lifecycle event with `exit_status: "stuck"`, evidence of the timeout/no-change result, and the root decision to repair, split, redelegate, or escalate. The final review should confirm root takeover did not replace substantive implementation delegation after the timeout.
 
@@ -74,20 +76,16 @@ Schema: `schemas/orchestration-ledger.schema.json`
   ],
   "context_packets": [
     {
+      "schema_version": "2.0",
       "packet_id": "",
       "role": "",
-      "runtime_type": "",
-      "tier": "",
       "objective": "",
       "scope": [],
       "non_goals": [],
       "evidence_handles": [],
-      "allowed_tools_paths": [],
-      "model": "",
-      "reasoning_effort": "",
-      "writable": false,
-      "entry_condition": "",
-      "exit_condition": "",
+      "allowed_actions_and_paths": [],
+      "constraints": [],
+      "done_condition": "",
       "output_budget_words": 350,
       "context_request_rule": "",
       "expected_return": []
@@ -150,6 +148,7 @@ Tier history:
 Agent roles:
 Runtime type:
 Packet ID:
+Context packet fields:
 Intended model:
 Actual model:
 Reasoning effort:

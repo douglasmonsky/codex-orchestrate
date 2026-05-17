@@ -1,0 +1,36 @@
+{
+  "fixture_id": "minimal-packet-v2",
+  "expected_result": "pass",
+  "packet": {
+    "schema_version": "2.0",
+    "packet_id": "packet-minimal-v2-001",
+    "scenario_id": "small-patch-with-validation",
+    "role": "mechanic",
+    "objective": "Apply the targeted typo fix and report the focused check.",
+    "scope": [
+      "file:README.md:12",
+      "cmd:markdown-check"
+    ],
+    "non_goals": [
+      "Do not inspect unrelated files."
+    ],
+    "evidence_handles": [
+      "file:README.md:12",
+      "cmd:markdown-check"
+    ],
+    "allowed_actions_and_paths": [
+      "README.md"
+    ],
+    "constraints": [
+      "Only edit README.md.",
+      "Return concise evidence, not pasted outputs."
+    ],
+    "done_condition": "Return the patch summary and focused check result.",
+    "output_budget_words": 180,
+    "context_request_rule": "Use Context request with reason, requested_handle, and decision_impact before asking for broader context.",
+    "expected_return": [
+      "Patch summary",
+      "Validation result"
+    ]
+  }
+}

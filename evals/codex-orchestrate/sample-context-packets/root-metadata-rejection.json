@@ -1,0 +1,38 @@
+{
+  "fixture_id": "root-metadata-rejection",
+  "expected_result": "fail",
+  "packet": {
+    "schema_version": "2.0",
+    "packet_id": "packet-root-metadata-001",
+    "scenario_id": "small-patch-with-validation",
+    "role": "implementer_simple",
+    "objective": "Apply the bounded one-file fix and return evidence.",
+    "scope": [
+      "file:src/example.py:42"
+    ],
+    "non_goals": [
+      "Do not broaden the patch."
+    ],
+    "evidence_handles": [
+      "file:src/example.py:42",
+      "cmd:focused-unit-test"
+    ],
+    "allowed_actions_and_paths": [
+      "src/example.py"
+    ],
+    "constraints": [
+      "Only edit src/example.py."
+    ],
+    "done_condition": "Return done, blocked, stuck, or a precise Context request.",
+    "output_budget_words": 300,
+    "context_request_rule": "Use Context request with reason, requested_handle, and decision_impact before asking for broader context.",
+    "expected_return": [
+      "Patch summary",
+      "Validation result"
+    ],
+    "model": "gpt-5.3-codex-spark",
+    "reasoning_effort": "medium",
+    "runtime_type": "custom",
+    "tier": "Tier 1"
+  }
+}
