@@ -40,6 +40,8 @@ python3 scripts/check_orchestration_context_packets.py evals/codex-orchestrate/s
 python3 scripts/check_orchestration_lifecycle.py evals/codex-orchestrate/sample-ledgers/*.json
 python3 scripts/check_orchestration_ledger.py evals/codex-orchestrate/sample-ledgers/*.json
 python3 scripts/check_orchestration_behavior.py evals/codex-orchestrate/sample-ledgers/*.json
+python3 scripts/report_orchestration_ledger.py evals/codex-orchestrate/sample-ledgers/small-patch.json
+python3 scripts/report_orchestration_ledger.py --json evals/codex-orchestrate/sample-ledgers/small-patch.json
 python3 scripts/run_orchestration_smoke.py
 python3 scripts/run_orchestration_smoke.py --scenario-id lifecycle-smoke --json
 python3 scripts/run_orchestration_smoke.py --scenario-id context-packet-smoke --json
@@ -90,6 +92,7 @@ When a request starts with `/orchestrate`, use `codex-orchestrate`. Prompt assem
 - `python3 scripts/create_orchestration_ledger.py --help` works and documents local-only ledger output.
 - `python3 scripts/check_orchestration_ledger.py evals/codex-orchestrate/sample-ledgers/*.json` passes for committed synthetic ledgers.
 - `python3 scripts/check_orchestration_behavior.py evals/codex-orchestrate/sample-ledgers/*.json` passes for scenario-to-ledger behavioral evidence.
+- `python3 scripts/report_orchestration_ledger.py evals/codex-orchestrate/sample-ledgers/small-patch.json` produces a post-run Markdown audit, and `--json` produces machine-readable report data.
 - `python3 scripts/run_orchestration_smoke.py` and a focused `--scenario-id` smoke confirm `/orchestrate` prompt assembly exposes the core policy surface.
 - Model pins in `.codex/agents/*.toml` still match `evals/codex-orchestrate/routing-policy.json`.
 - Ledger, lifecycle, and context-packet schemas stay aligned when orchestration behavior changes.

@@ -56,6 +56,7 @@ scripts/check_orchestration_lifecycle.py
 scripts/check_orchestration_ledger.py
 scripts/check_orchestration_behavior.py
 scripts/create_orchestration_ledger.py
+scripts/report_orchestration_ledger.py
 scripts/run_orchestration_smoke.py
 evals/codex-orchestrate/routing-policy.json
 evals/codex-orchestrate/sample-context-packets/*.json
@@ -135,6 +136,8 @@ python3 scripts/check_orchestration_context_packets.py evals/codex-orchestrate/s
 python3 scripts/check_orchestration_lifecycle.py evals/codex-orchestrate/sample-ledgers/*.json
 python3 scripts/check_orchestration_ledger.py evals/codex-orchestrate/sample-ledgers/*.json
 python3 scripts/check_orchestration_behavior.py evals/codex-orchestrate/sample-ledgers/*.json
+python3 scripts/report_orchestration_ledger.py evals/codex-orchestrate/sample-ledgers/small-patch.json
+python3 scripts/report_orchestration_ledger.py --json evals/codex-orchestrate/sample-ledgers/small-patch.json
 python3 scripts/run_orchestration_smoke.py
 python3 scripts/run_orchestration_smoke.py --scenario-id lifecycle-smoke --json
 python3 scripts/run_orchestration_smoke.py --scenario-id context-packet-smoke --json
@@ -143,9 +146,9 @@ python3 scripts/sync_orchestration_skill.py --check
 codex debug prompt-input '/orchestrate model routing smoke test'
 ```
 
-Recommended post-edit loop: creator help check, static checker, runtime compatibility check, context-packet validation, lifecycle validation, sample ledger validation, behavioral evidence check, prompt smoke harness, sync check/apply, `codex debug prompt-input`, commit, push.
+Recommended post-edit loop: creator help check, static checker, runtime compatibility check, context-packet validation, lifecycle validation, sample ledger validation, behavioral evidence check, ledger report smoke, prompt smoke harness, sync check/apply, `codex debug prompt-input`, commit, push.
 
-Use `scripts/create_orchestration_ledger.py` for private local ledgers when working in MonskySkills; it writes to ignored `local/orchestration-ledgers/` by default, runs `scripts/check_orchestration_ledger.py`, and runs `scripts/check_orchestration_behavior.py` when the `scenario_id` matches a committed scenario. Use `scripts/check_orchestration_behavior.py` to compare sanitized ledgers against scenario expectations; this validates recorded behavior, not future live model behavior. Use `scripts/run_orchestration_smoke.py` after instruction changes to confirm `/orchestrate` prompt assembly still exposes source-of-truth, runtime fallback, routing-ledger, model-routing, and final-review language.
+Use `scripts/create_orchestration_ledger.py` for private local ledgers when working in MonskySkills; it writes to ignored `local/orchestration-ledgers/` by default, runs `scripts/check_orchestration_ledger.py`, and runs `scripts/check_orchestration_behavior.py` when the `scenario_id` matches a committed scenario. Use `scripts/report_orchestration_ledger.py` to turn a ledger into a Markdown or JSON after-action audit covering tier history, subagents, model fallback, context requests, lifecycle exits, validation, final review, residual risks, and whether orchestration justified itself. Use `scripts/check_orchestration_behavior.py` to compare sanitized ledgers against scenario expectations; this validates recorded behavior, not future live model behavior. Use `scripts/run_orchestration_smoke.py` after instruction changes to confirm `/orchestrate` prompt assembly still exposes source-of-truth, runtime fallback, routing-ledger, model-routing, and final-review language.
 
 ## Invocation examples
 

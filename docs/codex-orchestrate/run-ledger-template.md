@@ -12,6 +12,16 @@ python3 scripts/create_orchestration_ledger.py
 
 It writes to ignored `local/orchestration-ledgers/` by default, runs `scripts/check_orchestration_ledger.py`, and runs `scripts/check_orchestration_behavior.py` when the `scenario_id` matches a committed scenario. In other repos, copy this JSON shape manually and keep private details local or sanitized.
 
+After creating or receiving a ledger, generate a quick after-action audit:
+
+```bash
+python3 scripts/report_orchestration_ledger.py local/orchestration-ledgers/<run>.json
+python3 scripts/report_orchestration_ledger.py --json local/orchestration-ledgers/<run>.json
+python3 scripts/report_orchestration_ledger.py --validate local/orchestration-ledgers/<run>.json
+```
+
+The report summarizes task state, tier history, subagents, intended versus actual models, context requests, lifecycle terminal exits, validation, final review, residual risks, usage estimates, and whether orchestration justified itself.
+
 When context packets are used, link routing entries to `packet_id` and record `context_packets` plus `subagent_lifecycle`. Every active packet needs a started event and terminal exit evidence. Use `packet-repaired` when entry conditions were unclear and the root repaired the packet before redelegating; this is the durable packet repair record.
 
 Schema: `schemas/orchestration-ledger.schema.json`
@@ -143,4 +153,5 @@ Validation:
 Final review:
 Residual risks:
 Usage estimate:
+Did orchestration justify itself?:
 ```

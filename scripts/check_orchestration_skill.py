@@ -37,6 +37,7 @@ RUNTIME_SCRIPT = ROOT / "scripts" / "check_runtime_compatibility.py"
 LEDGER_CHECK_SCRIPT = ROOT / "scripts" / "check_orchestration_ledger.py"
 BEHAVIOR_SCRIPT = ROOT / "scripts" / "check_orchestration_behavior.py"
 CREATOR_SCRIPT = ROOT / "scripts" / "create_orchestration_ledger.py"
+REPORT_SCRIPT = ROOT / "scripts" / "report_orchestration_ledger.py"
 SMOKE_SCRIPT = ROOT / "scripts" / "run_orchestration_smoke.py"
 CONTEXT_PACKET_CHECK_SCRIPT = ROOT / "scripts" / "check_orchestration_context_packets.py"
 LIFECYCLE_SCRIPT = ROOT / "scripts" / "check_orchestration_lifecycle.py"
@@ -466,6 +467,7 @@ def check_docs() -> None:
         "check_orchestration_ledger.py",
         "check_orchestration_behavior.py",
         "create_orchestration_ledger.py",
+        "report_orchestration_ledger.py",
         "run_orchestration_smoke.py",
         "agents/openai.yaml",
         "routing-policy.json",
@@ -489,6 +491,7 @@ def check_docs() -> None:
         "source-of-truth policy",
         "runtime fallback",
         "behavioral evidence",
+        "whether orchestration justified itself",
         "local/orchestration-ledgers",
     ]:
         require(re.search(re.escape(phrase), combined, re.IGNORECASE), f"docs missing: {phrase}")
@@ -607,6 +610,8 @@ def check_ledger_artifacts() -> None:
         "create_orchestration_ledger.py",
         "local/orchestration-ledgers",
         "check_orchestration_behavior.py",
+        "report_orchestration_ledger.py",
+        "Did orchestration justify itself?",
         "context_packets",
         "subagent_lifecycle",
         "packet_id",
@@ -760,6 +765,67 @@ def check_ledger_validator_and_samples() -> None:
     )
 
 
+def check_ledger_reporter() -> None:
+    text = read(REPORT_SCRIPT)
+    for phrase in [
+        "--json",
+        "--validate",
+        "--strict",
+        "check_orchestration_ledger.py",
+        "check_orchestration_lifecycle.py",
+        "check_orchestration_behavior.py",
+        "Did Orchestration Justify Itself?",
+        "orchestration_value",
+        "Tier history",
+        "intended_model",
+        "actual_model",
+        "context_requests",
+        "packet_repairs",
+        "residual_risks",
+    ]:
+        require_contains(text, phrase, "report_orchestration_ledger.py")
+
+    sample = SAMPLE_LEDGERS / "small-patch.json"
+    markdown = subprocess.run(
+        [sys.executable, str(REPORT_SCRIPT), str(sample)],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    require(
+        markdown.returncode == 0,
+        f"ledger report markdown failed: {markdown.stderr.strip() or markdown.stdout.strip()}",
+    )
+    for phrase in ["Did Orchestration Justify Itself?", "Answer: no", "Tier history"]:
+        require_contains(markdown.stdout, phrase, "report_orchestration_ledger.py markdown output")
+
+    machine = subprocess.run(
+        [sys.executable, str(REPORT_SCRIPT), "--json", str(sample)],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    require(
+        machine.returncode == 0,
+        f"ledger report json failed: {machine.stderr.strip() or machine.stdout.strip()}",
+    )
+    payload = json.loads(machine.stdout)
+    require(payload.get("status") == "ok", "ledger report json status should be ok")
+    require(payload["reports"][0]["orchestration_value"]["answer"] == "no", "small-patch report should classify orchestration value as no")
+
+    files = sorted(SAMPLE_LEDGERS.glob("*.json"))
+    validated = subprocess.run(
+        [sys.executable, str(REPORT_SCRIPT), "--validate", *[str(path) for path in files]],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    require(
+        validated.returncode == 0,
+        f"ledger report --validate failed: {validated.stderr.strip() or validated.stdout.strip()}",
+    )
+
+
 def check_lifecycle_script() -> None:
     text = read(LIFECYCLE_SCRIPT)
     for phrase in [
@@ -849,6 +915,7 @@ def main() -> int:
         check_context_packet_artifacts,
         check_ledger_creator,
         check_ledger_validator_and_samples,
+        check_ledger_reporter,
         check_lifecycle_script,
         check_behavior_script,
         check_smoke_script,
