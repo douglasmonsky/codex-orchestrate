@@ -30,6 +30,7 @@ There is no build system yet. For skill changes, run focused structural checks:
 
 ```bash
 python3 scripts/check_orchestration_skill.py
+python3 scripts/sync_orchestration_skill.py --check
 find .agents/skills -name SKILL.md -print
 find .codex/agents -name '*.toml' -print
 git diff --check
@@ -63,6 +64,7 @@ When TOML agent profiles change, inspect them for valid names, explicit model ro
 - Companion agent profiles or docs are committed with the skill when required.
 - README or docs are updated when install behavior changes.
 - `python3 scripts/check_orchestration_skill.py` passes when `codex-orchestrate` changes.
+- `python3 scripts/sync_orchestration_skill.py --check` passes after syncing global installs.
 - Model pins in `.codex/agents/*.toml` still match the documented `codex-orchestrate` model ladder.
 - `git diff --check` passes.
 - No secrets, tokens, or private data are staged.

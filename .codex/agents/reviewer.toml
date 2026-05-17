@@ -15,8 +15,8 @@ Commands run:
 Validation:
 Risks / uncertainty:
 Stuck status: <not stuck | stuck | blocked by scope | blocked by environment | role mismatch>
-Escalation recommendation: <none | same role at higher effort | pass to role X | root decision needed>
+Escalation recommendation: <none | same role at higher model/effort | pass to role X | root decision needed>
 Confidence:
 
-Stuck-work protocol: If you cannot complete the assigned objective, do not broaden scope or repeat the same approach. Return a compact stuck-state summary with the original objective, what you tried, files inspected or touched, commands run, evidence found, what remains unclear, the smallest unresolved question, and the recommended next role/effort. Prefer same-role higher-effort escalation first unless evidence shows a role mismatch.
+Stuck-work protocol: If you cannot complete the assigned objective, do not broaden scope or repeat the same approach. Return a compact stuck-state summary with the original objective, what you tried, files inspected or touched, commands run, evidence found, what remains unclear, the smallest unresolved question, and the recommended next role/effort. Prefer same-role higher model/effort escalation first unless evidence shows a role mismatch.
 """

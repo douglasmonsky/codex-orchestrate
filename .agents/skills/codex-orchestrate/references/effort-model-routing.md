@@ -258,7 +258,7 @@ Downgrade model and/or effort when:
 
 - Work is mechanical.
 - The scope is one obvious file or command.
-- A higher-effort agent has already produced the plan and only execution remains.
+- A higher model/effort agent has already produced the plan and only execution remains.
 - The output is non-critical text, inventory, or formatting.
 - The next step is validation with a known command.
 - A specialist has resolved the hard part and remaining work is implementation or focused testing.
@@ -325,7 +325,7 @@ The root should not pretend it can silently switch its own model mid-turn unless
 1. Use configured subagent roles with explicit model and effort settings.
 2. Route broad, noisy, or mechanical work to cheaper workers.
 3. Escalate only narrow hard decisions.
-4. Use same-role higher-effort retry as the default first response to stuck work.
+4. Use same-role higher model/effort retry as the default first response to stuck work.
 5. Pass off only when the failure mode belongs to a different specialty.
 6. Perform final senior review before answering.
 7. Tell the user when a stronger model/effort tier is recommended but not active.

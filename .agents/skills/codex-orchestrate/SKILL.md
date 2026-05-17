@@ -1,6 +1,6 @@
 ---
 name: codex-orchestrate
-description: Delegate-first Codex orchestration for coding, debugging, review, planning, research, migration, audit, testing, documentation, or any task that benefits from routing work to subagents. The root agent acts as dispatcher, escalation controller, synthesizer, and final senior reviewer. Delegate substantive work by default, continuously reassess delegation as the task evolves, support custom-agent and built-in-agent runtimes, escalate stuck work narrowly, and require root-level final review before completion. Avoid only for pure conversational micro-answers or when the user forbids subagents.
+description: Delegate-first Codex orchestration for coding, debugging, review, planning, research, migration, audit, testing, documentation, or any task that benefits from routing work to subagents. The root agent acts as dispatcher, escalation controller, synthesizer, and final senior reviewer. Delegate substantive work by default, continuously reassess delegation, use explicit model routing plus reasoning effort, support custom-agent and built-in-agent runtimes, escalate stuck work narrowly, and require root-level final review before completion. Avoid only for pure conversational micro-answers or when the user forbids subagents.
 ---
 
 # Codex Orchestration Skill
@@ -29,7 +29,7 @@ implementation, debugging, test execution, docs edits, mechanical edits -> worke
 planning, synthesis, fallback controller decisions -> default
 ```
 
-When falling back, preserve the intended role in the subagent prompt, set the closest available `agent_type`, and keep the same bounded objective, effort, output budget, and escalation trigger.
+When falling back, preserve the intended role in the subagent prompt, set the closest available `agent_type`, and keep the same bounded objective, selected model, reasoning effort, output budget, and escalation trigger.
 
 ## Model Routing
 
@@ -225,6 +225,6 @@ Do not expose private chain-of-thought or paste subagent prompts unless the user
 Load only the reference needed for the current decision:
 
 - `references/agent-roster.md`: role roster, when to use each role, expected outputs.
-- `references/effort-model-routing.md`: effort/model routing, fallback behavior, task templates.
+- `references/effort-model-routing.md`: explicit model and effort routing, fallback behavior, task templates.
 - `references/handoff-contracts.md`: subagent prompt templates, routing ledger template, pass-off templates.
 - `references/escalation-and-review.md`: stuck-state policy, escalation budget, final review checklists.

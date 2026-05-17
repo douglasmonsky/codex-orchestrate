@@ -66,8 +66,8 @@ cp -R .agents/skills/codex-orchestrate /path/to/repo/.agents/skills/
 For the global installed copy, sync from this repository:
 
 ```bash
-rm -rf ~/.codex/skills/codex-orchestrate
-cp -R .agents/skills/codex-orchestrate ~/.codex/skills/
+python3 scripts/sync_orchestration_skill.py --check
+python3 scripts/sync_orchestration_skill.py --apply
 ```
 
 For project-scoped custom agents, copy:
@@ -99,11 +99,15 @@ Copy useful parts of `AGENTS.orchestration.snippet.md` into the repo's `AGENTS.m
 
 Model names in `.codex/agents/*.toml` are pinned intentionally. If a runtime lacks a pinned model, use the nearest safe available model and record the intended/actual model in the routing ledger.
 
-Run the lightweight checker after changes:
+Run the lightweight checker and sync check after changes:
 
 ```bash
 python3 scripts/check_orchestration_skill.py
+python3 scripts/sync_orchestration_skill.py --check
+codex debug prompt-input '/orchestrate model routing smoke test'
 ```
+
+Recommended post-edit loop: checker, sync apply when drift exists, sync check, prompt smoke test, commit, push.
 
 ## Invocation examples
 

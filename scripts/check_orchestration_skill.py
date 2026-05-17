@@ -18,6 +18,7 @@ SKILL = ROOT / ".agents" / "skills" / "codex-orchestrate" / "SKILL.md"
 REFERENCES = ROOT / ".agents" / "skills" / "codex-orchestrate" / "references"
 AGENTS = ROOT / ".codex" / "agents"
 SCENARIOS = ROOT / "evals" / "codex-orchestrate" / "scenarios.json"
+SYNC_SCRIPT = ROOT / "scripts" / "sync_orchestration_skill.py"
 README = ROOT / "README.md"
 PACKAGE_README = ROOT / "docs" / "codex-orchestrate" / "package-readme.md"
 SNIPPET = ROOT / "docs" / "codex-orchestrate" / "AGENTS.orchestration.snippet.md"
@@ -110,6 +111,15 @@ HIGH_RISK_ROLES = {
 
 SPARK_ROLES = {"mechanic", "repo_scout", "implementer_simple"}
 MINI_ROLES = {"test_runner", "docs_writer"}
+FORBIDDEN_STALE_POLICY_PHRASES = [
+    "Stuck work escalates effort first",
+    "next effort/model level",
+    "higher-effort",
+    "same-role higher-effort",
+    "same role at higher effort",
+    "Recommended next agent/effort",
+    "effort/model level",
+]
 
 REQUIRED_SCENARIO_EXPECTED_FIELDS = [
     "route",
@@ -119,6 +129,16 @@ REQUIRED_SCENARIO_EXPECTED_FIELDS = [
     "final_review",
     "must_delegate",
     "runtime_fallback",
+]
+
+REQUIRED_LEDGER_FIELDS = [
+    "tier",
+    "role",
+    "runtime_type",
+    "model",
+    "effort",
+    "escalation",
+    "final_review",
 ]
 
 
@@ -143,6 +163,11 @@ def require_contains(text: str, needle: str, label: str) -> None:
 
 def check_skill() -> None:
     text = read(SKILL)
+    frontmatter = text.split("---", 2)[1] if text.startswith("---") else ""
+    require(
+        "model routing" in frontmatter.lower(),
+        "SKILL.md frontmatter description must mention model routing",
+    )
     for section in REQUIRED_SKILL_SECTIONS:
         require_contains(text, section, "SKILL.md")
 
@@ -196,6 +221,24 @@ def check_references() -> None:
         require_contains(handoffs, phrase, "handoff-contracts.md")
 
 
+def check_no_stale_effort_policy() -> None:
+    files = [
+        SKILL,
+        README,
+        PACKAGE_README,
+        SNIPPET,
+        *sorted(REFERENCES.glob("*.md")),
+        *sorted(AGENTS.glob("*.toml")),
+    ]
+    for path in files:
+        text = read(path)
+        for phrase in FORBIDDEN_STALE_POLICY_PHRASES:
+            require(
+                phrase not in text,
+                f"{path.relative_to(ROOT)} contains stale effort-only policy phrase: {phrase}",
+            )
+
+
 def check_scenarios() -> None:
     raw = read(SCENARIOS)
     scenarios = json.loads(raw)
@@ -214,6 +257,11 @@ def check_scenarios() -> None:
         for field in REQUIRED_SCENARIO_EXPECTED_FIELDS:
             require(field in expected, f"{scenario['id']} missing expected.{field}")
         require(expected["must_delegate"] is True, f"{scenario['id']} should assert must_delegate true")
+        ledger = scenario.get("expected_ledger")
+        require(isinstance(ledger, dict), f"{scenario['id']} needs expected_ledger object")
+        for field in REQUIRED_LEDGER_FIELDS:
+            require(field in ledger, f"{scenario['id']} missing expected_ledger.{field}")
+            require(isinstance(ledger[field], str) and ledger[field], f"{scenario['id']} expected_ledger.{field} must be non-empty")
 
     for required in {
         "tier0-upgrade",
@@ -222,6 +270,10 @@ def check_scenarios() -> None:
         "high-risk-security",
         "runtime-fallback",
         "model-escalation",
+        "duplicate-visibility",
+        "model-fallback",
+        "final-review-failure",
+        "risk-controller",
     }:
         require(required in categories, f"missing scenario category: {required}")
 
@@ -282,13 +334,24 @@ def check_docs() -> None:
         require(re.search(re.escape(phrase), combined, re.IGNORECASE), f"docs missing: {phrase}")
 
 
+def check_sync_script() -> None:
+    text = read(SYNC_SCRIPT)
+    require_contains(text, "--check", "sync_orchestration_skill.py")
+    require_contains(text, "--apply", "sync_orchestration_skill.py")
+    require_contains(text, "compare_tree", "sync_orchestration_skill.py")
+    require_contains(text, "compare_agents", "sync_orchestration_skill.py")
+    require_contains(text, "DRIFT", "sync_orchestration_skill.py")
+
+
 def main() -> int:
     checks = [
         check_skill,
         check_references,
+        check_no_stale_effort_policy,
         check_scenarios,
         check_agents,
         check_docs,
+        check_sync_script,
     ]
     try:
         for check in checks:

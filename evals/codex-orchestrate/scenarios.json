@@ -11,6 +11,15 @@
       "final_review": "Root verifies README claims against cited repo evidence before final response.",
       "must_delegate": true,
       "runtime_fallback": "explorer for read-only inspection; worker for docs edits"
+    },
+    "expected_ledger": {
+      "tier": "Tier 2",
+      "role": "repo_scout then docs_writer",
+      "runtime_type": "repo_scout/docs_writer or explorer/worker fallback",
+      "model": "gpt-5.3-codex-spark then gpt-5.4-mini",
+      "effort": "low",
+      "escalation": "none unless discovery or docs claims require deeper code judgment",
+      "final_review": "root checks README claims against repo evidence"
     }
   },
   {
@@ -25,6 +34,15 @@
       "final_review": "Root inspects changed diff and validation summary.",
       "must_delegate": true,
       "runtime_fallback": "worker"
+    },
+    "expected_ledger": {
+      "tier": "Tier 1 or Tier 2",
+      "role": "mechanic or implementer_simple",
+      "runtime_type": "mechanic/implementer_simple or worker fallback",
+      "model": "gpt-5.3-codex-spark",
+      "effort": "low or medium",
+      "escalation": "gpt-5.4 implementer only when Spark lacks capability or scope grows",
+      "final_review": "root inspects diff and focused validation"
     }
   },
   {
@@ -39,6 +57,15 @@
       "final_review": "Root reports exact commands, failure classification, and residual uncertainty.",
       "must_delegate": true,
       "runtime_fallback": "worker"
+    },
+    "expected_ledger": {
+      "tier": "Tier 2",
+      "role": "test_triage",
+      "runtime_type": "test_triage or worker fallback",
+      "model": "gpt-5.4",
+      "effort": "medium",
+      "escalation": "gpt-5.5 debugger only after triage cannot classify the failure",
+      "final_review": "root checks command evidence and failure classification"
     }
   },
   {
@@ -53,6 +80,15 @@
       "final_review": "Root performs mandatory senior review of security claims, validation, and residual risk.",
       "must_delegate": true,
       "runtime_fallback": "explorer for audit/design, worker for implementation"
+    },
+    "expected_ledger": {
+      "tier": "Tier 4",
+      "role": "architect and security_auditor",
+      "runtime_type": "architect/security_auditor or explorer fallback",
+      "model": "gpt-5.5",
+      "effort": "high",
+      "escalation": "stay on gpt-5.5 and narrow unresolved auth/security questions",
+      "final_review": "root verifies security claims, tests, and residual risk before finalizing"
     }
   },
   {
@@ -62,11 +98,20 @@
     "expected": {
       "route": "Keep the same delegation loop while mapping intended roles to available built-in agent types.",
       "delegation": "Use explorer for read-only scout/review work, worker for implementation/test work, and default for planning/synthesis if needed.",
-      "escalation": "Escalate by intended role and effort even when the callable agent_type is a fallback.",
+      "escalation": "Escalate by intended role and model/effort even when the callable agent_type is a fallback.",
       "model_routing": "Record intended model and actual fallback model in the routing ledger when a pinned model is unavailable.",
       "final_review": "Root notes fallback mapping only if useful and still performs final senior review.",
       "must_delegate": true,
       "runtime_fallback": "explorer, worker, default"
+    },
+    "expected_ledger": {
+      "tier": "Tier 2",
+      "role": "intended repo_scout and implementer_simple",
+      "runtime_type": "explorer and worker fallback",
+      "model": "intended model plus actual fallback model",
+      "effort": "preserve intended effort",
+      "escalation": "same intended role at higher model/effort before role switch",
+      "final_review": "root confirms fallback did not change acceptance criteria"
     }
   },
   {
@@ -81,6 +126,107 @@
       "final_review": "Root checks that the escalation stayed narrow and that final validation supports the patch.",
       "must_delegate": true,
       "runtime_fallback": "worker"
+    },
+    "expected_ledger": {
+      "tier": "Tier 2",
+      "role": "implementer_simple then implementer or implementer_strong",
+      "runtime_type": "worker fallback if custom roles unavailable",
+      "model": "gpt-5.3-codex-spark then gpt-5.4 or gpt-5.5",
+      "effort": "medium then medium or high",
+      "escalation": "same narrow objective, higher model/effort, no scope broadening",
+      "final_review": "root checks escalation scope and validation"
+    }
+  },
+  {
+    "id": "duplicate-skill-visibility",
+    "prompt": "/orchestrate Both repo-local and global codex-orchestrate skills are visible. Use the right one to inspect and update a small repo doc.",
+    "category": "duplicate-visibility",
+    "expected": {
+      "route": "Prefer the repo-local MonskySkills skill while working in MonskySkills, but keep global sync behavior documented.",
+      "delegation": "Delegate repo doc inspection to repo_scout and the small edit to docs_writer or fallback worker.",
+      "escalation": "Escalate only if duplicate visibility creates contradictory instructions or stale installed behavior.",
+      "model_routing": "Use gpt-5.3-codex-spark for repo_scout and gpt-5.4-mini for docs_writer.",
+      "final_review": "Root confirms the repo-local source of truth was used and final docs match source evidence.",
+      "must_delegate": true,
+      "runtime_fallback": "repo-local skill preferred; explorer/worker if custom agents unavailable"
+    },
+    "expected_ledger": {
+      "tier": "Tier 2",
+      "role": "repo_scout then docs_writer",
+      "runtime_type": "repo-local skill with custom roles or explorer/worker fallback",
+      "model": "gpt-5.3-codex-spark then gpt-5.4-mini",
+      "effort": "low",
+      "escalation": "root resolves source-of-truth conflict before continuing if instructions differ",
+      "final_review": "root verifies repo-local source of truth and installed-copy drift status"
+    }
+  },
+  {
+    "id": "high-risk-model-fallback",
+    "prompt": "/orchestrate gpt-5.5 is unavailable for this auth-sensitive change. Continue safely and record fallback.",
+    "category": "model-fallback",
+    "expected": {
+      "route": "Keep Tier 4 high-risk orchestration and do not downgrade the risk classification.",
+      "delegation": "Use architect/security_auditor intent with the nearest safe available model and explicit fallback notation.",
+      "escalation": "Escalate unresolved risk to root decision instead of pretending the fallback has identical capability.",
+      "model_routing": "Record intended gpt-5.5 and actual fallback model in the routing ledger and dispatch brief.",
+      "final_review": "Root reports the fallback and any confidence reduction before finalizing.",
+      "must_delegate": true,
+      "runtime_fallback": "explorer for read-only security/design review if custom roles unavailable"
+    },
+    "expected_ledger": {
+      "tier": "Tier 4",
+      "role": "architect/security_auditor",
+      "runtime_type": "custom role or explorer fallback",
+      "model": "intended gpt-5.5; actual nearest safe available model",
+      "effort": "high",
+      "escalation": "root decision if fallback cannot support security confidence",
+      "final_review": "root explicitly accounts for model fallback and residual risk"
+    }
+  },
+  {
+    "id": "root-final-review-failure",
+    "prompt": "/orchestrate A worker says the patch is done, but final root review finds missing validation.",
+    "category": "final-review-failure",
+    "expected": {
+      "route": "Do not finalize; route the missing validation or blocking issue back into the controller loop.",
+      "delegation": "Use test_runner for known validation or test_triage/debugger if validation fails ambiguously.",
+      "escalation": "Escalate only the missing validation issue, not the whole project.",
+      "model_routing": "Use gpt-5.4-mini for known test execution, gpt-5.4 for triage, and gpt-5.5 for ambiguous debugging.",
+      "final_review": "Root final review remains failed until validation evidence is present or the blocker is reported.",
+      "must_delegate": true,
+      "runtime_fallback": "worker"
+    },
+    "expected_ledger": {
+      "tier": "Tier 2",
+      "role": "test_runner or test_triage",
+      "runtime_type": "test_runner/test_triage or worker fallback",
+      "model": "gpt-5.4-mini or gpt-5.4",
+      "effort": "low or medium",
+      "escalation": "send only the missing validation issue back through the loop",
+      "final_review": "blocked until validation evidence exists or blocker is reported"
+    }
+  },
+  {
+    "id": "over-fanout-risk-controller",
+    "prompt": "/orchestrate This broad request is spawning too many branches. Decide whether to keep delegating or narrow scope.",
+    "category": "risk-controller",
+    "expected": {
+      "route": "Pause fanout and route a cost/risk checkpoint before spawning more agents.",
+      "delegation": "Use risk_controller or fallback default/explorer to choose the cheapest safe next step.",
+      "escalation": "Escalate to root decision if the risk_controller cannot define a stop condition.",
+      "model_routing": "Use gpt-5.4 with medium effort for risk_controller rather than gpt-5.5 unless high-risk judgment is involved.",
+      "final_review": "Root confirms fanout is bounded and the next route is justified.",
+      "must_delegate": true,
+      "runtime_fallback": "default or explorer"
+    },
+    "expected_ledger": {
+      "tier": "Tier 3",
+      "role": "risk_controller",
+      "runtime_type": "risk_controller or default/explorer fallback",
+      "model": "gpt-5.4",
+      "effort": "medium",
+      "escalation": "root decision if no clear stop condition exists",
+      "final_review": "root verifies fanout control and scope boundary"
     }
   }
 ]

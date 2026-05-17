@@ -51,13 +51,11 @@ cp .codex/agents/*.toml ~/.codex/agents/
 
 Restart Codex after installing or updating global skills.
 
-For `codex-orchestrate`, sync the current repo copy with:
+For `codex-orchestrate`, check or sync the current repo copy with:
 
 ```bash
-rm -rf ~/.codex/skills/codex-orchestrate
-cp -R .agents/skills/codex-orchestrate ~/.codex/skills/
-mkdir -p ~/.codex/agents
-cp .codex/agents/*.toml ~/.codex/agents/
+python3 scripts/sync_orchestration_skill.py --check
+python3 scripts/sync_orchestration_skill.py --apply
 ```
 
 ## Enabling `/orchestrate`
@@ -87,9 +85,13 @@ Run the skill-pack checker before committing orchestration changes:
 
 ```bash
 python3 scripts/check_orchestration_skill.py
+python3 scripts/sync_orchestration_skill.py --check
+codex debug prompt-input '/orchestrate model routing smoke test'
 ```
 
-The checker validates required skill sections, fallback role mapping, model routing scenarios, agent TOML model pins, duplicate stuck-protocol cleanup, and source-of-truth docs.
+Recommended post-edit loop: run the checker, sync with `--apply` when needed, confirm `--check` passes, smoke-test prompt visibility, then commit and push.
+
+The checker validates required skill sections, fallback role mapping, model routing scenarios, routing-ledger expectations, agent TOML model pins, duplicate stuck-protocol cleanup, sync tooling, and source-of-truth docs.
 
 ## Privacy
 

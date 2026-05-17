@@ -89,7 +89,7 @@ Escalation trigger:
 <what conditions mean this attempt is stuck>
 
 Escalation target if stuck:
-<same-role higher-effort target first, then pass-off target if role mismatch is found>
+<same-role higher model/effort target first, then pass-off target if role mismatch is found>
 
 Return format:
 Summary:
@@ -348,7 +348,7 @@ Model selected:
 gpt-5.5
 
 Escalation trigger:
-Blocking issue requires design, security, migration, root-cause debugging, or higher-effort disputed judgment.
+Blocking issue requires design, security, migration, root-cause debugging, or higher model/effort disputed judgment.
 
 Escalation target if stuck:
 architect, security_auditor, migration_analyst, debugger, or reviewer at xhigh if supported and justified.
