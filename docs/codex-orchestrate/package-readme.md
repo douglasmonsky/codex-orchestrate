@@ -6,14 +6,15 @@ This package contains an instruction-only Codex skill and custom agent configs f
 
 The root agent acts as dispatcher, escalation controller, synthesizer, and final senior reviewer. For repository work, it delegates substantive exploration, implementation, validation, debugging, review, or documentation to subagents by default, then reconciles the results.
 
-The goal is not to minimize total tokens in every case. Subagents do their own model and tool work. The goal is to keep the root context clean, route simple work to cheaper/faster agent configs, escalate only the narrow unresolved issue when work gets stuck, and reserve high-capability reasoning for genuinely hard decisions and final judgment.
+The goal is not to minimize total tokens in every case. Subagents do their own model and tool work. The goal is to keep the root context clean, continuously route each new task phase to the cheapest safe agent, escalate only the narrow unresolved issue when work gets stuck, and reserve high-capability reasoning for genuinely hard decisions and final judgment.
 
 ## New policy emphasis
 
-This version adds two hard policies:
+This version adds three hard policies:
 
-1. **Stuck work escalates effort first.** When a subagent gets stuck, the primary remedy is to retry the same narrow unresolved task at the next effort/model level. Pass off to a different specialist only when the evidence shows role mismatch.
-2. **The root performs final senior review.** The top-level/root agent must finish by reviewing subagent output as a senior developer, code reviewer, and architect. This is a check-and-balance gate; it is not fully outsourced to a reviewer subagent.
+1. **Routing is continuous.** The root reevaluates delegation after each user clarification, direct root step, subagent result, validation result, scope change, or new risk. If a Tier 0 direct answer grows into repository or tool work, the root leaves Tier 0 and delegates the next step.
+2. **Stuck work escalates effort first.** When a subagent gets stuck, the primary remedy is to retry the same narrow unresolved task at the next effort/model level. Pass off to a different specialist only when the evidence shows role mismatch.
+3. **The root performs final senior review.** The top-level/root agent must finish by reviewing subagent output as a senior developer, code reviewer, and architect. This is a check-and-balance gate; it is not fully outsourced to a reviewer subagent.
 
 ## Contents
 
@@ -77,6 +78,10 @@ Adjust model names in `.codex/agents/*.toml` to the models available in your env
 
 ```text
 Use $codex-orchestrate. Delegate by default, use the cheapest safe subagent for each step, escalate stuck work by effort first, and finish with root senior review.
+```
+
+```text
+Use $codex-orchestrate. Start direct only if this is truly pure Q&A; if the task turns into repo, command, implementation, validation, review, docs, research, or design work, reassess and delegate the next step.
 ```
 
 ```text

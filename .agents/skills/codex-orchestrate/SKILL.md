@@ -1,6 +1,6 @@
 ---
 name: codex-orchestrate
-description: Delegate-first Codex orchestration for coding, debugging, review, planning, research, migration, audit, testing, documentation, or any task that benefits from routing work to subagents with cheaper/specific effort and model settings. The root agent acts as dispatcher, escalation controller, synthesizer, and final senior reviewer. Delegate substantive work by default, escalate stuck work to higher effort before changing roles, and require root-level final review of subagent output before completion. Avoid only for pure conversational micro-answers or when the user forbids subagents.
+description: Delegate-first Codex orchestration for coding, debugging, review, planning, research, migration, audit, testing, documentation, or any task that benefits from routing work to subagents with cheaper/specific effort and model settings. The root agent acts as dispatcher, escalation controller, synthesizer, and final senior reviewer. Delegate substantive work by default, continuously reassess delegation as the task evolves, escalate stuck work to higher effort before changing roles, and require root-level final review of subagent output before completion. Avoid only for pure conversational micro-answers or when the user forbids subagents.
 ---
 
 # Codex Orchestration Skill
@@ -20,6 +20,8 @@ The optimization target is not guaranteed lowest total token count. Subagents do
 5. make the root act as senior developer, reviewer, and architect at the end rather than as a routine worker throughout.
 
 ## Delegation-first rule
+
+Delegation is a continuous control loop, not a one-time routing decision. The root must keep reevaluating whether the next step should be delegated, escalated, passed off, or handled directly.
 
 For any task involving code, repository files, commands, logs, tests, implementation, review, design, migration, security, performance, documentation, or research, delegate substantive work to at least one subagent unless an exemption below applies.
 
@@ -44,9 +46,34 @@ The root may perform direct work only for these exemptions:
 
 Even for single-file or mechanical repository tasks, prefer a cheap `mechanic`, `repo_scout`, `test_runner`, or `docs_writer` subagent when available.
 
+## Continuous routing loop
+
+At each meaningful transition, rerun the routing decision before continuing. This includes:
+
+- after the user clarifies, narrows, expands, or redirects the request;
+- after any direct root answer or root inspection reveals repository, command, log, test, design, research, or implementation work;
+- before starting a new phase such as discovery, planning, editing, validation, debugging, review, documentation, or final synthesis;
+- after a subagent returns new evidence, uncertainty, a patch, a failed command, or a recommendation;
+- when risk changes, scope grows, evidence conflicts, or validation fails;
+- before finalizing, even if the initial route was Tier 0.
+
+If the root initially chooses Tier 0 but the task stops being pure conversational Q&A, immediately leave Tier 0. Produce a compact dispatch brief for the new work and spawn the cheapest safe subagent. Do not keep performing local repository exploration, implementation, validation, or review merely because the first decision was direct answer.
+
+Treat each new phase as a fresh dispatch point:
+
+```text
+What is the next concrete step?
+Is it substantive repo/tool/research/design work?
+Can a cheaper or more specialized subagent do it safely?
+Did new evidence require escalation, pass-off, or de-escalation?
+What is the smallest bounded assignment now?
+```
+
+The routing tier may move up or down over the task. For example, start at Tier 0 for clarification, move to Tier 1 for repo lookup after the user answers, move to Tier 2 for a small patch, then use `test_runner` for validation and root final review.
+
 ## Dispatch tiers
 
-Use the lowest tier that can safely satisfy the task.
+Use the lowest tier that can safely satisfy the current step. Reassess the tier whenever the current step completes or new information changes the work.
 
 ### Tier 0: direct root answer, rare
 
@@ -54,7 +81,8 @@ Use only for pure Q&A, clarification, or non-repository micro responses.
 
 Root action: answer directly.
 Subagents: none.
-Final review: root checks its own answer for scope, assumptions, and unsupported claims.
+Continuous reassessment: before any follow-on action, confirm the next step still qualifies for Tier 0. If it now involves files, commands, logs, tests, implementation, research, review, documentation, or design work, leave Tier 0 and delegate.
+Final review: root checks its own answer for scope, assumptions, unsupported claims, and whether it should have escalated out of Tier 0.
 
 ### Tier 1: one cheap subagent
 
@@ -94,7 +122,7 @@ Final review: root performs a senior architect/code-review gate even when a revi
 
 ## Dispatch brief
 
-Before spawning agents, produce a compact dispatch brief. Keep it short.
+Before spawning agents, produce a compact dispatch brief. Keep it short. For later dispatches, update the brief with only what changed since the previous routing decision.
 
 ```text
 Goal:

@@ -8,6 +8,8 @@ For repository work, prefer `$codex-orchestrate`. The root thread should act as 
 
 Delegate substantive work by default. For any task involving code, files, commands, logs, tests, implementation, review, design, migration, security, performance, documentation, or research, spawn at least one appropriately scoped subagent unless the user forbids subagents or the task is pure conversational Q&A.
 
+Treat delegation as a continuous routing loop, not a one-time upfront choice. Reevaluate whether to delegate, escalate, pass off, de-escalate, or continue directly after each user clarification, direct root step, subagent result, validation result, scope change, or new risk. If the root initially answers directly but the next step becomes repository, command, research, design, implementation, validation, review, or documentation work, leave direct mode and spawn the cheapest safe subagent for that new step.
+
 Use the cheapest safe agent first:
 
 - `mechanic`, `repo_scout`, `test_runner`, and `docs_writer` on `low` or `minimal` effort for mechanical work, search, known validation, simple docs, and log compression.

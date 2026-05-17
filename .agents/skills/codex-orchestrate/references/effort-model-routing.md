@@ -1,12 +1,28 @@
 # Effort and Model Routing
 
-This skill uses effort/model routing to keep the root agent from doing every task with a high-capability configuration. The root chooses a cheap safe worker first, escalates stuck work narrowly, and performs final senior review before completion.
+This skill uses effort/model routing to keep the root agent from doing every task with a high-capability configuration. The root chooses a cheap safe worker first, continually reevaluates routing as work changes, escalates stuck work narrowly, and performs final senior review before completion.
 
 ## Routing principle
 
-Use the cheapest adequate worker first. Escalate only a narrow hard part, not the whole task.
+Use the cheapest adequate worker for the current step. Routing is not fixed at the start of the task: reassess before each new phase, after every subagent result, after direct root work, and whenever new evidence changes scope or risk. Escalate only a narrow hard part, not the whole task.
 
 A strong root model should behave like a controller: classify, delegate, synthesize, escalate, and verify decisions. It should not perform broad search, log digestion, routine edits, or ordinary validation when a cheaper subagent can do them.
+
+## Continuous reassessment
+
+Recheck the route at each transition:
+
+- clarification -> discovery;
+- discovery -> planning;
+- planning -> implementation;
+- implementation -> validation;
+- validation failure -> triage/debugging;
+- patch complete -> review;
+- review passed -> final synthesis.
+
+If a direct root answer becomes repository, command, log, test, implementation, research, review, documentation, or design work, leave direct mode and delegate the new step. Do not keep a Tier 0 decision just because it was correct for the opening response.
+
+The correct next route may be cheaper, stronger, or a different role than the previous one. De-escalate after a specialist resolves the hard part; escalate when ambiguity, risk, or failure appears.
 
 ## Effort levels
 
@@ -129,7 +145,7 @@ Use for:
 
 Typical reason: these tasks involve tradeoffs, edge cases, high ambiguity, or high cost of error.
 
-## Initial routing rules
+## Routing rules
 
 Start cheap unless the first-order risk is high.
 
@@ -148,6 +164,8 @@ Choose high/strong first when:
 - The task is security-sensitive, migration-sensitive, architecture-sensitive, concurrency-sensitive, performance-sensitive, or production-critical.
 - There is high ambiguity and high cost of error.
 - The root is reconciling conflicting subagent outputs.
+
+After any initial route, continue applying these rules to the next concrete step. A task can start with direct clarification, move to a cheap scout, escalate to an architect for one disputed decision, then de-escalate to a mechanic or test runner.
 
 ## Escalation rules
 
