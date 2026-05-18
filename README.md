@@ -259,6 +259,3 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for contribution guidance and [SECURITY.m
 
 MIT. See [LICENSE](LICENSE).
 
-## Privacy
-
-Do not store secrets, tokens, private student data, local exports, or machine-specific credential files in this repository. Use synthetic examples only.
