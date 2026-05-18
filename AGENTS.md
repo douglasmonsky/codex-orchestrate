@@ -85,7 +85,7 @@ When a request starts with `/orchestrate`, use `codex-orchestrate`. Prompt assem
 - `python3 scripts/check_runtime_compatibility.py` runs and any runtime model warnings are understood.
 - `python3 scripts/check_orchestration_context_packets.py evals/codex-orchestrate/sample-context-packets/*.json` passes for committed synthetic packet fixtures.
 - `python3 scripts/check_orchestration_lifecycle.py evals/codex-orchestrate/sample-ledgers/*.json` passes for lifecycle-linked ledger fixtures, including expected lifecycle rejections.
-- `python3 scripts/create_orchestration_ledger.py --help` works and documents local-only ledger output.
+- `python3 scripts/create_orchestration_ledger.py --help` works and documents repo-local output plus `--global-output` for `~/.codex/orchestration-ledgers/`.
 - `python3 scripts/check_orchestration_ledger.py evals/codex-orchestrate/sample-ledgers/*.json` passes for committed synthetic ledgers.
 - `python3 scripts/check_orchestration_behavior.py evals/codex-orchestrate/sample-ledgers/*.json` passes for scenario-to-ledger behavioral evidence.
 - `python3 scripts/report_orchestration_ledger.py evals/codex-orchestrate/sample-ledgers/small-patch.json` produces a post-run Markdown audit, and `--json` produces machine-readable report data.

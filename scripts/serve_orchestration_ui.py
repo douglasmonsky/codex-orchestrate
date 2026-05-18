@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import json
 import mimetypes
+import os
 import subprocess
 import sys
 from http import HTTPStatus
@@ -21,6 +22,7 @@ ROOT = Path(__file__).resolve().parents[1]
 UI_DIR = ROOT / "ui" / "orchestration-dashboard"
 SAMPLE_LEDGER_DIR = ROOT / "evals" / "codex-orchestrate" / "sample-ledgers"
 LOCAL_LEDGER_DIR = ROOT / "local" / "orchestration-ledgers"
+GLOBAL_LEDGER_DIR = Path(os.environ.get("CODEX_HOME", Path.home() / ".codex")) / "orchestration-ledgers"
 REPORT_SCRIPT = ROOT / "scripts" / "report_orchestration_ledger.py"
 RUNTIME_SCRIPT = ROOT / "scripts" / "check_runtime_compatibility.py"
 DEFAULT_HOST = "127.0.0.1"
@@ -77,15 +79,27 @@ def inside(child: Path, parent: Path) -> bool:
     return True
 
 
+def display_path(path: Path) -> str:
+    try:
+        return str(path.relative_to(ROOT))
+    except ValueError:
+        return str(path)
+
+
 def ledger_files() -> list[tuple[str, str, Path]]:
     files: list[tuple[str, str, Path]] = []
-    for path in sorted(SAMPLE_LEDGER_DIR.glob("*.json")):
-        files.append((f"sample:{path.name}", "sample", path))
+    if GLOBAL_LEDGER_DIR.exists():
+        for path in sorted(GLOBAL_LEDGER_DIR.rglob("*.json")):
+            if inside(path, GLOBAL_LEDGER_DIR):
+                rel = path.relative_to(GLOBAL_LEDGER_DIR).as_posix()
+                files.append((f"global:{rel}", "global", path))
     if LOCAL_LEDGER_DIR.exists():
         for path in sorted(LOCAL_LEDGER_DIR.rglob("*.json")):
             if inside(path, LOCAL_LEDGER_DIR):
                 rel = path.relative_to(LOCAL_LEDGER_DIR).as_posix()
                 files.append((f"local:{rel}", "local", path))
+    for path in sorted(SAMPLE_LEDGER_DIR.glob("*.json")):
+        files.append((f"sample:{path.name}", "sample", path))
     return files
 
 
@@ -104,7 +118,7 @@ def summarize_ledger(ledger_id: str, source: str, path: Path) -> dict[str, Any]:
     return {
         "id": ledger_id,
         "source": source,
-        "path": str(path.relative_to(ROOT)),
+        "path": display_path(path),
         "name": path.name,
         "task_summary": summary["task"]["summary"],
         "scenario_id": summary["task"]["scenario_id"],
@@ -133,7 +147,7 @@ def list_ledgers() -> list[dict[str, Any]]:
                 {
                     "id": ledger_id,
                     "source": source,
-                    "path": str(path.relative_to(ROOT)),
+                    "path": display_path(path),
                     "name": path.name,
                     "error": str(exc),
                 }
@@ -164,7 +178,7 @@ def report_payload(ledger_id: str, validate: bool) -> dict[str, Any]:
     command.append(str(path))
     payload = run_json_command(command)
     payload["ledger_id"] = ledger_id
-    payload["ledger_path"] = str(path.relative_to(ROOT))
+    payload["ledger_path"] = display_path(path)
     return payload
 
 
@@ -182,6 +196,7 @@ def commands_payload() -> dict[str, Any]:
         "report_json": "python3 scripts/report_orchestration_ledger.py --json evals/codex-orchestrate/sample-ledgers/small-patch.json",
         "report_validate": "python3 scripts/report_orchestration_ledger.py --validate local/orchestration-ledgers/<run>.json",
         "create_ledger": "python3 scripts/create_orchestration_ledger.py",
+        "create_global_ledger": "python3 scripts/create_orchestration_ledger.py --global-output",
         "check_ledger": "python3 scripts/check_orchestration_ledger.py evals/codex-orchestrate/sample-ledgers/*.json",
         "check_lifecycle": "python3 scripts/check_orchestration_lifecycle.py evals/codex-orchestrate/sample-ledgers/*.json",
         "check_behavior": "python3 scripts/check_orchestration_behavior.py evals/codex-orchestrate/sample-ledgers/*.json",
@@ -196,6 +211,8 @@ def health_payload() -> dict[str, Any]:
         "ui_dir": str(UI_DIR.relative_to(ROOT)),
         "sample_ledger_count": len(list(SAMPLE_LEDGER_DIR.glob("*.json"))),
         "local_ledger_count": len(list(LOCAL_LEDGER_DIR.rglob("*.json"))) if LOCAL_LEDGER_DIR.exists() else 0,
+        "global_ledger_count": len(list(GLOBAL_LEDGER_DIR.rglob("*.json"))) if GLOBAL_LEDGER_DIR.exists() else 0,
+        "global_ledger_dir": str(GLOBAL_LEDGER_DIR),
         "read_only": True,
         "allowed_methods": ["GET", "HEAD"],
     }
@@ -235,7 +252,20 @@ class OrchestrationUiHandler(BaseHTTPRequestHandler):
             if parsed.path == "/api/health":
                 json_response(self, health_payload())
             elif parsed.path == "/api/ledgers":
-                json_response(self, {"status": "ok", "ledgers": list_ledgers()})
+                ledgers = list_ledgers()
+                json_response(
+                    self,
+                    {
+                        "status": "ok",
+                        "ledgers": ledgers,
+                        "sources": {
+                            "global": sum(1 for ledger in ledgers if ledger.get("source") == "global"),
+                            "local": sum(1 for ledger in ledgers if ledger.get("source") == "local"),
+                            "sample": sum(1 for ledger in ledgers if ledger.get("source") == "sample"),
+                        },
+                        "global_ledger_dir": str(GLOBAL_LEDGER_DIR),
+                    },
+                )
             elif parsed.path == "/api/report":
                 query = parse_qs(parsed.query)
                 ledger_id = query.get("id", [""])[0]
@@ -271,6 +301,8 @@ def self_test() -> None:
     for phrase in ["window.location.protocol", "renderFileProtocolNotice", "serve_orchestration_ui.py --port 8765"]:
         if phrase not in app:
             raise UiError(f"dashboard file:// fallback missing {phrase}")
+    if "global_ledger_count" not in health_payload():
+        raise UiError("health payload missing global ledger count")
     health = health_payload()
     if health["status"] != "ok" or not health["read_only"]:
         raise UiError("health payload failed read-only check")

@@ -44,7 +44,7 @@ Final-review gate:
 
 Produce a durable post-run ledger for any Tier 3 or Tier 4 run, any model fallback, any security/privacy/migration/auth task, any run with more than two subagents, any failed validation, or any final-review blocker. Tier 1 and Tier 2 ledgers are optional unless one of those triggers appears.
 
-When working inside the `codex-orchestrate` repository, use `python3 scripts/create_orchestration_ledger.py` for the durable version. In other repos, use `docs/codex-orchestrate/run-ledger-template.md` manually. Keep private ledgers local or sanitized before committing.
+Durable ledgers are not automatic runtime logs. When a trigger applies, final review is blocked until the root creates the ledger or explicitly states why it could not. In the `codex-orchestrate` repository, use `python3 scripts/create_orchestration_ledger.py` for repo-local ledgers or add `--global-output` to write under `~/.codex/orchestration-ledgers/`. In other repos, write the same JSON shape to `~/.codex/orchestration-ledgers/` or use `docs/codex-orchestrate/run-ledger-template.md` manually. Keep private ledgers local/global or sanitized before committing.
 
 ## Context packet template
 

@@ -548,6 +548,9 @@ def check_docs() -> None:
         "read-only local dashboard",
         "http://127.0.0.1:8765",
         "local/orchestration-ledgers",
+        "~/.codex/orchestration-ledgers",
+        "Durable ledgers are not automatic",
+        "--global-output",
         "timed-out",
         "root takeover",
         "redelegate",
@@ -783,7 +786,8 @@ def check_ledger_artifacts() -> None:
 
     template = read(LEDGER_TEMPLATE)
     for phrase in [
-        "Keep real ledgers local or sanitized",
+        "Keep real ledgers local/global or sanitized",
+        "Durable ledgers are not automatic",
         "Produce a durable post-run ledger",
         "Tier 3 or Tier 4",
         "model fallback",
@@ -805,6 +809,8 @@ def check_ledger_artifacts() -> None:
         "usage_estimate",
         "create_orchestration_ledger.py",
         "local/orchestration-ledgers",
+        "~/.codex/orchestration-ledgers",
+        "--global-output",
         "check_orchestration_behavior.py",
         "report_orchestration_ledger.py",
         "serve_orchestration_ui.py",
@@ -883,6 +889,9 @@ def check_ledger_creator() -> None:
     text = read(CREATOR_SCRIPT)
     for phrase in [
         "local/orchestration-ledgers",
+        "GLOBAL_DIR",
+        "~/.codex/orchestration-ledgers",
+        "--global-output",
         "--allow-tracked-output",
         "load_policy",
         "role_model_map",
@@ -900,6 +909,7 @@ def check_ledger_creator() -> None:
         "--output",
         "--scenario-id",
         "--task-summary",
+        "--global-output",
         "--allow-tracked-output",
     ]:
         require_contains(text, phrase, "create_orchestration_ledger.py")
@@ -988,6 +998,9 @@ def check_orchestration_ui() -> None:
         "check_full",
         "report_orchestration_ledger.py",
         "check_runtime_compatibility.py",
+        "GLOBAL_LEDGER_DIR",
+        "global_ledger_count",
+        "create_global_ledger",
         "relative paths for a styled file:// fallback",
     ]:
         require_contains(text, phrase, "serve_orchestration_ui.py")
@@ -1000,6 +1013,8 @@ def check_orchestration_ui() -> None:
         "Orchestration Ledger Console",
         'href="styles.css"',
         'src="app.js"',
+        'option value="global"',
+        "ledger-source-note",
         "Run validation",
         "Model Routes",
         "Routing Timeline",
@@ -1024,6 +1039,9 @@ def check_orchestration_ui() -> None:
         "validation.entries",
         "navigator.clipboard.writeText",
         "renderFileProtocolNotice",
+        "renderSourceNote",
+        "globalLedgerDir",
+        "Durable ledgers are not automatic",
         "window.location.protocol",
         "python3 scripts/serve_orchestration_ui.py --port 8765",
     ]:
@@ -1038,6 +1056,7 @@ def check_orchestration_ui() -> None:
         "evidence-item",
         "command-row",
         "file-mode",
+        "source-note",
         "@media",
     ]:
         require_contains(css, phrase, "ui/orchestration-dashboard/styles.css")

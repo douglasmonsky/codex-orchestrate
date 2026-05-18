@@ -4,6 +4,8 @@ const state = {
   commands: {},
   runtime: null,
   validate: false,
+  sources: { global: 0, local: 0, sample: 0 },
+  globalLedgerDir: "~/.codex/orchestration-ledgers",
 };
 
 const serverCommand = "python3 scripts/serve_orchestration_ui.py --port 8765";
@@ -14,6 +16,7 @@ const el = {
   refreshButton: document.querySelector("#refresh-button"),
   search: document.querySelector("#ledger-search"),
   sourceFilter: document.querySelector("#source-filter"),
+  sourceNote: document.querySelector("#ledger-source-note"),
   ledgerCount: document.querySelector("#ledger-count"),
   ledgerList: document.querySelector("#ledger-list"),
   statusPanel: document.querySelector("#status-panel"),
@@ -138,6 +141,18 @@ function filteredLedgers() {
   });
 }
 
+function renderSourceNote() {
+  const globalCount = state.sources.global || 0;
+  const localCount = state.sources.local || 0;
+  const sampleCount = state.sources.sample || 0;
+  const privateCount = globalCount + localCount;
+  const note = privateCount
+    ? `${privateCount} private ledger(s): ${globalCount} global, ${localCount} repo-local. Samples: ${sampleCount}.`
+    : `No private run ledgers found. Samples are fixtures; durable ledgers are not automatic. Create one with the global ledger command.`;
+  el.sourceNote.textContent = note;
+  el.sourceNote.classList.toggle("warning", privateCount === 0);
+}
+
 function renderLedgerList() {
   const ledgers = filteredLedgers();
   el.ledgerCount.textContent = String(ledgers.length);
@@ -229,6 +244,8 @@ function renderFileProtocolNotice() {
   el.refreshButton.disabled = true;
   el.search.disabled = true;
   el.sourceFilter.disabled = true;
+  el.sourceNote.textContent = "File mode cannot read dashboard endpoints. Start the local server to see real ledgers.";
+  el.sourceNote.classList.add("warning");
   el.ledgerCount.textContent = "0";
   appendEmpty(el.ledgerList, "The dashboard data API is not available from a file URL.");
   setStatus(`Start the local read-only server, then open ${serverUrl}.`, true);
@@ -430,8 +447,11 @@ async function loadAll() {
       fetchJson("/api/commands"),
     ]);
     state.ledgers = ledgersPayload.ledgers || [];
+    state.sources = ledgersPayload.sources || { global: 0, local: 0, sample: 0 };
+    state.globalLedgerDir = ledgersPayload.global_ledger_dir || state.globalLedgerDir;
     state.runtime = runtimePayload;
     state.commands = commandsPayload.commands || {};
+    renderSourceNote();
     renderLedgerList();
     renderRuntime();
     renderCommands();
@@ -440,6 +460,10 @@ async function loadAll() {
       await selectLedger(first);
     } else {
       setStatus("No valid ledgers found.", true);
+    }
+    const realCount = (state.sources.global || 0) + (state.sources.local || 0);
+    if (!realCount && state.ledgers.length) {
+      setStatus(`Showing sample fixtures only. Durable ledgers are not automatic; create real ledgers under ${state.globalLedgerDir}.`, true);
     }
   } catch (error) {
     setStatus(error.message, true);

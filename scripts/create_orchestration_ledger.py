@@ -1,16 +1,18 @@
 #!/usr/bin/env python3
-"""Create a local codex-orchestrate run ledger.
+"""Create a private codex-orchestrate run ledger.
 
 The default mode is an interactive wizard that writes a private JSON ledger to
 local/orchestration-ledgers/ and immediately validates it with the existing
-ledger checker. If the scenario_id matches a committed scenario, the behavior
-checker runs too.
+ledger checker. Use --global-output to write to ~/.codex/orchestration-ledgers/
+so dashboards in any repo can find cross-repo ledgers. If the scenario_id
+matches a committed scenario, the behavior checker runs too.
 """
 
 from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import subprocess
 import sys
@@ -26,6 +28,7 @@ SCENARIOS = ROOT / "evals" / "codex-orchestrate" / "scenarios.json"
 LEDGER_CHECK = ROOT / "scripts" / "check_orchestration_ledger.py"
 BEHAVIOR_CHECK = ROOT / "scripts" / "check_orchestration_behavior.py"
 DEFAULT_DIR = ROOT / "local" / "orchestration-ledgers"
+GLOBAL_DIR = Path(os.environ.get("CODEX_HOME", Path.home() / ".codex")) / "orchestration-ledgers"
 POLICY = load_policy()
 MODEL_BY_ROLE = role_model_map(POLICY)
 EFFORT_BY_ROLE = role_effort_map(POLICY)
@@ -172,18 +175,26 @@ def scenario_defaults(scenario: dict[str, Any] | None) -> dict[str, str]:
     }
 
 
-def resolve_output(path: Path | None, task_summary: str, allow_tracked_output: bool) -> Path:
+def resolve_output(path: Path | None, task_summary: str, allow_tracked_output: bool, global_output: bool) -> Path:
     if path is None:
         stamp = datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ")
-        return DEFAULT_DIR / f"{stamp}-{slugify(task_summary)}.json"
+        base = GLOBAL_DIR if global_output else DEFAULT_DIR
+        return base / f"{stamp}-{slugify(task_summary)}.json"
     resolved = path if path.is_absolute() else ROOT / path
     if allow_tracked_output:
         return resolved
+    allowed_private_dirs = [(ROOT / "local").resolve(), GLOBAL_DIR.resolve()]
+    if any(is_relative_to(resolved.resolve(), directory) for directory in allowed_private_dirs):
+        return resolved
+    raise CreatorError("Refusing to write outside local/ or ~/.codex/orchestration-ledgers/ without --allow-tracked-output")
+
+
+def is_relative_to(path: Path, parent: Path) -> bool:
     try:
-        resolved.resolve().relative_to((ROOT / "local").resolve())
-    except ValueError as exc:
-        raise CreatorError("Refusing to write outside local/ without --allow-tracked-output") from exc
-    return resolved
+        path.relative_to(parent)
+    except ValueError:
+        return False
+    return True
 
 
 def collect_routing_entries(defaults: dict[str, str], task_summary: str) -> list[dict[str, Any]]:
@@ -350,7 +361,16 @@ def write_and_validate(ledger: dict[str, Any], output: Path, scenarios: dict[str
 
 def parse_args(argv: list[str]) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--output", type=Path, help="ledger output path; defaults to local/orchestration-ledgers/")
+    parser.add_argument(
+        "--output",
+        type=Path,
+        help="ledger output path; defaults to local/orchestration-ledgers/ or ~/.codex/orchestration-ledgers/ with --global-output",
+    )
+    parser.add_argument(
+        "--global-output",
+        action="store_true",
+        help="default output to ~/.codex/orchestration-ledgers/ so dashboards can find cross-repo ledgers",
+    )
     parser.add_argument("--scenario-id", help="scenario id to record in the ledger")
     parser.add_argument("--task-summary", help="sanitized task summary to record in the ledger")
     parser.add_argument(
@@ -366,7 +386,7 @@ def main(argv: list[str]) -> int:
     try:
         scenarios = load_scenarios()
         ledger = build_ledger(args, scenarios)
-        output = resolve_output(args.output, ledger["task_summary"], args.allow_tracked_output)
+        output = resolve_output(args.output, ledger["task_summary"], args.allow_tracked_output, args.global_output)
         write_and_validate(ledger, output, scenarios)
     except (CreatorError, EOFError, OSError, json.JSONDecodeError, KeyboardInterrupt) as exc:
         print(f"FAIL: {exc}", file=sys.stderr)

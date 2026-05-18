@@ -167,6 +167,22 @@ select {
   font-weight: 700;
 }
 
+.source-note {
+  padding: 9px 10px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.58);
+  color: var(--muted);
+  font-size: 0.78rem;
+  line-height: 1.35;
+}
+
+.source-note.warning {
+  border-color: rgba(154, 106, 28, 0.28);
+  background: #fff9f0;
+  color: var(--warn);
+}
+
 .section-heading {
   display: flex;
   align-items: baseline;

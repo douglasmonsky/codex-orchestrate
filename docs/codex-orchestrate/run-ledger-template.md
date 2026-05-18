@@ -1,6 +1,6 @@
 # Codex Orchestration Run Ledger Template
 
-Use this template for substantial `/orchestrate` runs when a durable routing record is required. Keep real ledgers local or sanitized by default; do not commit private task details, secrets, credentials, or user data.
+Use this template for substantial `/orchestrate` runs when a durable routing record is required. Durable ledgers are not automatic runtime logs; they appear only when the root creates a JSON ledger. Keep real ledgers local/global or sanitized by default; do not commit private task details, secrets, credentials, or user data.
 
 Produce a durable post-run ledger for any Tier 3 or Tier 4 run, any model fallback, any security/privacy/migration/auth task, any run with more than two subagents, any failed validation, or any final-review blocker. Tier 1 and Tier 2 ledgers are optional unless one of those triggers appears.
 
@@ -11,6 +11,14 @@ python3 scripts/create_orchestration_ledger.py
 ```
 
 It writes to ignored `local/orchestration-ledgers/` by default, runs `scripts/check_orchestration_ledger.py`, and runs `scripts/check_orchestration_behavior.py` when the `scenario_id` matches a committed scenario. In other repos, copy this JSON shape manually and keep private details local or sanitized.
+
+For cross-repo private ledgers that the dashboard can find from this repository, use:
+
+```bash
+python3 scripts/create_orchestration_ledger.py --global-output
+```
+
+That writes under `~/.codex/orchestration-ledgers/`.
 
 For repo validation after ledger or orchestration-policy edits, start with the tiered wrapper:
 
@@ -38,7 +46,7 @@ For browser review inside the `codex-orchestrate` repo, start the read-only loca
 python3 scripts/serve_orchestration_ui.py --port 8765
 ```
 
-Open `http://127.0.0.1:8765` to inspect sample ledgers and ignored private ledgers under `local/orchestration-ledgers/`. The dashboard does not edit ledgers or run write operations.
+Open `http://127.0.0.1:8765` to inspect sample ledgers and private ledgers under `~/.codex/orchestration-ledgers/` and `local/orchestration-ledgers/`. The dashboard does not edit ledgers or run write operations.
 
 When context packets are used, link routing entries to `packet_id` and record `context_packets` plus `subagent_lifecycle`. Every active packet needs a started event and terminal exit evidence. Use `packet-repaired` when the minimal packet was unclear and the root repaired the objective, scope, constraints, allowed actions/paths, or done condition before redelegating; this is the durable packet repair record.
 
