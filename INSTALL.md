@@ -9,19 +9,19 @@ The easiest path is to ask Codex to install it for you. Open a new Codex session
 If Codex can access GitHub:
 
 ```text
-Install codex-orchestrate from https://github.com/douglasmonsky/codex-orchestrate into my global Codex environment. Use the repo's INSTALL.md. Copy only the runtime skill folder and companion agent TOMLs, add or update the /orchestrate rule in my global AGENTS.md if needed, do not overwrite my Codex config, and restart instructions are enough if you cannot restart Codex for me. Verify the installed files and tell me exactly what changed.
+Install codex-orchestrate from https://github.com/douglasmonsky/codex-orchestrate into my global Codex environment. Use the repo's INSTALL.md. Copy only the runtime skill folder and companion agent TOMLs. Leave AGENTS.md unchanged and do not overwrite my Codex config. After installing, print the exact direct skill mention I should paste into Codex, using the installed SKILL.md path. Restart instructions are enough if you cannot restart Codex for me. Verify the installed files and tell me exactly what changed.
 ```
 
 If you already have this repository open locally:
 
 ```text
-Install codex-orchestrate from this checkout into my global Codex environment. Use INSTALL.md. Copy only .agents/skills/codex-orchestrate/ and .codex/agents/*.toml, add or update the /orchestrate rule in my global AGENTS.md if needed, do not overwrite my Codex config, verify the installed files, and tell me exactly what changed.
+Install codex-orchestrate from this checkout into my global Codex environment. Use INSTALL.md. Copy only .agents/skills/codex-orchestrate/ and .codex/agents/*.toml. Leave AGENTS.md unchanged and do not overwrite my Codex config. After installing, print the exact direct skill mention I should paste into Codex, using the installed SKILL.md path. Verify the installed files and tell me exactly what changed.
 ```
 
 If you only want it in the current project:
 
 ```text
-Install codex-orchestrate into this project only. Use this repo's INSTALL.md. Copy the skill to this repo's .agents/skills/ folder and the companion TOMLs to this repo's .codex/agents/ folder, add or update the project AGENTS.md /orchestrate rule if needed, do not touch my global Codex config, verify the installed files, and tell me exactly what changed.
+Install codex-orchestrate into this project only. Use this repo's INSTALL.md. Copy the skill to this repo's .agents/skills/ folder and the companion TOMLs to this repo's .codex/agents/ folder. Leave AGENTS.md unchanged and do not touch my global Codex config. After installing, print the exact direct skill mention I should paste into Codex, using the project-local SKILL.md path. Verify the installed files and tell me exactly what changed.
 ```
 
 After Codex finishes, restart Codex so the new skill and agent profiles are loaded.
@@ -67,18 +67,24 @@ cp .codex/agents/*.toml /path/to/repo/.codex/agents/
 
 Then restart Codex in that project.
 
-## Enable `/orchestrate`
+## Direct Skill Invocation
 
-Add this rule to your global `~/.codex/AGENTS.md` or to the target project's `AGENTS.md`:
+No `AGENTS.md` change is required for normal use. After global install, invoke the skill by directly mentioning the installed `SKILL.md`:
 
 ```text
-When a user starts a request with /orchestrate, use $codex-orchestrate for continuous delegate-first orchestration. Reevaluate delegation after each phase, keep subagent packets compact, recover stalled subagents by repairing/redelegating the same objective, and finish with root senior review before responding.
+[$codex-orchestrate](/Users/douglasmonsky/.codex/skills/codex-orchestrate/SKILL.md) Use this skill for the following repository task: <task>
 ```
 
-For a fuller prompt surface, copy the relevant parts of:
+If your home directory is different, use your actual installed path:
 
 ```text
-docs/codex-orchestrate/AGENTS.orchestration.snippet.md
+[$codex-orchestrate](/Users/<your-user>/.codex/skills/codex-orchestrate/SKILL.md)
+```
+
+For a repository-scoped install, use that repo's local skill path:
+
+```text
+[$codex-orchestrate](/path/to/repo/.agents/skills/codex-orchestrate/SKILL.md)
 ```
 
 ## Optional Fanout Limits
@@ -99,7 +105,7 @@ Keep `max_depth = 1` unless recursive delegation is intentionally needed. Do not
 After restarting Codex, start a new session in any repository and ask:
 
 ```text
-/orchestrate Explain how you would route a non-trivial repo task before making changes.
+[$codex-orchestrate](/Users/douglasmonsky/.codex/skills/codex-orchestrate/SKILL.md) Explain how you would route a non-trivial repo task before making changes.
 ```
 
 You should see the assistant initialize a routing loop, discuss delegation, compact context packets, stuck-work recovery, and final root review.

@@ -18,6 +18,14 @@ Under the hood, this repo provides:
 
 If you only want to use the skill, start with [INSTALL.md](INSTALL.md). The first section gives copy/paste prompts that ask Codex to install it for you through One Step Auto Installation.
 
+After installation, the clearest invocation is a direct skill mention:
+
+```text
+[$codex-orchestrate](/Users/douglasmonsky/.codex/skills/codex-orchestrate/SKILL.md) Use this skill for the following repository task: <task>
+```
+
+No global `AGENTS.md` change is required.
+
 Use the development and validation sections below only if you want to modify the skill, audit its behavior, or work on the repo itself.
 
 ## Ask Codex Or ChatGPT To Explain It
@@ -107,13 +115,15 @@ The orchestration config example is merge-only:
 
 Do not overwrite `~/.codex/config.toml`; merge only the `[agents]` keys you want.
 
-## Enabling `/orchestrate`
+## Calling The Skill
 
-After installing `codex-orchestrate`, add this rule to your global or project `AGENTS.md`:
+After installing `codex-orchestrate`, call it with a direct skill mention:
 
 ```text
-When a user starts a request with `/orchestrate`, treat it as an explicit instruction to use `$codex-orchestrate` for continuous delegate-first orchestration. Reevaluate delegation after each phase, spawn the cheapest safe subagents for substantive repository work, use built-in fallback roles when custom agents are unavailable, escalate stuck work narrowly, and finish with root senior review before responding.
+[$codex-orchestrate](/Users/douglasmonsky/.codex/skills/codex-orchestrate/SKILL.md) Use this skill for the following repository task: <task>
 ```
+
+If installed into a project, point the link at that project's `.agents/skills/codex-orchestrate/SKILL.md`. This package does not require users to edit global or project `AGENTS.md` just to invoke the skill.
 
 Activation must initialize the controller loop, routing ledger, first-step classification, model/effort selection, and final-review gate before substantive work.
 

@@ -7,19 +7,19 @@ description: Delegate-first Codex orchestration for coding, debugging, review, p
 
 ## Purpose
 
-Use this skill when the user asks for `$codex-orchestrate`, `/orchestrate`, or any substantial coding, debugging, review, planning, research, migration, testing, documentation, or audit task where subagents can keep the root context clean.
+Use this skill when the user invokes the installed skill directly, asks for `$codex-orchestrate`, uses `/orchestrate`, or has any substantial coding, debugging, review, planning, research, migration, testing, documentation, or audit task where subagents can keep the root context clean.
 
 The root thread is the controller. It owns user intent, scope, routing, escalation decisions, synthesis, and final senior review. It should not become the routine worker for broad repository exploration, implementation, validation, debugging, or review.
 
 ## Activation Contract
 
-When `/orchestrate` or `$codex-orchestrate` is invoked, initialize the controller loop before doing substantive work: record first-step classification, open the routing ledger, choose the initial tier, record model/effort selection for the next agent, set the final-review gate, then delegate or explicitly justify Tier 0.
+When this skill is invoked directly, `$codex-orchestrate` is requested, or `/orchestrate` is routed to the skill, initialize the controller loop before doing substantive work: record first-step classification, open the routing ledger, choose the initial tier, record model/effort selection for the next agent, set the final-review gate, then delegate or explicitly justify Tier 0.
 
 ## Source Of Truth
 
-For this skill pack, the repo-local copy in `MonskySkills/.agents/skills/codex-orchestrate` is authoritative. A copy in `~/.codex/skills/codex-orchestrate` is an installed runtime copy.
+For this skill pack, the repo-local copy in `codex-orchestrate/.agents/skills/codex-orchestrate` is authoritative. A copy in `~/.codex/skills/codex-orchestrate` is an installed runtime copy.
 
-If both repo-local and global copies are visible, prefer the repo-local copy when working inside `MonskySkills`; otherwise use the global copy. After changing the repo-local skill, sync it to the global install before relying on it in new Codex sessions.
+If both repo-local and global copies are visible, prefer the repo-local copy when working inside the `codex-orchestrate` repository; otherwise use the global copy. After changing the repo-local skill, sync it to the global install before relying on it in new Codex sessions.
 
 ## Runtime Capabilities
 
@@ -91,7 +91,7 @@ The ledger is not a substitute for delegation. It is the root's control surface 
 
 Produce a durable post-run ledger for any Tier 3 or Tier 4 run, any model fallback, any security/privacy/migration/auth task, any run with more than two subagents, any failed validation, or any final-review blocker. Tier 1 and Tier 2 ledgers are optional unless one of those triggers appears.
 
-When working inside MonskySkills, use `python3 scripts/create_orchestration_ledger.py` to create and validate the local ledger, `python3 scripts/orchestration_check.py --quick` for tiered validation, then `python3 scripts/serve_orchestration_ui.py` for read-only dashboard review when useful. Otherwise use `docs/codex-orchestrate/run-ledger-template.md` manually. Keep private ledgers local or sanitized before committing.
+When working inside the `codex-orchestrate` repository, use `python3 scripts/create_orchestration_ledger.py` to create and validate the local ledger, `python3 scripts/orchestration_check.py --quick` for tiered validation, then `python3 scripts/serve_orchestration_ui.py` for read-only dashboard review when useful. Otherwise use `docs/codex-orchestrate/run-ledger-template.md` manually. Keep private ledgers local or sanitized before committing.
 
 ## Delegation Defaults
 

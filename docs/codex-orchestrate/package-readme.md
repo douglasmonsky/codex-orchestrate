@@ -120,7 +120,13 @@ or the trusted project config:
 
 The config example is merge-only. Do not overwrite an existing Codex config; keep `agents.max_depth = 1` unless recursive delegation is explicitly intended.
 
-Copy useful parts of `AGENTS.orchestration.snippet.md` into the repo's `AGENTS.md`.
+After installing, invoke the skill with a direct skill mention instead of editing `AGENTS.md`:
+
+```text
+[$codex-orchestrate](/Users/douglasmonsky/.codex/skills/codex-orchestrate/SKILL.md) Use this skill for the following repository task: <task>
+```
+
+For a project-scoped install, point the link at that repo's `.agents/skills/codex-orchestrate/SKILL.md`.
 
 Model names in `.codex/agents/*.toml` are pinned intentionally. Strict model pins are the source-of-truth policy. `scripts/check_runtime_compatibility.py` reports operational availability and warnings; runtime fallback must be recorded in the routing ledger, but it does not loosen source validation.
 
