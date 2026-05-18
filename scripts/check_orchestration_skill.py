@@ -998,8 +998,11 @@ def check_orchestration_ui() -> None:
     for phrase in [
         "Orchestration Ledger Console",
         "Run validation",
+        "Model Routes",
         "Routing Timeline",
         "Context Lifecycle",
+        "Validation Evidence",
+        "Escalations",
         "Final Review",
         "Residual Risks",
     ]:
@@ -1014,6 +1017,9 @@ def check_orchestration_ui() -> None:
         "orchestration_value",
         "routing_decisions",
         "terminal_packet_ids",
+        "fallback_notes",
+        "validation.entries",
+        "navigator.clipboard.writeText",
     ]:
         require_contains(app, phrase, "ui/orchestration-dashboard/app.js")
 
@@ -1023,6 +1029,8 @@ def check_orchestration_ui() -> None:
         "grid-template-columns",
         "ledger-list",
         "timeline-item",
+        "evidence-item",
+        "command-row",
         "@media",
     ]:
         require_contains(css, phrase, "ui/orchestration-dashboard/styles.css")

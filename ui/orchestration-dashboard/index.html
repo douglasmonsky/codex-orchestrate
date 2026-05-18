@@ -17,7 +17,7 @@
           <input id="validate-toggle" type="checkbox">
           <span>Run validation</span>
         </label>
-        <button id="refresh-button" type="button">Refresh</button>
+        <button id="refresh-button" type="button" aria-label="Refresh dashboard data">Refresh</button>
       </div>
     </header>
 
@@ -42,7 +42,7 @@
       </aside>
 
       <section class="workspace" aria-live="polite">
-        <section id="status-panel" class="status-strip"></section>
+        <section id="status-panel" class="status-strip" role="status"></section>
 
         <section class="summary-grid">
           <article class="summary-panel verdict-panel">
@@ -73,9 +73,16 @@
 
           <article class="report-panel">
             <div class="section-heading">
-              <h2>Models</h2>
+              <h2>Model Routes</h2>
             </div>
             <div id="model-list" class="pill-list"></div>
+          </article>
+
+          <article class="report-panel">
+            <div class="section-heading">
+              <h2>Validation Evidence</h2>
+            </div>
+            <div id="validation-entries" class="evidence-list"></div>
           </article>
 
           <article class="report-panel span-2">
@@ -90,6 +97,14 @@
               <h2>Context Lifecycle</h2>
             </div>
             <dl id="lifecycle-details" class="details-grid compact"></dl>
+            <div id="lifecycle-events" class="evidence-list"></div>
+          </article>
+
+          <article class="report-panel">
+            <div class="section-heading">
+              <h2>Escalations</h2>
+            </div>
+            <div id="escalation-list" class="evidence-list"></div>
           </article>
 
           <article class="report-panel">
