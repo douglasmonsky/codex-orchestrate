@@ -264,6 +264,13 @@ def self_test() -> None:
     missing = [name for name in required_assets if not (UI_DIR / name).exists()]
     if missing:
         raise UiError(f"missing UI asset(s): {', '.join(missing)}")
+    html = (UI_DIR / "index.html").read_text()
+    app = (UI_DIR / "app.js").read_text()
+    if 'href="/styles.css"' in html or 'src="/app.js"' in html:
+        raise UiError("dashboard assets must use relative paths for a styled file:// fallback")
+    for phrase in ["window.location.protocol", "renderFileProtocolNotice", "serve_orchestration_ui.py --port 8765"]:
+        if phrase not in app:
+            raise UiError(f"dashboard file:// fallback missing {phrase}")
     health = health_payload()
     if health["status"] != "ok" or not health["read_only"]:
         raise UiError("health payload failed read-only check")

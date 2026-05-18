@@ -164,6 +164,8 @@ Use `scripts/create_orchestration_ledger.py` for private local ledgers when work
 
 Use `scripts/serve_orchestration_ui.py --port 8765` for a read-only local dashboard at `http://127.0.0.1:8765`. It lists sample ledgers and ignored private ledgers under `local/orchestration-ledgers/`, renders report summaries from the existing reporter contract, shows runtime model compatibility, and rejects write methods.
 
+Open the dashboard through the local server, not by double-clicking `ui/orchestration-dashboard/index.html`. The direct `file://` path is a styled fallback only; the useful dashboard needs the server endpoints.
+
 ## Invocation examples
 
 ```text

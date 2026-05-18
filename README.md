@@ -183,6 +183,8 @@ python3 scripts/serve_orchestration_ui.py --port 8765
 
 Open `http://127.0.0.1:8765` to review sample ledgers and ignored private ledgers under `local/orchestration-ledgers/`. The dashboard only exposes read-only endpoints for ledger listings, report summaries, runtime model compatibility, and copyable commands.
 
+Do not open `ui/orchestration-dashboard/index.html` directly as a `file://` URL for normal use. The static file now shows a styled server-required fallback, but live ledger data, validation, and runtime checks require the local read-only server.
+
 ## Project Status
 
 The package is validated by the included static checks, fixtures, prompt smoke tests, ledger/lifecycle validators, and dashboard self-test. These checks show that the repository artifacts are internally consistent; they do not guarantee that every future live Codex run will route perfectly.

@@ -988,6 +988,7 @@ def check_orchestration_ui() -> None:
         "check_full",
         "report_orchestration_ledger.py",
         "check_runtime_compatibility.py",
+        "relative paths for a styled file:// fallback",
     ]:
         require_contains(text, phrase, "serve_orchestration_ui.py")
 
@@ -997,6 +998,8 @@ def check_orchestration_ui() -> None:
     html = read(UI_DIR / "index.html")
     for phrase in [
         "Orchestration Ledger Console",
+        'href="styles.css"',
+        'src="app.js"',
         "Run validation",
         "Model Routes",
         "Routing Timeline",
@@ -1020,6 +1023,9 @@ def check_orchestration_ui() -> None:
         "fallback_notes",
         "validation.entries",
         "navigator.clipboard.writeText",
+        "renderFileProtocolNotice",
+        "window.location.protocol",
+        "python3 scripts/serve_orchestration_ui.py --port 8765",
     ]:
         require_contains(app, phrase, "ui/orchestration-dashboard/app.js")
 
@@ -1031,6 +1037,7 @@ def check_orchestration_ui() -> None:
         "timeline-item",
         "evidence-item",
         "command-row",
+        "file-mode",
         "@media",
     ]:
         require_contains(css, phrase, "ui/orchestration-dashboard/styles.css")

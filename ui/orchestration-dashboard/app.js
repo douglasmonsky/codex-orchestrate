@@ -6,6 +6,9 @@ const state = {
   validate: false,
 };
 
+const serverCommand = "python3 scripts/serve_orchestration_ui.py --port 8765";
+const serverUrl = "http://127.0.0.1:8765";
+
 const el = {
   validateToggle: document.querySelector("#validate-toggle"),
   refreshButton: document.querySelector("#refresh-button"),
@@ -216,6 +219,47 @@ function renderCommands() {
   });
 }
 
+function renderFileProtocolNotice() {
+  document.body.classList.add("file-mode");
+  state.commands = {
+    start_dashboard: serverCommand,
+    open_dashboard: serverUrl,
+  };
+  el.validateToggle.disabled = true;
+  el.refreshButton.disabled = true;
+  el.search.disabled = true;
+  el.sourceFilter.disabled = true;
+  el.ledgerCount.textContent = "0";
+  appendEmpty(el.ledgerList, "The dashboard data API is not available from a file URL.");
+  setStatus(`Start the local read-only server, then open ${serverUrl}.`, true);
+
+  el.verdictAnswer.textContent = "Server required";
+  el.verdictRationale.textContent = "The dashboard reads ledgers through local JSON endpoints. Opening index.html directly can only show this fallback shell.";
+  el.runtimeStatus.textContent = "Offline";
+  el.runtimeDetail.textContent = "Runtime model compatibility is available after starting the local server.";
+  el.validationScore.textContent = "Unavailable";
+  el.validationDetail.textContent = "Validation checks run through the dashboard server.";
+  el.selectedLedgerId.textContent = "file:// fallback";
+  appendDetails(el.taskDetails, [
+    ["Problem", "Opened directly from disk"],
+    ["Start server", serverCommand],
+    ["Then open", serverUrl],
+  ]);
+  appendEmpty(el.modelList, "Model route summaries load after the server starts.");
+  appendEmpty(el.validationEntries, "Validation evidence loads after the server starts.");
+  appendEmpty(el.routingTimeline, "Routing timelines load after the server starts.");
+  appendDetails(el.lifecycleDetails, [
+    ["Packet IDs", "Unavailable"],
+    ["Events", "Unavailable"],
+    ["Terminal exits", "Unavailable"],
+  ]);
+  appendEmpty(el.lifecycleEvents, "Lifecycle evidence loads after the server starts.");
+  appendEmpty(el.escalationList, "Escalation evidence loads after the server starts.");
+  appendEmpty(el.finalReview, "Final review evidence loads after the server starts.");
+  appendEmpty(el.residualRisks, "Residual risks load after the server starts.");
+  renderCommands();
+}
+
 function renderReport(payload) {
   const report = payload.reports?.[0];
   if (!report) {
@@ -402,12 +446,16 @@ async function loadAll() {
   }
 }
 
-el.validateToggle.addEventListener("change", () => {
-  state.validate = el.validateToggle.checked;
-  if (state.selectedId) selectLedger(state.selectedId);
-});
-el.refreshButton.addEventListener("click", loadAll);
-el.search.addEventListener("input", renderLedgerList);
-el.sourceFilter.addEventListener("change", renderLedgerList);
+if (window.location.protocol === "file:") {
+  renderFileProtocolNotice();
+} else {
+  el.validateToggle.addEventListener("change", () => {
+    state.validate = el.validateToggle.checked;
+    if (state.selectedId) selectLedger(state.selectedId);
+  });
+  el.refreshButton.addEventListener("click", loadAll);
+  el.search.addEventListener("input", renderLedgerList);
+  el.sourceFilter.addEventListener("change", renderLedgerList);
 
-loadAll();
+  loadAll();
+}

@@ -41,6 +41,13 @@ select {
   font: inherit;
 }
 
+button:disabled,
+input:disabled,
+select:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
 button,
 select,
 input {
@@ -262,6 +269,12 @@ select {
 
 .status-strip.error {
   border-color: rgba(156, 61, 61, 0.35);
+  color: var(--bad);
+}
+
+.file-mode .status-strip {
+  border-color: rgba(156, 61, 61, 0.35);
+  background: #fff9f4;
   color: var(--bad);
 }
 
