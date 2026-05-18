@@ -91,7 +91,7 @@ Paste this into Codex or ChatGPT if you want an independent explanation before i
 Please inspect https://github.com/douglasmonsky/codex-orchestrate and give me an in-depth explanation of what this Codex skill does, how it works under the hood, how effectively it appears implemented, where it is strongest, where it is likely to add overhead, and what evidence in the repo supports your assessment. Please read README.md, INSTALL.md, .agents/skills/codex-orchestrate/SKILL.md, the files under .agents/skills/codex-orchestrate/references/, evals/codex-orchestrate/routing-policy.json, and scripts/orchestration_check.py. Do not make claims that are not supported by those files.
 ```
 
-Here is the output I received:
+Here is the output I received from that prompt:
 
 codex-orchestrate is not a separate orchestrator service. It is a Codex skill plus companion agent profiles that steer Codex toward delegate-first repository work.
 
