@@ -91,23 +91,15 @@ Paste this into Codex or ChatGPT if you want an independent explanation before i
 Please inspect https://github.com/douglasmonsky/codex-orchestrate and give me an in-depth explanation of what this Codex skill does, how it works under the hood, how effectively it appears implemented, where it is strongest, where it is likely to add overhead, and what evidence in the repo supports your assessment. Please read README.md, INSTALL.md, .agents/skills/codex-orchestrate/SKILL.md, the files under .agents/skills/codex-orchestrate/references/, evals/codex-orchestrate/routing-policy.json, and scripts/orchestration_check.py. Do not make claims that are not supported by those files.
 ```
 
-A useful answer should include conclusions like these:
+Here is the output I received:
 
-```text
 codex-orchestrate is not a separate orchestrator service. It is a Codex skill plus companion agent profiles that steer Codex toward delegate-first repository work.
-```
 
-```text
 The strongest implementation detail is the separation between subagent-visible packets and root-only routing metadata. Subagents get objective, scope, handles, constraints, done condition, and return format; the root keeps model, tier, escalation, fallback, and lifecycle accounting.
-```
 
-```text
 The package looks most valuable for multi-phase repo tasks, debugging, validation failures, security or migration work, and situations where root takeover after a stalled subagent is a real risk. It is probably overkill for small deterministic edits or simple Q&A.
-```
 
-```text
 The repo includes structural checks, scenario fixtures, sample ledgers, context-packet validation, lifecycle validation, prompt smoke checks, and a tiered validation wrapper. These are evidence of implementation rigor, but they validate the package and recorded behavior; they do not prove every future live Codex run will route perfectly.
-```
 
 ## Command Reference
 
