@@ -501,6 +501,9 @@ def check_docs() -> None:
         "--quick",
         "--runtime",
         "--full",
+        "Ask Codex Or ChatGPT To Explain It",
+        "under the hood",
+        "Do not make claims",
         "check_orchestration_ledger.py",
         "check_orchestration_behavior.py",
         "create_orchestration_ledger.py",
@@ -546,7 +549,7 @@ def check_basic_install_doc() -> None:
     text = read(INSTALL)
     for phrase in [
         "# Basic Install",
-        "Quick Start - Self-Install",
+        "One Step Auto Installation",
         "ask Codex to install it for you",
         "If Codex can access GitHub",
         "If you already have this repository open locally",
@@ -558,6 +561,7 @@ def check_basic_install_doc() -> None:
         "verify the installed files",
         "Manual Install - What You Need",
         "install manually instead of relying on Codex",
+        "One Step Auto Installation prompts",
         "You do not need",
         "Global Install",
         "Repository-Scoped Install",

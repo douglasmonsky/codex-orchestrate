@@ -2,7 +2,7 @@
 
 This is the small install path for using `codex-orchestrate` without the development, eval, dashboard, ledger, and validation tooling in this repository.
 
-## Quick Start - Self-Install
+## One Step Auto Installation
 
 The easiest path is to ask Codex to install it for you. Open a new Codex session and paste one of these prompts.
 
@@ -28,7 +28,7 @@ After Codex finishes, restart Codex so the new skill and agent profiles are load
 
 ## Manual Install - What You Need
 
-Everything below is only for users who want to get in the weeds and install manually instead of relying on Codex to perform the self-install prompts above.
+Everything below is only for users who want to get in the weeds and install manually instead of relying on Codex to perform the One Step Auto Installation prompts above.
 
 Install only these runtime pieces:
 

@@ -6,11 +6,45 @@ In my own use while building this package, the skill has been most useful when a
 
 The package is intended to be usable as a free/open-source Codex skill: the runtime install is small, while the heavier validation, ledger, and dashboard tooling lives here for people who want to inspect or improve the orchestration policy.
 
+Under the hood, this repo provides:
+
+- A `codex-orchestrate` skill that teaches Codex to treat `/orchestrate` as a continuous controller loop instead of a one-time planning step.
+- Custom agent TOMLs that pin role-specific models, reasoning effort, sandbox mode, and stuck-work return behavior.
+- A minimal context-packet protocol so subagents receive the task, scope, evidence handles, constraints, done condition, and return format without root-only routing rationale.
+- Root-only routing and ledger rules for tier selection, model fallback, lifecycle exits, stalled-agent recovery, validation, residual risk, and final senior review.
+- Optional validation, sample ledgers, smoke checks, and a read-only dashboard for people who want evidence that the skill package still matches its policy.
+
 ## Quick Start
 
-If you only want to use the skill, start with [INSTALL.md](INSTALL.md). The first section gives copy/paste prompts that ask Codex to install it for you.
+If you only want to use the skill, start with [INSTALL.md](INSTALL.md). The first section gives copy/paste prompts that ask Codex to install it for you through One Step Auto Installation.
 
 Use the development and validation sections below only if you want to modify the skill, audit its behavior, or work on the repo itself.
+
+## Ask Codex Or ChatGPT To Explain It
+
+Paste this into Codex or ChatGPT if you want an independent explanation before installing:
+
+```text
+Please inspect https://github.com/douglasmonsky/codex-orchestrate and give me an in-depth explanation of what this Codex skill does, how it works under the hood, how effectively it appears implemented, where it is strongest, where it is likely to add overhead, and what evidence in the repo supports your assessment. Please read README.md, INSTALL.md, .agents/skills/codex-orchestrate/SKILL.md, the files under .agents/skills/codex-orchestrate/references/, evals/codex-orchestrate/routing-policy.json, and scripts/orchestration_check.py. Do not make claims that are not supported by those files.
+```
+
+A useful answer should include conclusions like these:
+
+```text
+codex-orchestrate is not a separate orchestrator service. It is a Codex skill plus companion agent profiles that steer Codex toward delegate-first repository work.
+```
+
+```text
+The strongest implementation detail is the separation between subagent-visible packets and root-only routing metadata. Subagents get objective, scope, handles, constraints, done condition, and return format; the root keeps model, tier, escalation, fallback, and lifecycle accounting.
+```
+
+```text
+The package looks most valuable for multi-phase repo tasks, debugging, validation failures, security or migration work, and situations where root takeover after a stalled subagent is a real risk. It is probably overkill for small deterministic edits or simple Q&A.
+```
+
+```text
+The repo includes structural checks, scenario fixtures, sample ledgers, context-packet validation, lifecycle validation, prompt smoke checks, and a tiered validation wrapper. These are evidence of implementation rigor, but they validate the package and recorded behavior; they do not prove every future live Codex run will route perfectly.
+```
 
 ## Layout
 
@@ -40,7 +74,7 @@ The global copy in `~/.codex/skills/codex-orchestrate/` is an installed runtime 
 
 ## Installing the Skill
 
-If you only want to use `codex-orchestrate`, start with [INSTALL.md](INSTALL.md). It lists the self-install prompts, minimal runtime files, and manual copy commands without the eval, dashboard, ledger, and validation tooling used to develop this repo.
+If you only want to use `codex-orchestrate`, start with [INSTALL.md](INSTALL.md). It lists the One Step Auto Installation prompts, minimal runtime files, and manual copy commands without the eval, dashboard, ledger, and validation tooling used to develop this repo.
 
 The bare manual global install is:
 
