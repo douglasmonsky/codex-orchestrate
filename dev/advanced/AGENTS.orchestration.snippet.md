@@ -1,6 +1,15 @@
-# AGENTS.md snippet: Delegate-first orchestration defaults
+# Advanced AGENTS.md snippet: delegate-first orchestration defaults
 
-Use this snippet in a repo-level `AGENTS.md` or focused subdirectory `AGENTS.md`.
+This is an advanced development artifact, not the normal install path. Prefer direct
+skill invocation for regular use:
+
+```text
+[$codex-orchestrate](/Users/<your-user>/.codex/skills/codex-orchestrate/SKILL.md) Use this skill for the following repository task: <task>
+```
+
+Use this snippet only if you deliberately want a persistent repo-level or focused
+subdirectory `AGENTS.md` rule after understanding that it makes orchestration the
+default for that scope.
 
 ## Subagent and orchestration policy
 

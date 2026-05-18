@@ -65,12 +65,13 @@ ui/orchestration-dashboard/
 evals/codex-orchestrate/routing-policy.json
 evals/codex-orchestrate/sample-context-packets/*.json
 evals/codex-orchestrate/sample-ledgers/*.json
+dev/README.md
+dev/advanced/AGENTS.orchestration.snippet.md
 INSTALL.md
 CONTRIBUTING.md
 SECURITY.md
 RELEASE_CHECKLIST.md
 LICENSE
-AGENTS.orchestration.snippet.md
 ```
 
 Additional escalation agent configs included in this revision:
@@ -136,6 +137,8 @@ For a project-scoped install, point the link at that repo's `.agents/skills/code
 Model names in `.codex/agents/*.toml` are pinned intentionally. Strict model pins are the source-of-truth policy. `scripts/check_runtime_compatibility.py` reports operational availability and warnings; runtime fallback must be recorded in the routing ledger, but it does not loosen source validation.
 
 The skill UI metadata is stored in `.agents/skills/codex-orchestrate/agents/openai.yaml`. Shared harness constants for role/model routing, smoke terms, context-packet budgets, and durable-ledger triggers are stored in `evals/codex-orchestrate/routing-policy.json`; helper scripts and static checks read that manifest.
+
+Advanced or legacy-facing materials live under `dev/`. They are not part of the basic runtime install. In particular, `dev/advanced/AGENTS.orchestration.snippet.md` exists for maintainers or power users who deliberately want a persistent local alias; public install docs should continue to recommend direct skill invocation instead of editing `AGENTS.md`.
 
 Initial subagent dispatch should use minimal context packets, not raw repo context, transcripts, pasted logs, or root routing rationale. Use context handles such as `file:path:line`, `cmd:name`, `diff:path`, `ledger:entry`, `artifact:path`, and `scenario:id`. If a subagent needs more context, it must return a structured Context request with reason, requested handle/path, and decision impact; that request triggers root reassessment before more context is granted.
 

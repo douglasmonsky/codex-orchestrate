@@ -52,7 +52,8 @@ RELEASE_CHECKLIST = ROOT / "RELEASE_CHECKLIST.md"
 GITHUB_ISSUE_TEMPLATES = ROOT / ".github" / "ISSUE_TEMPLATE"
 AGENTS_MD = ROOT / "AGENTS.md"
 PACKAGE_README = ROOT / "docs" / "codex-orchestrate" / "package-readme.md"
-SNIPPET = ROOT / "docs" / "codex-orchestrate" / "AGENTS.orchestration.snippet.md"
+DEV_README = ROOT / "dev" / "README.md"
+SNIPPET = ROOT / "dev" / "advanced" / "AGENTS.orchestration.snippet.md"
 CONFIG_EXAMPLE = ROOT / ".codex" / "config.orchestration.example.toml"
 LEDGER_SCHEMA = ROOT / "schemas" / "orchestration-ledger.schema.json"
 CONTEXT_PACKET_SCHEMA = ROOT / "schemas" / "orchestration-context-packet.schema.json"
@@ -488,7 +489,7 @@ def check_agents() -> None:
 
 
 def check_docs() -> None:
-    combined = "\n".join(read(path) for path in [README, AGENTS_MD, PACKAGE_README, SNIPPET])
+    combined = "\n".join(read(path) for path in [README, AGENTS_MD, PACKAGE_README, DEV_README, SNIPPET])
     for phrase in [
         "INSTALL.md",
         "basic end-user install",
@@ -550,6 +551,8 @@ def check_docs() -> None:
         "timed-out",
         "root takeover",
         "redelegate",
+        "Development-Only Materials",
+        "direct skill invocation",
     ]:
         require(re.search(re.escape(phrase), combined, re.IGNORECASE), f"docs missing: {phrase}")
 

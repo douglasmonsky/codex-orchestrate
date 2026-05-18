@@ -28,6 +28,8 @@ No global `AGENTS.md` change is required.
 
 Use the development and validation sections below only if you want to modify the skill, audit its behavior, or work on the repo itself.
 
+For the full package artifact map and maintainer notes, see [docs/codex-orchestrate/package-readme.md](docs/codex-orchestrate/package-readme.md).
+
 ## Ask Codex Or ChatGPT To Explain It
 
 Paste this into Codex or ChatGPT if you want an independent explanation before installing:
@@ -62,7 +64,8 @@ The repo includes structural checks, scenario fixtures, sample ledgers, context-
 .codex/config.orchestration.example.toml
                       Merge-only sample config for bounded orchestration fanout
 .github/              Issue templates for public feedback
-docs/                 Install notes, snippets, and design rationale
+docs/                 Package docs and run-ledger templates
+dev/                  Development-only and advanced artifacts, not runtime install
 evals/                Routing policy manifest, static scenarios, and synthetic ledger/context fixtures
 schemas/              Machine-readable contracts for repeatable skill outputs and context packets
 ui/                   Read-only local dashboard assets for reviewing orchestration ledgers

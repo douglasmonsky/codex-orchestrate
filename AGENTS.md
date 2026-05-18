@@ -20,7 +20,8 @@ This repository packages the `codex-orchestrate` Codex skill, companion agent pr
 - `.github/ISSUE_TEMPLATE/`: public issue templates for bugs and orchestration-policy feedback.
 - `INSTALL.md`: basic end-user install path without development validation tooling.
 - `CONTRIBUTING.md`, `SECURITY.md`, `RELEASE_CHECKLIST.md`, `LICENSE`: public-release wrapper docs.
-- `docs/`: install notes, snippets, examples, and rationale.
+- `docs/`: package docs and run-ledger templates.
+- `dev/`: development-only or advanced artifacts that are not part of the basic runtime install.
 - `evals/codex-orchestrate/routing-policy.json`: machine-readable orchestration role/model/context-packet and lifecycle policy used by checks and helper scripts.
 - `schemas/`: machine-readable contracts for skill output artifacts, lifecycle evidence, and context packets.
 - `ui/orchestration-dashboard/`: read-only local dashboard assets for reviewing orchestration ledgers.
