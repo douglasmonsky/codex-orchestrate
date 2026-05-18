@@ -30,6 +30,50 @@ Use the development and validation sections below only if you want to modify the
 
 For the full package artifact map and maintainer notes, see [docs/codex-orchestrate/package-readme.md](docs/codex-orchestrate/package-readme.md).
 
+## Why Token Patterns Matter
+
+Subagents do not make a task free. Fanout can increase total token usage because every agent has its own context, tool calls, and model work. The reason to use `codex-orchestrate` is narrower: it tries to change where tokens are spent.
+
+The intended pattern is:
+
+- Keep the root agent in controller mode instead of filling the main thread with raw repo scans, logs, and half-finished implementation reasoning.
+- Send small context packets to subagents so they get the objective, scope, handles, constraints, done condition, and return format without root-only routing metadata.
+- Route routine bounded work to cheaper models and reserve stronger models for high-risk review, security, debugging, architecture, migration, and ambiguous failures.
+- Escalate only the stuck slice instead of re-running the whole task at a stronger model.
+- Use final root review to decide whether the delegated evidence actually satisfies the user request.
+
+This means `codex-orchestrate` is most useful when context shape, not just raw token count, is the problem. It is least useful when the task is already a one-step answer.
+
+## Use Cases
+
+### Multi-Phase Repository Work
+
+Use it when a task is likely to move through discovery, implementation, validation, correction, and review. Examples include adding a feature across several files, hardening a local tool, changing a CLI workflow, or improving a frontend where design, code, and browser validation all matter.
+
+The skill is meant to keep those phases from collapsing into one root-agent thread. Scouts gather compact evidence, implementers work inside bounded packets, validators summarize command results, and the root performs final review over the evidence.
+
+### Debugging And Validation Failures
+
+Use it when checks fail and the cause is not obvious. The policy routes known checks to validation agents, unclear failures to triage/debugging roles, and stalled work to narrow escalation rather than broad root takeover.
+
+This is one of the places where token patterns matter most: a focused debugger with the right failure handle is usually cleaner than pasting large logs into the root thread and letting the main conversation become the debug scratchpad.
+
+### Review, Security, Auth, And Migration Risk
+
+Use it when the cost of a wrong change is high. Security/privacy/auth work, migrations, public APIs, concurrency, performance-sensitive code, and irreversible data changes should get stronger specialist routing and final root review.
+
+These runs may cost more than direct implementation, but the intended tradeoff is better risk control: cheap agents handle bounded evidence gathering, while stronger models are saved for judgment-heavy steps.
+
+### Stalled Or Timed-Out Subagents
+
+Use it when a subagent times out, closes without useful changes, or asks the root to decide too early. The skill treats that as stuck evidence. The next move should be packet repair, narrower redelegation, model/effort escalation, or a specialist pass-off, not silent root takeover.
+
+This failure mode is a major reason the repo includes lifecycle checks and sample ledgers.
+
+### When Not To Use It
+
+Do not use it for simple Q&A, tiny deterministic edits, one-command status checks, or tasks where the user explicitly wants no subagents. The overhead is not justified when there is no meaningful routing decision to make.
+
 ## Ask Codex Or ChatGPT To Explain It
 
 Paste this into Codex or ChatGPT if you want an independent explanation before installing:
@@ -56,28 +100,11 @@ The package looks most valuable for multi-phase repo tasks, debugging, validatio
 The repo includes structural checks, scenario fixtures, sample ledgers, context-packet validation, lifecycle validation, prompt smoke checks, and a tiered validation wrapper. These are evidence of implementation rigor, but they validate the package and recorded behavior; they do not prove every future live Codex run will route perfectly.
 ```
 
-## Layout
+## Command Reference
 
-```text
-.agents/skills/       Codex skill folders, each with a SKILL.md entrypoint
-.codex/agents/        Optional custom agent TOML profiles used by skills
-.codex/config.orchestration.example.toml
-                      Merge-only sample config for bounded orchestration fanout
-.github/              Issue templates for public feedback
-docs/                 Package docs and run-ledger templates
-dev/                  Development-only and advanced artifacts, not runtime install
-evals/                Routing policy manifest, static scenarios, and synthetic ledger/context fixtures
-schemas/              Machine-readable contracts for repeatable skill outputs and context packets
-ui/                   Read-only local dashboard assets for reviewing orchestration ledgers
-INSTALL.md            Basic end-user install path without validation tooling
-CONTRIBUTING.md       Contributor expectations and local checks
-SECURITY.md           Vulnerability reporting and security boundaries
-RELEASE_CHECKLIST.md  Public-release checklist
-README.md             Repo overview, positioning, and contributor workflow
-AGENTS.md             Project-specific Codex instructions
-```
+The commands below are for people who want to install manually, modify the skill, validate the package, or inspect orchestration ledgers. If you only want the end-user install path, use [INSTALL.md](INSTALL.md).
 
-## Source of truth
+### Source Of Truth
 
 This repository is the source of truth for the `codex-orchestrate` skill. The authoritative runtime skill folder is:
 
@@ -87,7 +114,7 @@ This repository is the source of truth for the `codex-orchestrate` skill. The au
 
 The global copy in `~/.codex/skills/codex-orchestrate/` is an installed runtime copy. After changing the repo copy, sync it globally and restart Codex before expecting other sessions to use the update.
 
-## Installing the Skill
+### Installing The Skill
 
 If you only want to use `codex-orchestrate`, start with [INSTALL.md](INSTALL.md). It lists the One Step Auto Installation prompts, minimal runtime files, and manual copy commands without the eval, dashboard, ledger, and validation tooling used to develop this repo.
 
@@ -122,7 +149,7 @@ The orchestration config example is merge-only:
 
 Do not overwrite `~/.codex/config.toml`; merge only the `[agents]` keys you want.
 
-## Calling The Skill
+### Calling The Skill
 
 After installing `codex-orchestrate`, call it with a direct skill mention:
 
@@ -140,7 +167,7 @@ Durable ledgers can link each routing decision to a packet id and subagent lifec
 
 A timed-out, closed, or no-change subagent is stuck evidence. Repair or split the packet, then redelegate or escalate the same narrow objective; do not let timeout recovery become root takeover except for deterministic micro-actions. Delegating validation or review after root implements the substantive work is not enough.
 
-## Model routing
+### Model Routing
 
 `codex-orchestrate` treats model choice as a first-class routing decision:
 
@@ -157,7 +184,7 @@ Strict model pins in `.codex/agents/*.toml` are the source-of-truth policy. `scr
 
 Harness metadata lives in `.agents/skills/codex-orchestrate/agents/openai.yaml`. Shared routing constants for checks and helper scripts live in `evals/codex-orchestrate/routing-policy.json`; changing role/model policy or context-packet budgets means updating that manifest and validating parity with the TOMLs and packet fixtures.
 
-## Validation
+### Validation
 
 Use the tiered validation wrapper first:
 
@@ -173,7 +200,7 @@ Recommended post-edit loop: `--quick`, `--runtime` when runtime behavior matters
 
 The checker validates required skill sections, activation contract, context packet protocol, lifecycle ledger policy, `agents/openai.yaml`, routing-policy completeness, fallback role mapping, model routing scenarios, routing-ledger expectations, durable ledger trigger rules, context-packet schema/fixture coverage, lifecycle fixture coverage, ledger schema/template coverage, synthetic run-ledger fixtures, behavioral evidence fixtures, tiered validation, ledger reporting, local dashboard assets, agent TOML parity with the routing policy, duplicate stuck-protocol cleanup, sync tooling, runtime compatibility tooling, ledger creator tooling, smoke tooling, and source-of-truth docs. `scripts/create_orchestration_ledger.py` creates private ledgers under `local/orchestration-ledgers/` by default, or under `~/.codex/orchestration-ledgers/` with `--global-output`, and validates them immediately. `scripts/report_orchestration_ledger.py` turns a ledger into a post-run Markdown or JSON audit, including whether orchestration justified itself. `docs/codex-orchestrate/run-ledger-template.md` remains the manual template for substantial `/orchestrate` runs outside this repository.
 
-## Local dashboard
+### Local Dashboard
 
 Run the read-only orchestration dashboard with:
 
@@ -184,6 +211,29 @@ python3 scripts/serve_orchestration_ui.py --port 8765
 Open `http://127.0.0.1:8765` to review sample ledgers plus private ledgers under `~/.codex/orchestration-ledgers/` and `local/orchestration-ledgers/`. Durable ledgers are not automatic runtime logs; they appear only when an orchestrated run creates a JSON ledger through the creator or template. The dashboard only exposes read-only endpoints for ledger listings, report summaries, runtime model compatibility, and copyable commands.
 
 Do not open `ui/orchestration-dashboard/index.html` directly as a `file://` URL for normal use. The static file now shows a styled server-required fallback, but live ledger data, validation, and runtime checks require the local read-only server.
+
+## Repository Reference
+
+### Layout
+
+```text
+.agents/skills/       Codex skill folders, each with a SKILL.md entrypoint
+.codex/agents/        Optional custom agent TOML profiles used by skills
+.codex/config.orchestration.example.toml
+                      Merge-only sample config for bounded orchestration fanout
+.github/              Issue templates for public feedback
+docs/                 Package docs and run-ledger templates
+dev/                  Development-only and advanced artifacts, not runtime install
+evals/                Routing policy manifest, static scenarios, and synthetic ledger/context fixtures
+schemas/              Machine-readable contracts for repeatable skill outputs and context packets
+ui/                   Read-only local dashboard assets for reviewing orchestration ledgers
+INSTALL.md            Basic end-user install path without validation tooling
+CONTRIBUTING.md       Contributor expectations and local checks
+SECURITY.md           Vulnerability reporting and security boundaries
+RELEASE_CHECKLIST.md  Public-release checklist
+README.md             Repo overview, positioning, and contributor workflow
+AGENTS.md             Project-specific Codex instructions
+```
 
 ## Project Status
 
