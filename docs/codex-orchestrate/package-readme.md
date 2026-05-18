@@ -1,5 +1,8 @@
 # Codex Delegate-First Orchestration Skill Pack
 
+> [!IMPORTANT]
+> **Unofficial community project.** `codex-orchestrate` is not created, reviewed, endorsed, sponsored, or supported by OpenAI. It is an independent open-source skill package for Codex users. OpenAI, ChatGPT, and Codex are trademarks of OpenAI.
+
 This package contains an instruction-only Codex skill and custom agent configs for aggressive subagent delegation, effort/model routing, stuck-work escalation, specialist pass-offs, and mandatory root final review.
 
 Repository tooling requires Python 3.11+. The installed skill itself is text and TOML; Python is needed only for helper scripts, validation, ledgers, and dashboard review.

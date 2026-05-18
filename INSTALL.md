@@ -1,5 +1,8 @@
 # Basic Install
 
+> [!IMPORTANT]
+> **Unofficial community project.** `codex-orchestrate` is not created, reviewed, endorsed, sponsored, or supported by OpenAI. It is an independent open-source skill package for Codex users. OpenAI, ChatGPT, and Codex are trademarks of OpenAI.
+
 This is the small install path for using `codex-orchestrate` without the development, eval, dashboard, ledger, and validation tooling in this repository.
 
 Python 3.11+ is required only for this repository's helper scripts. Manual skill installation is just copying text/TOML files.

@@ -1,5 +1,8 @@
 # codex-orchestrate
 
+> [!IMPORTANT]
+> **Unofficial community project.** `codex-orchestrate` is not created, reviewed, endorsed, sponsored, or supported by OpenAI. It is an independent open-source skill package for Codex users. OpenAI, ChatGPT, and Codex are trademarks of OpenAI.
+
 `codex-orchestrate` is a Codex skill for continuous subagent orchestration on non-trivial repository work. It is designed to help a root Codex agent stay in controller mode: classify the task, delegate bounded work, recover stalled subagents, keep context packets compact, route by model/effort, and finish with root senior review.
 
 In my own use while building this package, the skill has been most useful when a task changes phase, validation fails, implementation gets stuck, or a root agent is at risk of quietly doing all substantive work itself. It is intentionally not a magic improvement for every prompt. For simple Q&A, tiny deterministic edits, or one-command checks, the orchestration overhead is usually not worth it.
@@ -264,4 +267,3 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for contribution guidance and [SECURITY.m
 ## License
 
 MIT. See [LICENSE](LICENSE).
-
