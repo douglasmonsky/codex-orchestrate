@@ -45,6 +45,11 @@ CONTEXT_PACKET_CHECK_SCRIPT = ROOT / "scripts" / "check_orchestration_context_pa
 LIFECYCLE_SCRIPT = ROOT / "scripts" / "check_orchestration_lifecycle.py"
 README = ROOT / "README.md"
 INSTALL = ROOT / "INSTALL.md"
+LICENSE = ROOT / "LICENSE"
+CONTRIBUTING = ROOT / "CONTRIBUTING.md"
+SECURITY = ROOT / "SECURITY.md"
+RELEASE_CHECKLIST = ROOT / "RELEASE_CHECKLIST.md"
+GITHUB_ISSUE_TEMPLATES = ROOT / ".github" / "ISSUE_TEMPLATE"
 AGENTS_MD = ROOT / "AGENTS.md"
 PACKAGE_README = ROOT / "docs" / "codex-orchestrate" / "package-readme.md"
 SNIPPET = ROOT / "docs" / "codex-orchestrate" / "AGENTS.orchestration.snippet.md"
@@ -504,6 +509,10 @@ def check_docs() -> None:
         "Ask Codex Or ChatGPT To Explain It",
         "under the hood",
         "Do not make claims",
+        "CONTRIBUTING.md",
+        "SECURITY.md",
+        "RELEASE_CHECKLIST.md",
+        "LICENSE",
         "check_orchestration_ledger.py",
         "check_orchestration_behavior.py",
         "create_orchestration_ledger.py",
@@ -584,6 +593,55 @@ def check_basic_install_doc() -> None:
         "evals/codex-orchestrate",
     ]:
         require(forbidden not in text, f"INSTALL.md should avoid validation/tooling bloat: {forbidden}")
+
+
+def check_public_release_docs() -> None:
+    license_text = read(LICENSE)
+    for phrase in [
+        "MIT License",
+        "Copyright (c) 2026 Douglas Monsky",
+        "THE SOFTWARE IS PROVIDED",
+    ]:
+        require_contains(license_text, phrase, "LICENSE")
+
+    contributing = read(CONTRIBUTING)
+    for phrase in [
+        "Good Contributions",
+        "Please Avoid",
+        "python3 scripts/orchestration_check.py --quick",
+        "python3 scripts/orchestration_check.py --full --fail-fast",
+        "Do not commit real private task details",
+    ]:
+        require_contains(contributing, phrase, "CONTRIBUTING.md")
+
+    security = read(SECURITY)
+    for phrase in [
+        "Reporting A Vulnerability",
+        "Security-Sensitive Areas",
+        "dashboard binds to `127.0.0.1`",
+        "does not overwrite `~/.codex/config.toml`",
+    ]:
+        require_contains(security, phrase, "SECURITY.md")
+
+    release = read(RELEASE_CHECKLIST)
+    for phrase in [
+        "Public Release Checklist",
+        "Confirm the intended license is correct",
+        "Confirm the GitHub repository visibility change is intentional",
+        "python3 scripts/orchestration_check.py --full --fail-fast",
+        "direct skill invocation",
+        "Initial public release of codex-orchestrate",
+    ]:
+        require_contains(release, phrase, "RELEASE_CHECKLIST.md")
+
+    for filename, phrases in {
+        "bug_report.yml": ["Bug report", "Use synthetic examples only", "python3 scripts/orchestration_check.py --quick"],
+        "policy_feedback.yml": ["Orchestration policy feedback", "Context packets", "Model routing"],
+        "config.yml": ["blank_issues_enabled"],
+    }.items():
+        text = read(GITHUB_ISSUE_TEMPLATES / filename)
+        for phrase in phrases:
+            require_contains(text, phrase, filename)
 
 
 def check_config_example() -> None:
@@ -1029,6 +1087,7 @@ def main() -> int:
         check_agents,
         check_docs,
         check_basic_install_doc,
+        check_public_release_docs,
         check_config_example,
         check_sync_script,
         check_runtime_script,

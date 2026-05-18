@@ -72,7 +72,7 @@ Then restart Codex in that project.
 No `AGENTS.md` change is required for normal use. After global install, invoke the skill by directly mentioning the installed `SKILL.md`:
 
 ```text
-[$codex-orchestrate](/Users/douglasmonsky/.codex/skills/codex-orchestrate/SKILL.md) Use this skill for the following repository task: <task>
+[$codex-orchestrate](/Users/<your-user>/.codex/skills/codex-orchestrate/SKILL.md) Use this skill for the following repository task: <task>
 ```
 
 If your home directory is different, use your actual installed path:
@@ -105,7 +105,7 @@ Keep `max_depth = 1` unless recursive delegation is intentionally needed. Do not
 After restarting Codex, start a new session in any repository and ask:
 
 ```text
-[$codex-orchestrate](/Users/douglasmonsky/.codex/skills/codex-orchestrate/SKILL.md) Explain how you would route a non-trivial repo task before making changes.
+[$codex-orchestrate](/Users/<your-user>/.codex/skills/codex-orchestrate/SKILL.md) Explain how you would route a non-trivial repo task before making changes.
 ```
 
 You should see the assistant initialize a routing loop, discuss delegation, compact context packets, stuck-work recovery, and final root review.

@@ -1,0 +1,41 @@
+name: Orchestration policy feedback
+description: Suggest a routing, context-packet, lifecycle, model, or validation improvement.
+title: "[Policy]: "
+labels: ["policy", "enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: Which orchestration behavior is weak, confusing, too expensive, or unsafe?
+    validations:
+      required: true
+  - type: textarea
+    id: proposed
+    attributes:
+      label: Proposed change
+      description: What should change in the skill, agent profiles, docs, fixtures, or validators?
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence
+      description: Link to sanitized examples, fixture ideas, or public docs. Do not include private run details.
+    validations:
+      required: false
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Activation and routing loop
+        - Context packets
+        - Subagent lifecycle
+        - Model routing
+        - Runtime fallback
+        - Validation and ledgers
+        - Install and docs
+        - Other
+    validations:
+      required: true

@@ -37,7 +37,8 @@ FORBIDDEN_COMMAND_FRAGMENTS = [
 ]
 
 SECRET_PATTERN = re.compile(
-    r"sk-[A-Za-z0-9]{20,}|BEGIN (RSA|OPENSSH|PRIVATE) KEY|"
+    "s" "k-" + r"[A-Za-z0-9]{20,}|"
+    "BEGIN " + r"(RSA|OPENSSH|" + "PRIV" "ATE" + r") KEY|"
     r"api[_-]?key\s*[:=]|token\s*[:=]|password\s*[:=]|secret\s*[:=]"
 )
 SECRET_EXCLUDED_DIRS = {".git", "__pycache__", "local", ".pytest_cache", ".mypy_cache", ".ruff_cache"}

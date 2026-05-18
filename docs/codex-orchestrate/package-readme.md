@@ -48,6 +48,7 @@ The model policy follows the current OpenAI Codex docs for subagent model pins, 
 .agents/skills/codex-orchestrate/references/escalation-and-review.md
 .codex/config.orchestration.example.toml
 .codex/agents/*.toml
+.github/ISSUE_TEMPLATE/*.yml
 docs/codex-orchestrate/run-ledger-template.md
 schemas/orchestration-ledger.schema.json
 schemas/orchestration-context-packet.schema.json
@@ -65,6 +66,10 @@ evals/codex-orchestrate/routing-policy.json
 evals/codex-orchestrate/sample-context-packets/*.json
 evals/codex-orchestrate/sample-ledgers/*.json
 INSTALL.md
+CONTRIBUTING.md
+SECURITY.md
+RELEASE_CHECKLIST.md
+LICENSE
 AGENTS.orchestration.snippet.md
 ```
 
@@ -123,7 +128,7 @@ The config example is merge-only. Do not overwrite an existing Codex config; kee
 After installing, invoke the skill with a direct skill mention instead of editing `AGENTS.md`:
 
 ```text
-[$codex-orchestrate](/Users/douglasmonsky/.codex/skills/codex-orchestrate/SKILL.md) Use this skill for the following repository task: <task>
+[$codex-orchestrate](/Users/<your-user>/.codex/skills/codex-orchestrate/SKILL.md) Use this skill for the following repository task: <task>
 ```
 
 For a project-scoped install, point the link at that repo's `.agents/skills/codex-orchestrate/SKILL.md`.

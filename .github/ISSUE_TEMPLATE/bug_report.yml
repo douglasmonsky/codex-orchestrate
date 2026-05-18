@@ -1,0 +1,41 @@
+name: Bug report
+description: Report an install, validation, dashboard, or orchestration-policy bug.
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: What happened?
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Reproduction
+      description: Use synthetic examples only. Do not include private transcripts, ledgers, credentials, or user data.
+      placeholder: |
+        1. Install with ...
+        2. Invoke with ...
+        3. Expected ...
+        4. Actual ...
+    validations:
+      required: true
+  - type: textarea
+    id: checks
+    attributes:
+      label: Checks run
+      description: Include relevant commands and results.
+      placeholder: |
+        python3 scripts/orchestration_check.py --quick
+        python3 scripts/orchestration_check.py --full --fail-fast
+    validations:
+      required: false
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Codex runtime, operating system, and whether this was global or project-scoped install.
+    validations:
+      required: false

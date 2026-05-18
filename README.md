@@ -21,7 +21,7 @@ If you only want to use the skill, start with [INSTALL.md](INSTALL.md). The firs
 After installation, the clearest invocation is a direct skill mention:
 
 ```text
-[$codex-orchestrate](/Users/douglasmonsky/.codex/skills/codex-orchestrate/SKILL.md) Use this skill for the following repository task: <task>
+[$codex-orchestrate](/Users/<your-user>/.codex/skills/codex-orchestrate/SKILL.md) Use this skill for the following repository task: <task>
 ```
 
 No global `AGENTS.md` change is required.
@@ -61,11 +61,15 @@ The repo includes structural checks, scenario fixtures, sample ledgers, context-
 .codex/agents/        Optional custom agent TOML profiles used by skills
 .codex/config.orchestration.example.toml
                       Merge-only sample config for bounded orchestration fanout
+.github/              Issue templates for public feedback
 docs/                 Install notes, snippets, and design rationale
 evals/                Routing policy manifest, static scenarios, and synthetic ledger/context fixtures
 schemas/              Machine-readable contracts for repeatable skill outputs and context packets
 ui/                   Read-only local dashboard assets for reviewing orchestration ledgers
 INSTALL.md            Basic end-user install path without validation tooling
+CONTRIBUTING.md       Contributor expectations and local checks
+SECURITY.md           Vulnerability reporting and security boundaries
+RELEASE_CHECKLIST.md  Public-release checklist
 README.md             Repo overview, positioning, and contributor workflow
 AGENTS.md             Project-specific Codex instructions
 ```
@@ -120,7 +124,7 @@ Do not overwrite `~/.codex/config.toml`; merge only the `[agents]` keys you want
 After installing `codex-orchestrate`, call it with a direct skill mention:
 
 ```text
-[$codex-orchestrate](/Users/douglasmonsky/.codex/skills/codex-orchestrate/SKILL.md) Use this skill for the following repository task: <task>
+[$codex-orchestrate](/Users/<your-user>/.codex/skills/codex-orchestrate/SKILL.md) Use this skill for the following repository task: <task>
 ```
 
 If installed into a project, point the link at that project's `.agents/skills/codex-orchestrate/SKILL.md`. This package does not require users to edit global or project `AGENTS.md` just to invoke the skill.
@@ -175,6 +179,20 @@ python3 scripts/serve_orchestration_ui.py --port 8765
 ```
 
 Open `http://127.0.0.1:8765` to review sample ledgers and ignored private ledgers under `local/orchestration-ledgers/`. The dashboard only exposes read-only endpoints for ledger listings, report summaries, runtime model compatibility, and copyable commands.
+
+## Project Status
+
+The package is validated by the included static checks, fixtures, prompt smoke tests, ledger/lifecycle validators, and dashboard self-test. These checks show that the repository artifacts are internally consistent; they do not guarantee that every future live Codex run will route perfectly.
+
+Before making the GitHub repository public, use [RELEASE_CHECKLIST.md](RELEASE_CHECKLIST.md). The repo currently assumes a standard permissive MIT license; switch the license before public release if that is not the intended open-source posture.
+
+## Contributing And Security
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for contribution guidance and [SECURITY.md](SECURITY.md) for vulnerability-reporting expectations and security-sensitive areas.
+
+## License
+
+MIT. See [LICENSE](LICENSE).
 
 ## Privacy
 

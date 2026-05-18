@@ -17,7 +17,9 @@ This repository packages the `codex-orchestrate` Codex skill, companion agent pr
 - `.agents/skills/<skill-name>/agents/openai.yaml`: UI metadata and invocation hints for discoverable skills.
 - `.codex/agents/*.toml`: custom Codex agent profiles used by one or more skills.
 - `.codex/config.orchestration.example.toml`: merge-only sample config for bounded orchestration fanout.
+- `.github/ISSUE_TEMPLATE/`: public issue templates for bugs and orchestration-policy feedback.
 - `INSTALL.md`: basic end-user install path without development validation tooling.
+- `CONTRIBUTING.md`, `SECURITY.md`, `RELEASE_CHECKLIST.md`, `LICENSE`: public-release wrapper docs.
 - `docs/`: install notes, snippets, examples, and rationale.
 - `evals/codex-orchestrate/routing-policy.json`: machine-readable orchestration role/model/context-packet and lifecycle policy used by checks and helper scripts.
 - `schemas/`: machine-readable contracts for skill output artifacts, lifecycle evidence, and context packets.
