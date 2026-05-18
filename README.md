@@ -20,6 +20,7 @@ docs/                 Install notes, snippets, and design rationale
 evals/                Routing policy manifest, static scenarios, and synthetic ledger/context fixtures
 schemas/              Machine-readable contracts for repeatable skill outputs and context packets
 ui/                   Read-only local dashboard assets for reviewing orchestration ledgers
+INSTALL.md            Basic end-user install path without validation tooling
 README.md             Repo overview and usage
 AGENTS.md             Project-specific Codex instructions
 ```
@@ -41,6 +42,8 @@ This repository is the source of truth for skills we create. For `codex-orchestr
 The global copy in `~/.codex/skills/codex-orchestrate/` is an installed runtime copy. After changing the repo copy, sync it globally and restart Codex before expecting other sessions to use the update.
 
 ## Installing a stored skill locally
+
+If you only want to use `codex-orchestrate`, start with [INSTALL.md](INSTALL.md). It lists the minimal runtime files and copy commands without the eval, dashboard, ledger, and validation tooling used to develop this repo.
 
 Copy a skill into the global Codex skills folder:
 

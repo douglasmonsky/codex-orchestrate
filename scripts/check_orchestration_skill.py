@@ -44,6 +44,7 @@ SMOKE_SCRIPT = ROOT / "scripts" / "run_orchestration_smoke.py"
 CONTEXT_PACKET_CHECK_SCRIPT = ROOT / "scripts" / "check_orchestration_context_packets.py"
 LIFECYCLE_SCRIPT = ROOT / "scripts" / "check_orchestration_lifecycle.py"
 README = ROOT / "README.md"
+INSTALL = ROOT / "INSTALL.md"
 AGENTS_MD = ROOT / "AGENTS.md"
 PACKAGE_README = ROOT / "docs" / "codex-orchestrate" / "package-readme.md"
 SNIPPET = ROOT / "docs" / "codex-orchestrate" / "AGENTS.orchestration.snippet.md"
@@ -484,6 +485,8 @@ def check_agents() -> None:
 def check_docs() -> None:
     combined = "\n".join(read(path) for path in [README, AGENTS_MD, PACKAGE_README, SNIPPET])
     for phrase in [
+        "INSTALL.md",
+        "basic end-user install",
         "source of truth",
         "authoritative",
         "sync",
@@ -537,6 +540,31 @@ def check_docs() -> None:
         "redelegate",
     ]:
         require(re.search(re.escape(phrase), combined, re.IGNORECASE), f"docs missing: {phrase}")
+
+
+def check_basic_install_doc() -> None:
+    text = read(INSTALL)
+    for phrase in [
+        "# Basic Install",
+        "without the development",
+        ".agents/skills/codex-orchestrate/",
+        ".codex/agents/*.toml",
+        "You do not need",
+        "Global Install",
+        "Repository-Scoped Install",
+        "Enable `/orchestrate`",
+        "Optional Fanout Limits",
+        "Smoke Check",
+        "Restart Codex",
+    ]:
+        require_contains(text, phrase, "INSTALL.md")
+    for forbidden in [
+        "orchestration_check.py",
+        "check_orchestration_",
+        "serve_orchestration_ui.py",
+        "evals/codex-orchestrate",
+    ]:
+        require(forbidden not in text, f"INSTALL.md should avoid validation/tooling bloat: {forbidden}")
 
 
 def check_config_example() -> None:
@@ -981,6 +1009,7 @@ def main() -> int:
         check_scenarios,
         check_agents,
         check_docs,
+        check_basic_install_doc,
         check_config_example,
         check_sync_script,
         check_runtime_script,

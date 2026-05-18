@@ -64,6 +64,7 @@ ui/orchestration-dashboard/
 evals/codex-orchestrate/routing-policy.json
 evals/codex-orchestrate/sample-context-packets/*.json
 evals/codex-orchestrate/sample-ledgers/*.json
+INSTALL.md
 AGENTS.orchestration.snippet.md
 ```
 
@@ -76,6 +77,8 @@ test_triage.toml
 ```
 
 ## Recommended install
+
+For a basic end-user install without the development validation stack, use the root `INSTALL.md`. It lists the minimal runtime files: `.agents/skills/codex-orchestrate/` and `.codex/agents/*.toml`.
 
 For a repository-scoped skill, copy:
 
