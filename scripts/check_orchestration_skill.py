@@ -546,9 +546,16 @@ def check_basic_install_doc() -> None:
     text = read(INSTALL)
     for phrase in [
         "# Basic Install",
+        "Quick Start - Self-Install",
+        "ask Codex to install it for you",
+        "If Codex can access GitHub",
+        "If you already have this repository open locally",
+        "If you only want it in the current project",
         "without the development",
         ".agents/skills/codex-orchestrate/",
         ".codex/agents/*.toml",
+        "do not overwrite my Codex config",
+        "verify the installed files",
         "You do not need",
         "Global Install",
         "Repository-Scoped Install",

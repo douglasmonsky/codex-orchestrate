@@ -2,6 +2,30 @@
 
 This is the small install path for using `codex-orchestrate` without the development, eval, dashboard, ledger, and validation tooling in this repository.
 
+## Quick Start - Self-Install
+
+The easiest path is to ask Codex to install it for you. Open a new Codex session and paste one of these prompts.
+
+If Codex can access GitHub:
+
+```text
+Install codex-orchestrate from https://github.com/douglasmonsky/MonskySkills into my global Codex environment. Use the repo's INSTALL.md. Copy only the runtime skill folder and companion agent TOMLs, add or update the /orchestrate rule in my global AGENTS.md if needed, do not overwrite my Codex config, and restart instructions are enough if you cannot restart Codex for me. Verify the installed files and tell me exactly what changed.
+```
+
+If you already have this repository open locally:
+
+```text
+Install codex-orchestrate from this MonskySkills checkout into my global Codex environment. Use INSTALL.md. Copy only .agents/skills/codex-orchestrate/ and .codex/agents/*.toml, add or update the /orchestrate rule in my global AGENTS.md if needed, do not overwrite my Codex config, verify the installed files, and tell me exactly what changed.
+```
+
+If you only want it in the current project:
+
+```text
+Install codex-orchestrate into this project only. Use the MonskySkills INSTALL.md. Copy the skill to this repo's .agents/skills/ folder and the companion TOMLs to this repo's .codex/agents/ folder, add or update the project AGENTS.md /orchestrate rule if needed, do not touch my global Codex config, verify the installed files, and tell me exactly what changed.
+```
+
+After Codex finishes, restart Codex so the new skill and agent profiles are loaded.
+
 ## What You Need
 
 Install only these runtime pieces:
