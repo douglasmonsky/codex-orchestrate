@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Check or sync the installed codex-orchestrate skill pack.
 
-The repo-local MonskySkills copy is authoritative. The global ~/.codex copy is
+The repo-local codex-orchestrate copy is authoritative. The global ~/.codex copy is
 the installed runtime copy.
 """
 

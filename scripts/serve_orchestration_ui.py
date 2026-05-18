@@ -202,7 +202,7 @@ def health_payload() -> dict[str, Any]:
 
 
 class OrchestrationUiHandler(BaseHTTPRequestHandler):
-    server_version = "MonskySkillsOrchestrationUI/1.0"
+    server_version = "CodexOrchestrateUI/1.0"
 
     def log_message(self, format: str, *args: Any) -> None:  # noqa: A002 - stdlib signature
         sys.stderr.write(f"{self.address_string()} - {format % args}\n")

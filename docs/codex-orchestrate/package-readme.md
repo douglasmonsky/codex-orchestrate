@@ -10,7 +10,7 @@ The goal is not to minimize total tokens in every case. Subagents do their own m
 
 ## Source of truth
 
-In `MonskySkills`, the repo-local copy is authoritative:
+In this repository, the repo-local copy is authoritative:
 
 ```text
 .agents/skills/codex-orchestrate/
@@ -132,7 +132,7 @@ When a durable ledger is required, connect each delegated subagent to packet id 
 
 If an implementation packet times out, closes, or produces no useful changes, record it as stuck, repair or split the packet, and redelegate or escalate the same narrow objective before implementation continues. Delegating validation or review after root implements the substantive work does not satisfy delegate-first orchestration.
 
-Produce a durable post-run ledger for any Tier 3 or Tier 4 run, any model fallback, any security/privacy/migration/auth task, any run with more than two subagents, any failed validation, or any final-review blocker. Tier 1 and Tier 2 ledgers are optional unless one of those triggers appears. Inside MonskySkills, use `scripts/create_orchestration_ledger.py` to write an ignored local ledger and validate it immediately. Elsewhere, use `docs/codex-orchestrate/run-ledger-template.md` and `schemas/orchestration-ledger.schema.json` manually to record actual model/effort usage, fallbacks, validation, final review, and residual risk. Keep real ledgers local or sanitized unless they contain no private task data.
+Produce a durable post-run ledger for any Tier 3 or Tier 4 run, any model fallback, any security/privacy/migration/auth task, any run with more than two subagents, any failed validation, or any final-review blocker. Tier 1 and Tier 2 ledgers are optional unless one of those triggers appears. Inside this repository, use `scripts/create_orchestration_ledger.py` to write an ignored local ledger and validate it immediately. Elsewhere, use `docs/codex-orchestrate/run-ledger-template.md` and `schemas/orchestration-ledger.schema.json` manually to record actual model/effort usage, fallbacks, validation, final review, and residual risk. Keep real ledgers local or sanitized unless they contain no private task data.
 
 Run the tiered validation wrapper after changes:
 
@@ -146,7 +146,7 @@ Use `--quick` for normal source edits, `--runtime` after syncing installed copie
 
 Recommended post-edit loop: `orchestration_check.py --quick`, `--runtime` when runtime behavior matters, `--full` before commit, `sync_orchestration_skill.py --apply`, `sync_orchestration_skill.py --check`, commit, push.
 
-Use `scripts/create_orchestration_ledger.py` for private local ledgers when working in MonskySkills; it writes to ignored `local/orchestration-ledgers/` by default, runs `scripts/check_orchestration_ledger.py`, and runs `scripts/check_orchestration_behavior.py` when the `scenario_id` matches a committed scenario. Use `scripts/report_orchestration_ledger.py` to turn a ledger into a Markdown or JSON after-action audit covering tier history, subagents, model fallback, context requests, lifecycle exits, validation, final review, residual risks, and whether orchestration justified itself. Use `scripts/check_orchestration_behavior.py` to compare sanitized ledgers against scenario expectations; this validates recorded behavior, not future live model behavior. Use `scripts/run_orchestration_smoke.py` after instruction changes to confirm `/orchestrate` prompt assembly still exposes source-of-truth, runtime fallback, routing-ledger, model-routing, and final-review language.
+Use `scripts/create_orchestration_ledger.py` for private local ledgers when working in this repository; it writes to ignored `local/orchestration-ledgers/` by default, runs `scripts/check_orchestration_ledger.py`, and runs `scripts/check_orchestration_behavior.py` when the `scenario_id` matches a committed scenario. Use `scripts/report_orchestration_ledger.py` to turn a ledger into a Markdown or JSON after-action audit covering tier history, subagents, model fallback, context requests, lifecycle exits, validation, final review, residual risks, and whether orchestration justified itself. Use `scripts/check_orchestration_behavior.py` to compare sanitized ledgers against scenario expectations; this validates recorded behavior, not future live model behavior. Use `scripts/run_orchestration_smoke.py` after instruction changes to confirm `/orchestrate` prompt assembly still exposes source-of-truth, runtime fallback, routing-ledger, model-routing, and final-review language.
 
 Use `scripts/serve_orchestration_ui.py --port 8765` for a read-only local dashboard at `http://127.0.0.1:8765`. It lists sample ledgers and ignored private ledgers under `local/orchestration-ledgers/`, renders report summaries from the existing reporter contract, shows runtime model compatibility, and rejects write methods.
 

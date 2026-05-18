@@ -28,7 +28,7 @@ When custom agent profiles such as `repo_scout`, `mechanic`, or `test_runner` ar
 
 Keep a compact routing ledger with the current step, tier, agents used, runtime mapping, selected model, reasoning effort, why the model is sufficient, evidence, risks, next routing decision, escalation status, and final-review gate.
 
-Produce a durable post-run ledger for any Tier 3 or Tier 4 run, any model fallback, any security/privacy/migration/auth task, any run with more than two subagents, any failed validation, or any final-review blocker. Tier 1 and Tier 2 ledgers are optional unless one of those triggers appears. In MonskySkills, use `python3 scripts/create_orchestration_ledger.py` to create and validate the ignored local ledger; elsewhere use `docs/codex-orchestrate/run-ledger-template.md` manually. Keep private details local or sanitized.
+Produce a durable post-run ledger for any Tier 3 or Tier 4 run, any model fallback, any security/privacy/migration/auth task, any run with more than two subagents, any failed validation, or any final-review blocker. Tier 1 and Tier 2 ledgers are optional unless one of those triggers appears. In the `codex-orchestrate` repo, use `python3 scripts/create_orchestration_ledger.py` to create and validate the ignored local ledger; elsewhere use `docs/codex-orchestrate/run-ledger-template.md` manually. Keep private details local or sanitized.
 
 Use the cheapest safe agent/model/effort first:
 

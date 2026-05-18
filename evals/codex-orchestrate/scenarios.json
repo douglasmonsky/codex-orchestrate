@@ -142,7 +142,7 @@
     "prompt": "/orchestrate Both repo-local and global codex-orchestrate skills are visible. Use the right one to inspect and update a small repo doc.",
     "category": "duplicate-visibility",
     "expected": {
-      "route": "Prefer the repo-local MonskySkills skill while working in MonskySkills, but keep global sync behavior documented.",
+      "route": "Prefer the repo-local codex-orchestrate skill while working in this repository, but keep global sync behavior documented.",
       "delegation": "Delegate repo doc inspection to repo_scout and the small edit to docs_writer or fallback worker.",
       "escalation": "Escalate only if duplicate visibility creates contradictory instructions or stale installed behavior.",
       "model_routing": "Use gpt-5.3-codex-spark for repo_scout and gpt-5.4-mini for docs_writer.",

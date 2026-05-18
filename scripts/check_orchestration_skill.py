@@ -556,6 +556,8 @@ def check_basic_install_doc() -> None:
         ".codex/agents/*.toml",
         "do not overwrite my Codex config",
         "verify the installed files",
+        "Manual Install - What You Need",
+        "install manually instead of relying on Codex",
         "You do not need",
         "Global Install",
         "Repository-Scoped Install",

@@ -1,8 +1,8 @@
-# MonskySkills Agent Instructions
+# codex-orchestrate Agent Instructions
 
 ## Purpose
 
-This repository stores reusable Codex skills, companion agent profiles, snippets, and installation notes created or curated for Douglas Monsky.
+This repository packages the `codex-orchestrate` Codex skill, companion agent profiles, install docs, and optional validation/reporting tooling.
 
 ## Tech Stack
 
@@ -27,7 +27,7 @@ This repository stores reusable Codex skills, companion agent profiles, snippets
 
 ```bash
 git clone <repo-url>
-cd MonskySkills
+cd codex-orchestrate
 ```
 
 ## Verification Commands

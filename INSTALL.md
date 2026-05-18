@@ -9,24 +9,26 @@ The easiest path is to ask Codex to install it for you. Open a new Codex session
 If Codex can access GitHub:
 
 ```text
-Install codex-orchestrate from https://github.com/douglasmonsky/MonskySkills into my global Codex environment. Use the repo's INSTALL.md. Copy only the runtime skill folder and companion agent TOMLs, add or update the /orchestrate rule in my global AGENTS.md if needed, do not overwrite my Codex config, and restart instructions are enough if you cannot restart Codex for me. Verify the installed files and tell me exactly what changed.
+Install codex-orchestrate from https://github.com/douglasmonsky/codex-orchestrate into my global Codex environment. Use the repo's INSTALL.md. Copy only the runtime skill folder and companion agent TOMLs, add or update the /orchestrate rule in my global AGENTS.md if needed, do not overwrite my Codex config, and restart instructions are enough if you cannot restart Codex for me. Verify the installed files and tell me exactly what changed.
 ```
 
 If you already have this repository open locally:
 
 ```text
-Install codex-orchestrate from this MonskySkills checkout into my global Codex environment. Use INSTALL.md. Copy only .agents/skills/codex-orchestrate/ and .codex/agents/*.toml, add or update the /orchestrate rule in my global AGENTS.md if needed, do not overwrite my Codex config, verify the installed files, and tell me exactly what changed.
+Install codex-orchestrate from this checkout into my global Codex environment. Use INSTALL.md. Copy only .agents/skills/codex-orchestrate/ and .codex/agents/*.toml, add or update the /orchestrate rule in my global AGENTS.md if needed, do not overwrite my Codex config, verify the installed files, and tell me exactly what changed.
 ```
 
 If you only want it in the current project:
 
 ```text
-Install codex-orchestrate into this project only. Use the MonskySkills INSTALL.md. Copy the skill to this repo's .agents/skills/ folder and the companion TOMLs to this repo's .codex/agents/ folder, add or update the project AGENTS.md /orchestrate rule if needed, do not touch my global Codex config, verify the installed files, and tell me exactly what changed.
+Install codex-orchestrate into this project only. Use this repo's INSTALL.md. Copy the skill to this repo's .agents/skills/ folder and the companion TOMLs to this repo's .codex/agents/ folder, add or update the project AGENTS.md /orchestrate rule if needed, do not touch my global Codex config, verify the installed files, and tell me exactly what changed.
 ```
 
 After Codex finishes, restart Codex so the new skill and agent profiles are loaded.
 
-## What You Need
+## Manual Install - What You Need
+
+Everything below is only for users who want to get in the weeds and install manually instead of relying on Codex to perform the self-install prompts above.
 
 Install only these runtime pieces:
 
@@ -39,7 +41,7 @@ You do not need `evals/`, `schemas/`, `scripts/`, `ui/`, or the development docs
 
 ## Global Install
 
-From a checkout of `MonskySkills`:
+From a checkout of `codex-orchestrate`:
 
 ```bash
 mkdir -p ~/.codex/skills ~/.codex/agents
@@ -104,6 +106,6 @@ You should see the assistant initialize a routing loop, discuss delegation, comp
 
 ## Updating
 
-To update later, pull the latest `MonskySkills` checkout and repeat the global or repository-scoped copy commands above.
+To update later, pull the latest `codex-orchestrate` checkout and repeat the global or repository-scoped copy commands above.
 
 If you are developing this repo, use the validation workflow in `README.md`. If you only want to use the skill, this file is enough.

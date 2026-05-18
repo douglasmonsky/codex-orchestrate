@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://monskyskills.local/schemas/orchestration-ledger.schema.json",
+  "$id": "https://codex-orchestrate.local/schemas/orchestration-ledger.schema.json",
   "title": "Codex Orchestration Run Ledger",
   "type": "object",
   "additionalProperties": false,

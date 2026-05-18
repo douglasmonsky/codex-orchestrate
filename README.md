@@ -1,13 +1,16 @@
-# MonskySkills
+# codex-orchestrate
 
-Personal Codex skill repository for storing, reviewing, and reusing skills and companion agent configuration.
+`codex-orchestrate` is a Codex skill for continuous subagent orchestration on non-trivial repository work. It is designed to help a root Codex agent stay in controller mode: classify the task, delegate bounded work, recover stalled subagents, keep context packets compact, route by model/effort, and finish with root senior review.
 
-## How to use this
+In my own use while building this package, the skill has been most useful when a task changes phase, validation fails, implementation gets stuck, or a root agent is at risk of quietly doing all substantive work itself. It is intentionally not a magic improvement for every prompt. For simple Q&A, tiny deterministic edits, or one-command checks, the orchestration overhead is usually not worth it.
 
-1. Add each reusable skill under `.agents/skills/<skill-name>/`.
-2. Keep optional Codex agent profiles under `.codex/agents/`.
-3. Keep install notes, snippets, and usage examples in `docs/`.
-4. Commit each skill or meaningful update separately so it is easy to review or roll back.
+The package is intended to be usable as a free/open-source Codex skill: the runtime install is small, while the heavier validation, ledger, and dashboard tooling lives here for people who want to inspect or improve the orchestration policy.
+
+## Quick Start
+
+If you only want to use the skill, start with [INSTALL.md](INSTALL.md). The first section gives copy/paste prompts that ask Codex to install it for you.
+
+Use the development and validation sections below only if you want to modify the skill, audit its behavior, or work on the repo itself.
 
 ## Layout
 
@@ -21,19 +24,13 @@ evals/                Routing policy manifest, static scenarios, and synthetic l
 schemas/              Machine-readable contracts for repeatable skill outputs and context packets
 ui/                   Read-only local dashboard assets for reviewing orchestration ledgers
 INSTALL.md            Basic end-user install path without validation tooling
-README.md             Repo overview and usage
+README.md             Repo overview, positioning, and contributor workflow
 AGENTS.md             Project-specific Codex instructions
 ```
 
-## Current skills
-
-- `codex-orchestrate`: delegate-first Codex orchestration skill for routing repository work through subagents, selecting explicit models/effort, escalating stuck work, and requiring final root review.
-
-MonskySkills is currently optimized around this personal Codex orchestration layer. Add more skills when a workflow repeats enough to justify its own reusable skill package.
-
 ## Source of truth
 
-This repository is the source of truth for skills we create. For `codex-orchestrate`, the authoritative copy is:
+This repository is the source of truth for the `codex-orchestrate` skill. The authoritative runtime skill folder is:
 
 ```text
 .agents/skills/codex-orchestrate/
@@ -41,18 +38,18 @@ This repository is the source of truth for skills we create. For `codex-orchestr
 
 The global copy in `~/.codex/skills/codex-orchestrate/` is an installed runtime copy. After changing the repo copy, sync it globally and restart Codex before expecting other sessions to use the update.
 
-## Installing a stored skill locally
+## Installing the Skill
 
-If you only want to use `codex-orchestrate`, start with [INSTALL.md](INSTALL.md). It lists the minimal runtime files and copy commands without the eval, dashboard, ledger, and validation tooling used to develop this repo.
+If you only want to use `codex-orchestrate`, start with [INSTALL.md](INSTALL.md). It lists the self-install prompts, minimal runtime files, and manual copy commands without the eval, dashboard, ledger, and validation tooling used to develop this repo.
 
-Copy a skill into the global Codex skills folder:
+The bare manual global install is:
 
 ```bash
 mkdir -p ~/.codex/skills
-cp -R .agents/skills/<skill-name> ~/.codex/skills/
+cp -R .agents/skills/codex-orchestrate ~/.codex/skills/
 ```
 
-If a skill has companion agent profiles, copy those too:
+Copy the companion agent profiles too:
 
 ```bash
 mkdir -p ~/.codex/agents
@@ -123,7 +120,7 @@ Use `--quick` during normal edits, `--runtime` after syncing installed copies or
 
 Recommended post-edit loop: `--quick`, `--runtime` when runtime behavior matters, `--full` before commit, `python3 scripts/sync_orchestration_skill.py --apply`, `python3 scripts/sync_orchestration_skill.py --check`, commit, push. Existing individual scripts remain callable for focused debugging.
 
-The checker validates required skill sections, activation contract, context packet protocol, lifecycle ledger policy, `agents/openai.yaml`, routing-policy completeness, fallback role mapping, model routing scenarios, routing-ledger expectations, durable ledger trigger rules, context-packet schema/fixture coverage, lifecycle fixture coverage, ledger schema/template coverage, synthetic run-ledger fixtures, behavioral evidence fixtures, tiered validation, ledger reporting, local dashboard assets, agent TOML parity with the routing policy, duplicate stuck-protocol cleanup, sync tooling, runtime compatibility tooling, ledger creator tooling, smoke tooling, and source-of-truth docs. `scripts/create_orchestration_ledger.py` creates private ledgers under `local/orchestration-ledgers/` by default and validates them immediately. `scripts/report_orchestration_ledger.py` turns a ledger into a post-run Markdown or JSON audit, including whether orchestration justified itself. `docs/codex-orchestrate/run-ledger-template.md` remains the manual template for substantial `/orchestrate` runs outside MonskySkills.
+The checker validates required skill sections, activation contract, context packet protocol, lifecycle ledger policy, `agents/openai.yaml`, routing-policy completeness, fallback role mapping, model routing scenarios, routing-ledger expectations, durable ledger trigger rules, context-packet schema/fixture coverage, lifecycle fixture coverage, ledger schema/template coverage, synthetic run-ledger fixtures, behavioral evidence fixtures, tiered validation, ledger reporting, local dashboard assets, agent TOML parity with the routing policy, duplicate stuck-protocol cleanup, sync tooling, runtime compatibility tooling, ledger creator tooling, smoke tooling, and source-of-truth docs. `scripts/create_orchestration_ledger.py` creates private ledgers under `local/orchestration-ledgers/` by default and validates them immediately. `scripts/report_orchestration_ledger.py` turns a ledger into a post-run Markdown or JSON audit, including whether orchestration justified itself. `docs/codex-orchestrate/run-ledger-template.md` remains the manual template for substantial `/orchestrate` runs outside this repository.
 
 ## Local dashboard
 

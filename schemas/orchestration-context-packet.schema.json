@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://monskyskills.local/schemas/orchestration-context-packet.schema.json",
+  "$id": "https://codex-orchestrate.local/schemas/orchestration-context-packet.schema.json",
   "title": "Codex Orchestration Context Packet",
   "type": "object",
   "additionalProperties": false,

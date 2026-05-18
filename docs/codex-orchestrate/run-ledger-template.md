@@ -4,7 +4,7 @@ Use this template for substantial `/orchestrate` runs when a durable routing rec
 
 Produce a durable post-run ledger for any Tier 3 or Tier 4 run, any model fallback, any security/privacy/migration/auth task, any run with more than two subagents, any failed validation, or any final-review blocker. Tier 1 and Tier 2 ledgers are optional unless one of those triggers appears.
 
-When working inside MonskySkills, prefer the guided local creator:
+When working inside the `codex-orchestrate` repo, prefer the guided local creator:
 
 ```bash
 python3 scripts/create_orchestration_ledger.py
@@ -32,7 +32,7 @@ python3 scripts/report_orchestration_ledger.py --validate local/orchestration-le
 
 The report summarizes task state, tier history, subagents, intended versus actual models, context requests, lifecycle terminal exits, validation, final review, residual risks, usage estimates, and whether orchestration justified itself.
 
-For browser review inside MonskySkills, start the read-only local dashboard:
+For browser review inside the `codex-orchestrate` repo, start the read-only local dashboard:
 
 ```bash
 python3 scripts/serve_orchestration_ui.py --port 8765
