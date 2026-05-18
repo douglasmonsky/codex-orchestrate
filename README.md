@@ -46,6 +46,10 @@ The intended pattern is:
 
 This means `codex-orchestrate` is most useful when context shape, not just raw token count, is the problem. It is least useful when the task is already a one-step answer.
 
+For a broader view of Codex usage patterns, token totals, cached input, reasoning output, model mix, and estimated cost across all Codex work, also look at [douglasmonsky/codex-usage-tracker](https://github.com/douglasmonsky/codex-usage-tracker). It complements this repo: `codex-orchestrate` focuses on routing work more deliberately, while Codex Usage Tracker helps you inspect how token usage behaves across orchestration and non-orchestration sessions.
+
+![Codex Usage Tracker dashboard showing aggregate call filters, token totals, model rows, and a details panel.](docs/codex-orchestrate/codex-usage-tracker-dashboard.png)
+
 ## Use Cases
 
 ### Multi-Phase Repository Work
@@ -215,6 +219,8 @@ python3 scripts/serve_orchestration_ui.py --port 8765
 ```
 
 Open `http://127.0.0.1:8765` to review sample ledgers plus private ledgers under `~/.codex/orchestration-ledgers/` or `$CODEX_HOME/orchestration-ledgers/` and `local/orchestration-ledgers/`. Durable ledgers are not automatic runtime logs; they appear only when an orchestrated run creates a JSON ledger through the creator or template. The dashboard only exposes read-only endpoints for ledger listings, report summaries, runtime model compatibility, and copyable commands.
+
+![Orchestration Ledger Console showing a synthetic sample ledger, routing decisions, model routes, and validation evidence.](docs/codex-orchestrate/orchestration-ledger-console.png)
 
 The dashboard refuses non-loopback hosts by default. Binding to `0.0.0.0` or a LAN address requires `--unsafe-bind` because ledger summaries and local path labels may be exposed on the network.
 
