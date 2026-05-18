@@ -2,6 +2,8 @@
 
 This is the small install path for using `codex-orchestrate` without the development, eval, dashboard, ledger, and validation tooling in this repository.
 
+Python 3.11+ is required only for this repository's helper scripts. Manual skill installation is just copying text/TOML files.
+
 ## One Step Auto Installation
 
 The easiest path is to ask Codex to install it for you. Open a new Codex session and paste one of these prompts.
@@ -25,6 +27,8 @@ Install codex-orchestrate into this project only. Use this repo's INSTALL.md. Co
 ```
 
 After Codex finishes, restart Codex so the new skill and agent profiles are loaded.
+
+If your Codex environment uses `CODEX_HOME`, install and invoke the skill from that directory instead of `~/.codex`.
 
 ## Manual Install - What You Need
 
@@ -51,6 +55,8 @@ cp .codex/agents/*.toml ~/.codex/agents/
 ```
 
 The `rm -rf` line removes only the previous installed `codex-orchestrate` copy. It does not change this repository.
+
+If you use a non-default Codex home, replace `~/.codex` with `$CODEX_HOME` in the commands above.
 
 Restart Codex after installing or updating the global copy.
 

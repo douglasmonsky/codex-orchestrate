@@ -1,0 +1,30 @@
+{
+  "id": "validation-failure-triage",
+  "title": "Validation failure with triage and escalation",
+  "task_type": "synthetic-replayable-repo-task",
+  "prompt": "Use $codex-orchestrate on a repo task where a focused validation command fails after a patch. Route the failure to triage, decide whether debugger escalation is needed, avoid root takeover, and finish with final review that records the blocker or verified fix.",
+  "expected_routes": [
+    "implementer",
+    "test_runner",
+    "test_triage",
+    "debugger"
+  ],
+  "expected_artifacts": [
+    "failing validation evidence",
+    "triage finding",
+    "narrow escalation or explicit no-escalation rationale",
+    "final review blocker or pass decision"
+  ],
+  "expected_evidence": [
+    "failed validation captured without raw log dumping",
+    "stuck or failure state recorded",
+    "routing decision after validation failure",
+    "residual risk statement"
+  ],
+  "not_expected": [
+    "silent root takeover",
+    "same-role retry loop without new evidence",
+    "final success claim without validation evidence"
+  ],
+  "proof_boundary": "This benchmark spec is a replayable task for humans or Codex sessions. The metadata checker validates the benchmark contract but does not run live Codex or prove future routing behavior."
+}

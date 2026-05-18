@@ -14,8 +14,11 @@ import sys
 from pathlib import Path
 from typing import Any
 
+from orchestration_env import require_python_311
 from orchestration_policy import built_in_roles, load_policy, role_names
 
+
+require_python_311()
 
 ROOT = Path(__file__).resolve().parents[1]
 SCENARIOS = ROOT / "evals" / "codex-orchestrate" / "scenarios.json"

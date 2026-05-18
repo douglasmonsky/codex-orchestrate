@@ -74,6 +74,7 @@ When a request starts with `/orchestrate`, use `codex-orchestrate`. Prompt assem
 
 ## Definition Of Done
 
+- Repository tooling runs on Python 3.11+.
 - Skill instructions are clear enough to use after restarting Codex.
 - Companion agent profiles or docs are committed with the skill when required.
 - README or docs are updated when install behavior changes.
@@ -82,12 +83,14 @@ When a request starts with `/orchestrate`, use `codex-orchestrate`. Prompt assem
 - `python3 scripts/orchestration_check.py --full` passes before committing substantial harness changes.
 - `python3 scripts/check_orchestration_skill.py` passes as the strict structural/source checker.
 - `python3 scripts/sync_orchestration_skill.py --check` passes after syncing global installs.
+- `scripts/sync_orchestration_skill.py --apply` remains ownership-aware and does not delete unrelated global agent TOMLs.
 - `python3 scripts/check_runtime_compatibility.py` runs and any runtime model warnings are understood.
 - `python3 scripts/check_orchestration_context_packets.py evals/codex-orchestrate/sample-context-packets/*.json` passes for committed synthetic packet fixtures.
 - `python3 scripts/check_orchestration_lifecycle.py evals/codex-orchestrate/sample-ledgers/*.json` passes for lifecycle-linked ledger fixtures, including expected lifecycle rejections.
 - `python3 scripts/create_orchestration_ledger.py --help` works and documents repo-local output plus `--global-output` for `~/.codex/orchestration-ledgers/`.
 - `python3 scripts/check_orchestration_ledger.py evals/codex-orchestrate/sample-ledgers/*.json` passes for committed synthetic ledgers.
 - `python3 scripts/check_orchestration_behavior.py evals/codex-orchestrate/sample-ledgers/*.json` passes for scenario-to-ledger behavioral evidence.
+- `python3 scripts/check_orchestration_benchmarks.py` passes for replayable benchmark metadata.
 - `python3 scripts/report_orchestration_ledger.py evals/codex-orchestrate/sample-ledgers/small-patch.json` produces a post-run Markdown audit, and `--json` produces machine-readable report data.
 - `python3 scripts/serve_orchestration_ui.py --self-test` passes for the read-only local dashboard, and manual browser smoke confirms `http://127.0.0.1:8765` renders ledger reports without write controls.
 - `python3 scripts/run_orchestration_smoke.py` and a focused `--scenario-id` smoke confirm `/orchestrate` prompt assembly exposes the core policy surface.

@@ -14,8 +14,11 @@ import sys
 from pathlib import Path
 from typing import Any
 
+from orchestration_env import require_python_311
 from orchestration_policy import context_packet_policy, load_policy, role_context_budget_map
 
+
+require_python_311()
 
 ROOT = Path(__file__).resolve().parents[1]
 SCHEMA = ROOT / "schemas" / "orchestration-context-packet.schema.json"

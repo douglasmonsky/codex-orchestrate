@@ -18,7 +18,7 @@ For cross-repo private ledgers that the dashboard can find from this repository,
 python3 scripts/create_orchestration_ledger.py --global-output
 ```
 
-That writes under `~/.codex/orchestration-ledgers/`.
+That writes under `~/.codex/orchestration-ledgers/`, or `$CODEX_HOME/orchestration-ledgers/` when `CODEX_HOME` is configured.
 
 For repo validation after ledger or orchestration-policy edits, start with the tiered wrapper:
 
@@ -28,7 +28,7 @@ python3 scripts/orchestration_check.py --runtime
 python3 scripts/orchestration_check.py --full
 ```
 
-Use `--quick` for committed fixtures, `--runtime` for installed/prompt behavior, and `--full` before committing broad harness changes.
+Use `--quick` for contract checks, `--runtime` for installed/prompt behavior, and `--full` for contract + runtime + behavior sample checks before committing broad harness changes.
 
 After creating or receiving a ledger, generate a quick after-action audit:
 
@@ -46,7 +46,7 @@ For browser review inside the `codex-orchestrate` repo, start the read-only loca
 python3 scripts/serve_orchestration_ui.py --port 8765
 ```
 
-Open `http://127.0.0.1:8765` to inspect sample ledgers and private ledgers under `~/.codex/orchestration-ledgers/` and `local/orchestration-ledgers/`. The dashboard does not edit ledgers or run write operations.
+Open `http://127.0.0.1:8765` to inspect sample ledgers and private ledgers under `~/.codex/orchestration-ledgers/` or `$CODEX_HOME/orchestration-ledgers/` and `local/orchestration-ledgers/`. The dashboard does not edit ledgers or run write operations. Non-loopback hosts require `--unsafe-bind`.
 
 When context packets are used, link routing entries to `packet_id` and record `context_packets` plus `subagent_lifecycle`. Every active packet needs a started event and terminal exit evidence. Use `packet-repaired` when the minimal packet was unclear and the root repaired the objective, scope, constraints, allowed actions/paths, or done condition before redelegating; this is the durable packet repair record.
 

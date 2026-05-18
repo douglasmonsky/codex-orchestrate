@@ -6,6 +6,10 @@ import json
 from pathlib import Path
 from typing import Any
 
+from orchestration_env import require_python_311
+
+
+require_python_311()
 
 ROOT = Path(__file__).resolve().parents[1]
 ROUTING_POLICY = ROOT / "evals" / "codex-orchestrate" / "routing-policy.json"

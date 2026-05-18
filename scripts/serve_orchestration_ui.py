@@ -6,7 +6,6 @@ from __future__ import annotations
 import argparse
 import json
 import mimetypes
-import os
 import subprocess
 import sys
 from http import HTTPStatus
@@ -15,14 +14,17 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import parse_qs, urlparse
 
+from orchestration_env import codex_home, display_path as safe_display_path, is_loopback_host, require_python_311
 from report_orchestration_ledger import ReportError, build_summary, load_json
 
+
+require_python_311()
 
 ROOT = Path(__file__).resolve().parents[1]
 UI_DIR = ROOT / "ui" / "orchestration-dashboard"
 SAMPLE_LEDGER_DIR = ROOT / "evals" / "codex-orchestrate" / "sample-ledgers"
 LOCAL_LEDGER_DIR = ROOT / "local" / "orchestration-ledgers"
-GLOBAL_LEDGER_DIR = Path(os.environ.get("CODEX_HOME", Path.home() / ".codex")) / "orchestration-ledgers"
+GLOBAL_LEDGER_DIR = codex_home() / "orchestration-ledgers"
 REPORT_SCRIPT = ROOT / "scripts" / "report_orchestration_ledger.py"
 RUNTIME_SCRIPT = ROOT / "scripts" / "check_runtime_compatibility.py"
 DEFAULT_HOST = "127.0.0.1"
@@ -80,10 +82,7 @@ def inside(child: Path, parent: Path) -> bool:
 
 
 def display_path(path: Path) -> str:
-    try:
-        return str(path.relative_to(ROOT))
-    except ValueError:
-        return str(path)
+    return safe_display_path(path, repo_root=ROOT)
 
 
 def ledger_files() -> list[tuple[str, str, Path]]:
@@ -155,13 +154,24 @@ def list_ledgers() -> list[dict[str, Any]]:
     return summaries
 
 
+def display_command(command: list[str]) -> str:
+    displayed: list[str] = []
+    for item in command:
+        path = Path(item)
+        if path.is_absolute():
+            displayed.append(display_path(path))
+        else:
+            displayed.append(item)
+    return " ".join(displayed)
+
+
 def run_json_command(command: list[str]) -> dict[str, Any]:
     completed = subprocess.run(command, check=False, capture_output=True, text=True)
     try:
         payload = json.loads(completed.stdout) if completed.stdout.strip() else {}
     except json.JSONDecodeError:
         payload = {"raw_stdout": completed.stdout}
-    payload["_command"] = " ".join(command)
+    payload["_command"] = display_command(command)
     payload["_returncode"] = completed.returncode
     if completed.stderr.strip():
         payload["_stderr"] = completed.stderr.strip()
@@ -207,12 +217,13 @@ def commands_payload() -> dict[str, Any]:
 def health_payload() -> dict[str, Any]:
     return {
         "status": "ok",
-        "repo": str(ROOT),
+        "repo": ROOT.name,
+        "path_redacted": True,
         "ui_dir": str(UI_DIR.relative_to(ROOT)),
         "sample_ledger_count": len(list(SAMPLE_LEDGER_DIR.glob("*.json"))),
         "local_ledger_count": len(list(LOCAL_LEDGER_DIR.rglob("*.json"))) if LOCAL_LEDGER_DIR.exists() else 0,
         "global_ledger_count": len(list(GLOBAL_LEDGER_DIR.rglob("*.json"))) if GLOBAL_LEDGER_DIR.exists() else 0,
-        "global_ledger_dir": str(GLOBAL_LEDGER_DIR),
+        "global_ledger_dir": display_path(GLOBAL_LEDGER_DIR),
         "read_only": True,
         "allowed_methods": ["GET", "HEAD"],
     }
@@ -263,7 +274,7 @@ class OrchestrationUiHandler(BaseHTTPRequestHandler):
                             "local": sum(1 for ledger in ledgers if ledger.get("source") == "local"),
                             "sample": sum(1 for ledger in ledgers if ledger.get("source") == "sample"),
                         },
-                        "global_ledger_dir": str(GLOBAL_LEDGER_DIR),
+                        "global_ledger_dir": display_path(GLOBAL_LEDGER_DIR),
                     },
                 )
             elif parsed.path == "/api/report":
@@ -306,6 +317,10 @@ def self_test() -> None:
     health = health_payload()
     if health["status"] != "ok" or not health["read_only"]:
         raise UiError("health payload failed read-only check")
+    if not health.get("path_redacted"):
+        raise UiError("health payload should redact absolute paths")
+    if not is_loopback_host("127.0.0.1") or is_loopback_host("0.0.0.0"):
+        raise UiError("loopback host guard failed")
     ledgers = list_ledgers()
     if not ledgers:
         raise UiError("no ledgers available for dashboard")
@@ -325,6 +340,11 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--host", default=DEFAULT_HOST, help=f"host to bind; default {DEFAULT_HOST}")
     parser.add_argument("--port", default=DEFAULT_PORT, type=int, help=f"port to bind; default {DEFAULT_PORT}")
+    parser.add_argument(
+        "--unsafe-bind",
+        action="store_true",
+        help="allow non-loopback hosts; ledger summaries and local path labels may be exposed on the network",
+    )
     parser.add_argument("--self-test", action="store_true", help="validate dashboard assets and API helpers without starting the server")
     return parser.parse_args(argv)
 
@@ -336,6 +356,8 @@ def main(argv: list[str]) -> int:
             self_test()
             print("OK: orchestration UI self-test passed")
             return 0
+        if not is_loopback_host(args.host) and not args.unsafe_bind:
+            raise UiError(f"refusing to bind non-loopback host {args.host!r}; pass --unsafe-bind to override")
         server = ThreadingHTTPServer((args.host, args.port), OrchestrationUiHandler)
     except (OSError, UiError) as exc:
         print(f"FAIL: {exc}", file=sys.stderr)

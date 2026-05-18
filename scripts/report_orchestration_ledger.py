@@ -16,6 +16,10 @@ import sys
 from pathlib import Path
 from typing import Any
 
+from orchestration_env import require_python_311
+
+
+require_python_311()
 
 ROOT = Path(__file__).resolve().parents[1]
 LEDGER_CHECK = ROOT / "scripts" / "check_orchestration_ledger.py"

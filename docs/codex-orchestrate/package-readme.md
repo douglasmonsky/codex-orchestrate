@@ -2,6 +2,8 @@
 
 This package contains an instruction-only Codex skill and custom agent configs for aggressive subagent delegation, effort/model routing, stuck-work escalation, specialist pass-offs, and mandatory root final review.
 
+Repository tooling requires Python 3.11+. The installed skill itself is text and TOML; Python is needed only for helper scripts, validation, ledgers, and dashboard review.
+
 ## Core behavior
 
 The root agent acts as dispatcher, escalation controller, synthesizer, and final senior reviewer. For repository work, it delegates substantive exploration, implementation, validation, debugging, review, or documentation to subagents by default, then reconciles the results.
@@ -17,6 +19,8 @@ In this repository, the repo-local copy is authoritative:
 ```
 
 The global copy in `~/.codex/skills/codex-orchestrate/` is an installed runtime copy. Sync the global copy after editing the repo source, then restart Codex.
+
+If `CODEX_HOME` is set, helper scripts use that directory instead of `~/.codex`.
 
 ## New policy emphasis
 
@@ -61,8 +65,11 @@ scripts/create_orchestration_ledger.py
 scripts/report_orchestration_ledger.py
 scripts/serve_orchestration_ui.py
 scripts/run_orchestration_smoke.py
+scripts/check_orchestration_benchmarks.py
+scripts/orchestration_env.py
 ui/orchestration-dashboard/
 evals/codex-orchestrate/routing-policy.json
+evals/codex-orchestrate/benchmarks/*.json
 evals/codex-orchestrate/sample-context-packets/*.json
 evals/codex-orchestrate/sample-ledgers/*.json
 dev/README.md
@@ -98,6 +105,8 @@ For the global installed copy, sync from this repository:
 python3 scripts/sync_orchestration_skill.py --check
 python3 scripts/sync_orchestration_skill.py --apply
 ```
+
+The sync script is ownership-aware. It updates only the `codex-orchestrate` skill folder and this repo's known companion agent TOMLs; unrelated global agent TOMLs are left untouched by default. Use `--strict-owned-directory` only to intentionally fail when extra unowned agent TOMLs exist.
 
 For project-scoped custom agents, copy:
 
@@ -156,13 +165,17 @@ python3 scripts/orchestration_check.py --runtime
 python3 scripts/orchestration_check.py --full
 ```
 
-Use `--quick` for normal source edits, `--runtime` after syncing installed copies or changing prompt-surface behavior, and `--full` before committing broader harness work. Add `--json` for automation and `--fail-fast` for triage. The wrapper is read-only; it never syncs with `--apply`, commits, pushes, formats, or writes smoke artifacts.
+Use `--quick` for contract checks, `--runtime` for prompt/runtime smoke checks, and `--full` for contract + runtime + behavior sample checks before committing broader harness work. Add `--json` for automation and `--fail-fast` for triage. The wrapper is read-only; it never syncs with `--apply`, commits, pushes, formats, or writes smoke artifacts.
 
 Recommended post-edit loop: `orchestration_check.py --quick`, `--runtime` when runtime behavior matters, `--full` before commit, `sync_orchestration_skill.py --apply`, `sync_orchestration_skill.py --check`, commit, push.
 
-Use `scripts/create_orchestration_ledger.py` for private ledgers when working in this repository; it writes to ignored `local/orchestration-ledgers/` by default, or to `~/.codex/orchestration-ledgers/` with `--global-output`, runs `scripts/check_orchestration_ledger.py`, and runs `scripts/check_orchestration_behavior.py` when the `scenario_id` matches a committed scenario. Use `scripts/report_orchestration_ledger.py` to turn a ledger into a Markdown or JSON after-action audit covering tier history, subagents, model fallback, context requests, lifecycle exits, validation, final review, residual risks, and whether orchestration justified itself. Use `scripts/check_orchestration_behavior.py` to compare sanitized ledgers against scenario expectations; this validates recorded behavior, not future live model behavior. Use `scripts/run_orchestration_smoke.py` after instruction changes to confirm `/orchestrate` prompt assembly still exposes source-of-truth, runtime fallback, routing-ledger, model-routing, and final-review language.
+Use `scripts/create_orchestration_ledger.py` for private ledgers when working in this repository; it writes to ignored `local/orchestration-ledgers/` by default, or to `~/.codex/orchestration-ledgers/` with `--global-output`, runs `scripts/check_orchestration_ledger.py`, and runs `scripts/check_orchestration_behavior.py` when the `scenario_id` matches a committed scenario. Use `scripts/report_orchestration_ledger.py` to turn a ledger into a Markdown or JSON after-action audit covering tier history, subagents, model fallback, context requests, lifecycle exits, validation, final review, residual risks, and whether orchestration justified itself. Use `scripts/check_orchestration_behavior.py` to compare sanitized ledgers against scenario expectations; this validates recorded behavior samples, not future live model behavior. Use `scripts/run_orchestration_smoke.py` after instruction changes to confirm `/orchestrate` prompt assembly still exposes source-of-truth, runtime fallback, routing-ledger, model-routing, and final-review language.
+
+Replayable benchmark metadata lives under `evals/codex-orchestrate/benchmarks/` and is checked by `scripts/check_orchestration_benchmarks.py`. These specs are intended benchmark prompts for humans or Codex sessions; they do not run live Codex automatically or prove future routing quality.
 
 Use `scripts/serve_orchestration_ui.py --port 8765` for a read-only local dashboard at `http://127.0.0.1:8765`. It lists sample ledgers plus private ledgers under `~/.codex/orchestration-ledgers/` and `local/orchestration-ledgers/`, renders report summaries from the existing reporter contract, shows runtime model compatibility, and rejects write methods.
+
+The dashboard refuses non-loopback hosts by default. Binding to `0.0.0.0` or a LAN address requires `--unsafe-bind` because ledger summaries and local path labels may be exposed on the network.
 
 Open the dashboard through the local server, not by double-clicking `ui/orchestration-dashboard/index.html`. The direct `file://` path is a styled fallback only; the useful dashboard needs the server endpoints.
 

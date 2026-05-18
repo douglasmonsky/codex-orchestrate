@@ -23,6 +23,8 @@ This repo is intentionally narrow: it exists to package and validate one Codex s
 
 ## Local Checks
 
+Repository tooling requires Python 3.11+ and uses only the standard library.
+
 Start with:
 
 ```bash
@@ -43,6 +45,7 @@ python3 scripts/check_orchestration_context_packets.py evals/codex-orchestrate/s
 python3 scripts/check_orchestration_ledger.py evals/codex-orchestrate/sample-ledgers/*.json
 python3 scripts/check_orchestration_lifecycle.py evals/codex-orchestrate/sample-ledgers/*.json
 python3 scripts/check_orchestration_behavior.py evals/codex-orchestrate/sample-ledgers/*.json
+python3 scripts/check_orchestration_benchmarks.py
 ```
 
 ## Pull Request Notes

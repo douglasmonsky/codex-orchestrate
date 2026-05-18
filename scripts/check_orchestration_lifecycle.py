@@ -9,6 +9,11 @@ import sys
 from pathlib import Path
 from typing import Any
 
+from orchestration_env import require_python_311
+
+
+require_python_311()
+
 from check_orchestration_context_packets import validate_packet
 from check_orchestration_ledger import validate_schema
 from orchestration_policy import context_packet_policy, load_policy

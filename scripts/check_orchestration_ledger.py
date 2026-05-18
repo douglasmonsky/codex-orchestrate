@@ -15,6 +15,10 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
+from orchestration_env import require_python_311
+
+
+require_python_311()
 
 ROOT = Path(__file__).resolve().parents[1]
 SCHEMA_RELATIVE = Path("schemas/orchestration-ledger.schema.json")

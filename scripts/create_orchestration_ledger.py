@@ -12,23 +12,26 @@ from __future__ import annotations
 
 import argparse
 import json
-import os
 import re
 import subprocess
 import sys
-from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
+from orchestration_env import codex_home, require_python_311
 from orchestration_policy import load_policy, role_effort_map, role_model_map
 
+
+require_python_311()
+
+from datetime import UTC, datetime
 
 ROOT = Path(__file__).resolve().parents[1]
 SCENARIOS = ROOT / "evals" / "codex-orchestrate" / "scenarios.json"
 LEDGER_CHECK = ROOT / "scripts" / "check_orchestration_ledger.py"
 BEHAVIOR_CHECK = ROOT / "scripts" / "check_orchestration_behavior.py"
 DEFAULT_DIR = ROOT / "local" / "orchestration-ledgers"
-GLOBAL_DIR = Path(os.environ.get("CODEX_HOME", Path.home() / ".codex")) / "orchestration-ledgers"
+GLOBAL_DIR = codex_home() / "orchestration-ledgers"
 POLICY = load_policy()
 MODEL_BY_ROLE = role_model_map(POLICY)
 EFFORT_BY_ROLE = role_effort_map(POLICY)

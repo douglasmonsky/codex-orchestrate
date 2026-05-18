@@ -20,6 +20,10 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Callable
 
+from orchestration_env import require_python_311
+
+
+require_python_311()
 
 ROOT = Path(__file__).resolve().parents[1]
 SAMPLE_PACKETS = ROOT / "evals" / "codex-orchestrate" / "sample-context-packets"
@@ -36,11 +40,14 @@ FORBIDDEN_COMMAND_FRAGMENTS = [
     "--write-artifacts",
 ]
 
-SECRET_PATTERN = re.compile(
-    "s" "k-" + r"[A-Za-z0-9]{20,}|"
-    "BEGIN " + r"(RSA|OPENSSH|" + "PRIV" "ATE" + r") KEY|"
-    r"api[_-]?key\s*[:=]|token\s*[:=]|password\s*[:=]|secret\s*[:=]"
-)
+SECRET_RULES = [
+    ("openai-token", re.compile("s" "k-" + r"[A-Za-z0-9]{20,}")),
+    ("private-key", re.compile("BEGIN " + r"(RSA|OPENSSH|" + "PRIV" "ATE" + r") KEY")),
+    ("api-key-assignment", re.compile(r"api[_-]?key\s*[:=]", re.IGNORECASE)),
+    ("token-assignment", re.compile(r"token\s*[:=]", re.IGNORECASE)),
+    ("password-assignment", re.compile(r"password\s*[:=]", re.IGNORECASE)),
+    ("secret-assignment", re.compile(r"secret\s*[:=]", re.IGNORECASE)),
+]
 SECRET_EXCLUDED_DIRS = {".git", "__pycache__", "local", ".pytest_cache", ".mypy_cache", ".ruff_cache"}
 TEXT_FILE_SUFFIXES = {
     ".css",
@@ -135,8 +142,10 @@ def secret_scan() -> tuple[int, str, str]:
         except OSError as exc:
             return 1, "", f"{path}: {exc}"
         for lineno, line in enumerate(text.splitlines(), start=1):
-            if SECRET_PATTERN.search(line):
-                matches.append(f"{rel(path)}:{lineno}: {line.strip()}")
+            for rule_name, pattern in SECRET_RULES:
+                if pattern.search(line):
+                    matches.append(f"{rel(path)}:{lineno}: secret-like pattern detected [rule={rule_name}]")
+                    break
     if matches:
         return 1, "\n".join(matches), "secret-like pattern(s) found"
     return 0, "OK: strict secret scan found no matches", ""
@@ -194,17 +203,17 @@ def quick_checks() -> list[Check]:
         py(
             ["scripts/check_orchestration_ledger.py", *ledgers],
             display="python3 scripts/check_orchestration_ledger.py evals/codex-orchestrate/sample-ledgers/*.json",
-            name="ledger fixtures",
+            name="ledger contract fixtures",
         ),
         py(
             ["scripts/check_orchestration_lifecycle.py", *ledgers],
             display="python3 scripts/check_orchestration_lifecycle.py evals/codex-orchestrate/sample-ledgers/*.json",
-            name="lifecycle fixtures",
+            name="lifecycle contract fixtures",
         ),
         py(
             ["scripts/check_orchestration_behavior.py", *ledgers],
             display="python3 scripts/check_orchestration_behavior.py evals/codex-orchestrate/sample-ledgers/*.json",
-            name="behavior fixtures",
+            name="behavior sample fixtures",
         ),
     ]
 
@@ -241,6 +250,7 @@ def full_only_checks() -> list[Check]:
         ),
         py(["scripts/serve_orchestration_ui.py", "--self-test"], display="python3 scripts/serve_orchestration_ui.py --self-test", name="dashboard self-test"),
         py(["scripts/create_orchestration_ledger.py", "--help"], display="python3 scripts/create_orchestration_ledger.py --help", name="ledger creator help"),
+        py(["scripts/check_orchestration_benchmarks.py"], display="python3 scripts/check_orchestration_benchmarks.py", name="replayable benchmark metadata"),
         py(
             ["-c", "import pathlib,tomllib; [tomllib.loads(p.read_text()) for p in pathlib.Path('.codex/agents').glob('*.toml')]; print('OK: TOML parsed')"],
             display="python3 -c 'import pathlib,tomllib; [tomllib.loads(p.read_text()) for p in pathlib.Path(\".codex/agents\").glob(\"*.toml\")]'",
@@ -283,7 +293,12 @@ def tier_from_args(args: argparse.Namespace) -> str:
 
 
 def print_human_start(tier: str, checks: list[Check]) -> None:
-    print(f"orchestration validation tier: {tier}")
+    labels = {
+        "quick": "quick (contract checks)",
+        "runtime": "runtime (prompt/runtime smoke)",
+        "full": "full (contract + runtime + behavior sample checks)",
+    }
+    print(f"orchestration validation tier: {labels.get(tier, tier)}")
     print(f"checks: {len(checks)}")
 
 
@@ -334,6 +349,11 @@ def main(argv: list[str]) -> int:
     payload = {
         "status": status,
         "tier": tier,
+        "tier_label": {
+            "quick": "contract checks",
+            "runtime": "prompt/runtime smoke",
+            "full": "contract + runtime + behavior sample checks",
+        }.get(tier, tier),
         "requested_checks": len(checks),
         "completed_checks": len(results),
         "passed": passed_count,

@@ -1,0 +1,30 @@
+{
+  "id": "multi-file-cli-docs-validation",
+  "title": "Multi-file CLI, docs, and validation task",
+  "task_type": "synthetic-replayable-repo-task",
+  "prompt": "Use $codex-orchestrate to add a small CLI option that changes output formatting, update the README usage example, add or update a focused test, run the relevant validation, and perform root final review.",
+  "expected_routes": [
+    "repo_scout",
+    "implementer",
+    "test_runner",
+    "reviewer"
+  ],
+  "expected_artifacts": [
+    "bounded implementation diff",
+    "documentation update",
+    "focused validation command result",
+    "final root review summary"
+  ],
+  "expected_evidence": [
+    "minimal context packets",
+    "routing ledger entries",
+    "subagent lifecycle terminal exits",
+    "validation evidence"
+  ],
+  "not_expected": [
+    "root-only substantive implementation",
+    "raw log dumping into the root thread",
+    "validation-only laundering"
+  ],
+  "proof_boundary": "This benchmark spec is a replayable task for humans or Codex sessions. The metadata checker validates the benchmark contract but does not run live Codex or prove future routing behavior."
+}

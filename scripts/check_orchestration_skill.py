@@ -10,9 +10,9 @@ import json
 import re
 import subprocess
 import sys
-import tomllib
 from pathlib import Path
 
+from orchestration_env import require_python_311
 from orchestration_policy import (
     context_packet_policy,
     load_policy,
@@ -24,6 +24,10 @@ from orchestration_policy import (
     supported_models,
 )
 
+
+require_python_311()
+
+import tomllib
 
 ROOT = Path(__file__).resolve().parents[1]
 SKILL = ROOT / ".agents" / "skills" / "codex-orchestrate" / "SKILL.md"
@@ -61,6 +65,9 @@ LEDGER_TEMPLATE = ROOT / "docs" / "codex-orchestrate" / "run-ledger-template.md"
 SAMPLE_LEDGERS = ROOT / "evals" / "codex-orchestrate" / "sample-ledgers"
 SAMPLE_CONTEXT_PACKETS = ROOT / "evals" / "codex-orchestrate" / "sample-context-packets"
 UI_DIR = ROOT / "ui" / "orchestration-dashboard"
+ENV_SCRIPT = ROOT / "scripts" / "orchestration_env.py"
+BENCHMARK_SCRIPT = ROOT / "scripts" / "check_orchestration_benchmarks.py"
+BENCHMARKS = ROOT / "evals" / "codex-orchestrate" / "benchmarks"
 
 
 REQUIRED_SKILL_SECTIONS = [
@@ -549,8 +556,16 @@ def check_docs() -> None:
         "http://127.0.0.1:8765",
         "local/orchestration-ledgers",
         "~/.codex/orchestration-ledgers",
+        "CODEX_HOME",
+        "Python 3.11+",
         "Durable ledgers are not automatic",
         "--global-output",
+        "--strict-owned-directory",
+        "--unsafe-bind",
+        "contract checks",
+        "behavior sample checks",
+        "check_orchestration_benchmarks.py",
+        "replayable benchmark",
         "timed-out",
         "root takeover",
         "redelegate",
@@ -587,6 +602,8 @@ def check_basic_install_doc() -> None:
         "Optional Fanout Limits",
         "Smoke Check",
         "Restart Codex",
+        "Python 3.11+",
+        "CODEX_HOME",
     ]:
         require_contains(text, phrase, "INSTALL.md")
     for forbidden in [
@@ -617,6 +634,7 @@ def check_public_release_docs() -> None:
         "python3 scripts/orchestration_check.py --quick",
         "python3 scripts/orchestration_check.py --full --fail-fast",
         "Do not commit real private task details",
+        "Python 3.11+",
     ]:
         require_contains(contributing, phrase, "CONTRIBUTING.md")
 
@@ -625,6 +643,7 @@ def check_public_release_docs() -> None:
         "Reporting A Vulnerability",
         "Security-Sensitive Areas",
         "dashboard binds to `127.0.0.1`",
+        "--unsafe-bind",
         "does not overwrite `~/.codex/config.toml`",
     ]:
         require_contains(security, phrase, "SECURITY.md")
@@ -666,9 +685,26 @@ def check_sync_script() -> None:
     text = read(SYNC_SCRIPT)
     require_contains(text, "--check", "sync_orchestration_skill.py")
     require_contains(text, "--apply", "sync_orchestration_skill.py")
+    require_contains(text, "--strict-owned-directory", "sync_orchestration_skill.py")
+    require_contains(text, "codex_home", "sync_orchestration_skill.py")
+    require_contains(text, "unrelated installed agent left untouched", "sync_orchestration_skill.py")
     require_contains(text, "compare_tree", "sync_orchestration_skill.py")
     require_contains(text, "compare_agents", "sync_orchestration_skill.py")
     require_contains(text, "DRIFT", "sync_orchestration_skill.py")
+    require("target.unlink()" not in text, "sync script must not delete unrelated installed agent TOMLs")
+
+
+def check_env_script() -> None:
+    text = read(ENV_SCRIPT)
+    for phrase in [
+        "require_python_311",
+        "Python 3.11+",
+        "codex_home",
+        "CODEX_HOME",
+        "display_path",
+        "is_loopback_host",
+    ]:
+        require_contains(text, phrase, "orchestration_env.py")
 
 
 def check_runtime_script() -> None:
@@ -703,6 +739,13 @@ def check_orchestration_wrapper() -> None:
         "git commit",
         "git push",
         "strict secret scan",
+        "SECRET_RULES",
+        "secret-like pattern detected [rule=",
+        "tier_label",
+        "contract checks",
+        "behavior sample fixtures",
+        "check_orchestration_benchmarks.py",
+        "replayable benchmark metadata",
         "read-only",
     ]:
         require_contains(text, phrase, "orchestration_check.py")
@@ -1001,6 +1044,11 @@ def check_orchestration_ui() -> None:
         "GLOBAL_LEDGER_DIR",
         "global_ledger_count",
         "create_global_ledger",
+        "--unsafe-bind",
+        "is_loopback_host",
+        "path_redacted",
+        "safe_display_path",
+        "refusing to bind non-loopback",
         "relative paths for a styled file:// fallback",
     ]:
         require_contains(text, phrase, "serve_orchestration_ui.py")
@@ -1113,6 +1161,23 @@ def check_smoke_script() -> None:
         require_contains(text, phrase, "run_orchestration_smoke.py")
 
 
+def check_benchmark_artifacts() -> None:
+    text = read(BENCHMARK_SCRIPT)
+    for phrase in [
+        "synthetic-replayable-repo-task",
+        "EXPECTED_IDS",
+        "does not run live Codex",
+        "expected_routes",
+        "expected_artifacts",
+        "--json",
+    ]:
+        require_contains(text, phrase, "check_orchestration_benchmarks.py")
+
+    expected = {"multi-file-cli-docs-validation.json", "validation-failure-triage.json"}
+    files = sorted(BENCHMARKS.glob("*.json"))
+    require({path.name for path in files} == expected, "benchmark fixture roster changed")
+
+
 def main() -> int:
     checks = [
         check_skill,
@@ -1126,6 +1191,7 @@ def main() -> int:
         check_basic_install_doc,
         check_public_release_docs,
         check_config_example,
+        check_env_script,
         check_sync_script,
         check_runtime_script,
         check_orchestration_wrapper,
@@ -1138,6 +1204,7 @@ def main() -> int:
         check_lifecycle_script,
         check_behavior_script,
         check_smoke_script,
+        check_benchmark_artifacts,
     ]
     try:
         for check in checks:

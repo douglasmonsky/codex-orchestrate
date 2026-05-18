@@ -15,8 +15,11 @@ import sys
 from pathlib import Path
 from typing import Any
 
+from orchestration_env import require_python_311
 from orchestration_policy import load_policy, role_model_map, supported_models
 
+
+require_python_311()
 
 ROOT = Path(__file__).resolve().parents[1]
 CODEX_DEBUG_MODELS = ["codex", "debug", "models"]

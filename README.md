@@ -6,6 +6,8 @@ In my own use while building this package, the skill has been most useful when a
 
 The package is intended to be usable as a free/open-source Codex skill: the runtime install is small, while the heavier validation, ledger, and dashboard tooling lives here for people who want to inspect or improve the orchestration policy.
 
+Repository tooling requires Python 3.11+. The installed skill itself is text and TOML; Python is only needed for the helper scripts, validation, ledgers, and dashboard.
+
 Under the hood, this repo provides:
 
 - A `codex-orchestrate` skill that teaches Codex to treat `/orchestrate` as a continuous controller loop instead of a one-time planning step.
@@ -112,7 +114,7 @@ This repository is the source of truth for the `codex-orchestrate` skill. The au
 .agents/skills/codex-orchestrate/
 ```
 
-The global copy in `~/.codex/skills/codex-orchestrate/` is an installed runtime copy. After changing the repo copy, sync it globally and restart Codex before expecting other sessions to use the update.
+The global copy in `~/.codex/skills/codex-orchestrate/` is an installed runtime copy. If `CODEX_HOME` is set, scripts use that directory instead of `~/.codex`. After changing the repo copy, sync it globally and restart Codex before expecting other sessions to use the update.
 
 ### Installing The Skill
 
@@ -140,6 +142,8 @@ For `codex-orchestrate`, check or sync the current repo copy with:
 python3 scripts/sync_orchestration_skill.py --check
 python3 scripts/sync_orchestration_skill.py --apply
 ```
+
+The sync script is ownership-aware: it updates only the `codex-orchestrate` skill folder and this repo's known companion agent TOMLs. Unrelated global agent TOMLs are left untouched by default. Use `--strict-owned-directory` only when intentionally checking for extra unowned agent profiles.
 
 The orchestration config example is merge-only:
 
@@ -194,11 +198,13 @@ python3 scripts/orchestration_check.py --runtime
 python3 scripts/orchestration_check.py --full
 ```
 
-Use `--quick` during normal edits, `--runtime` after syncing installed copies or changing prompt-surface behavior, and `--full` before committing or after broader harness work. Add `--json` for machine-readable results and `--fail-fast` when triaging the first failure. The wrapper is read-only; it never syncs with `--apply`, commits, pushes, formats, or writes smoke artifacts.
+Use `--quick` for contract checks, `--runtime` for prompt/runtime smoke checks, and `--full` for contract + runtime + behavior sample checks before committing broader harness work. Add `--json` for machine-readable results and `--fail-fast` when triaging the first failure. The wrapper is read-only; it never syncs with `--apply`, commits, pushes, formats, or writes smoke artifacts.
 
 Recommended post-edit loop: `--quick`, `--runtime` when runtime behavior matters, `--full` before commit, `python3 scripts/sync_orchestration_skill.py --apply`, `python3 scripts/sync_orchestration_skill.py --check`, commit, push. Existing individual scripts remain callable for focused debugging.
 
-The checker validates required skill sections, activation contract, context packet protocol, lifecycle ledger policy, `agents/openai.yaml`, routing-policy completeness, fallback role mapping, model routing scenarios, routing-ledger expectations, durable ledger trigger rules, context-packet schema/fixture coverage, lifecycle fixture coverage, ledger schema/template coverage, synthetic run-ledger fixtures, behavioral evidence fixtures, tiered validation, ledger reporting, local dashboard assets, agent TOML parity with the routing policy, duplicate stuck-protocol cleanup, sync tooling, runtime compatibility tooling, ledger creator tooling, smoke tooling, and source-of-truth docs. `scripts/create_orchestration_ledger.py` creates private ledgers under `local/orchestration-ledgers/` by default, or under `~/.codex/orchestration-ledgers/` with `--global-output`, and validates them immediately. `scripts/report_orchestration_ledger.py` turns a ledger into a post-run Markdown or JSON audit, including whether orchestration justified itself. `docs/codex-orchestrate/run-ledger-template.md` remains the manual template for substantial `/orchestrate` runs outside this repository.
+The checker validates required skill sections, activation contract, context packet protocol, lifecycle ledger policy, `agents/openai.yaml`, routing-policy completeness, fallback role mapping, model routing scenarios, routing-ledger expectations, durable ledger trigger rules, context-packet schema/fixture coverage, lifecycle fixture coverage, ledger schema/template coverage, synthetic run-ledger fixtures, behavior sample fixtures, tiered validation, ledger reporting, local dashboard assets, agent TOML parity with the routing policy, duplicate stuck-protocol cleanup, sync tooling, runtime compatibility tooling, ledger creator tooling, smoke tooling, and source-of-truth docs. `scripts/create_orchestration_ledger.py` creates private ledgers under `local/orchestration-ledgers/` by default, or under `~/.codex/orchestration-ledgers/` with `--global-output`, and validates them immediately. `scripts/report_orchestration_ledger.py` turns a ledger into a post-run Markdown or JSON audit, including whether orchestration justified itself. `docs/codex-orchestrate/run-ledger-template.md` remains the manual template for substantial `/orchestrate` runs outside this repository.
+
+Replayable benchmark metadata lives under `evals/codex-orchestrate/benchmarks/` and is checked by `python3 scripts/check_orchestration_benchmarks.py`. These benchmark specs are behavior-evidence prompts for humans or Codex sessions; they do not run live Codex automatically or prove future routing quality.
 
 ### Local Dashboard
 
@@ -208,7 +214,9 @@ Run the read-only orchestration dashboard with:
 python3 scripts/serve_orchestration_ui.py --port 8765
 ```
 
-Open `http://127.0.0.1:8765` to review sample ledgers plus private ledgers under `~/.codex/orchestration-ledgers/` and `local/orchestration-ledgers/`. Durable ledgers are not automatic runtime logs; they appear only when an orchestrated run creates a JSON ledger through the creator or template. The dashboard only exposes read-only endpoints for ledger listings, report summaries, runtime model compatibility, and copyable commands.
+Open `http://127.0.0.1:8765` to review sample ledgers plus private ledgers under `~/.codex/orchestration-ledgers/` or `$CODEX_HOME/orchestration-ledgers/` and `local/orchestration-ledgers/`. Durable ledgers are not automatic runtime logs; they appear only when an orchestrated run creates a JSON ledger through the creator or template. The dashboard only exposes read-only endpoints for ledger listings, report summaries, runtime model compatibility, and copyable commands.
+
+The dashboard refuses non-loopback hosts by default. Binding to `0.0.0.0` or a LAN address requires `--unsafe-bind` because ledger summaries and local path labels may be exposed on the network.
 
 Do not open `ui/orchestration-dashboard/index.html` directly as a `file://` URL for normal use. The static file now shows a styled server-required fallback, but live ledger data, validation, and runtime checks require the local read-only server.
 
@@ -225,7 +233,9 @@ Do not open `ui/orchestration-dashboard/index.html` directly as a `file://` URL 
 docs/                 Package docs and run-ledger templates
 dev/                  Development-only and advanced artifacts, not runtime install
 evals/                Routing policy manifest, static scenarios, and synthetic ledger/context fixtures
+evals/.../benchmarks/ Replayable benchmark task metadata, not automatic live evals
 schemas/              Machine-readable contracts for repeatable skill outputs and context packets
+scripts/              Standard-library helper, sync, validation, ledger, benchmark, and dashboard tools
 ui/                   Read-only local dashboard assets for reviewing orchestration ledgers
 INSTALL.md            Basic end-user install path without validation tooling
 CONTRIBUTING.md       Contributor expectations and local checks

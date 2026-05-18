@@ -10,8 +10,11 @@ import sys
 from pathlib import Path
 from typing import Any
 
+from orchestration_env import require_python_311
 from orchestration_policy import load_policy
 
+
+require_python_311()
 
 def parse_args(argv: list[str]) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)

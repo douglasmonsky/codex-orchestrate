@@ -26,13 +26,14 @@ Pay special attention to:
 
 - Prompts that could encourage root takeover after failed delegation.
 - Context packets that leak private transcripts, broad logs, secrets, or user data.
-- Scripts that read from or write to paths outside the repository or `~/.codex`.
+- Scripts that read from or write to paths outside the repository, `~/.codex`, or configured `CODEX_HOME`.
 - Sync behavior that could overwrite user configuration.
 - Dashboard endpoints, which should remain local and read-only.
 
 ## Current Boundaries
 
 - The local dashboard binds to `127.0.0.1` by default.
+- Non-loopback dashboard binding requires `--unsafe-bind` because ledger summaries and local path labels may be exposed on the network.
 - `scripts/serve_orchestration_ui.py` rejects write methods.
-- `scripts/sync_orchestration_skill.py` syncs skill and agent files only; it does not overwrite `~/.codex/config.toml`.
+- `scripts/sync_orchestration_skill.py` syncs owned skill and agent files only; it does not overwrite `~/.codex/config.toml` or delete unrelated agent TOMLs.
 - Real run ledgers should stay under ignored `local/` unless they are sanitized.
